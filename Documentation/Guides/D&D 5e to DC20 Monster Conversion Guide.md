@@ -1,4 +1,4 @@
-﻿# Updated D&D 5e to DC20 Monster Conversion Guide (0.20)
+﻿# D&D 5e to DC20 Monster Conversion Guide (0.20)
 
 ## Step 1: Determine Level and Type
 
