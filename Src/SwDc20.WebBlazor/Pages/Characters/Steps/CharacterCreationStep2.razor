@@ -1,0 +1,62 @@
+﻿<h4>Step 2: Save Masteries</h4>
+
+<div class="form-group">
+    <label>Select 2 Save Masteries:</label>
+    @if (SelectedMasteriesCount >= 2)
+    {
+        @*todo: Confirm if this is true*@
+        <div class="alert alert-warning">You can only select two save masteries.</div>
+    }
+    <div>
+        <div class="form-check">
+            <InputCheckbox @bind-Value="@Character.MightSaveMastery"
+                           @onchange="@(() => UpdateSaveMasteries())"
+                           disabled="@(SelectedMasteriesCount >= 4 && !Character.MightSaveMastery)"
+                           id="save-might"
+                           class="form-check-input" />
+            <label class="form-check-label" for="save-might">Might</label>
+        </div>
+        <div class="form-check">
+            <InputCheckbox @bind-Value="@Character.AgilitySaveMastery"
+                           @onchange="@(() => UpdateSaveMasteries())"
+                           disabled="@(SelectedMasteriesCount >= 4 && !Character.AgilitySaveMastery)"
+                           id="save-agility"
+                           class="form-check-input" />
+            <label class="form-check-label" for="save-agility">Agility</label>
+        </div>
+        <div class="form-check">
+            <InputCheckbox @bind-Value="@Character.CharismaSaveMastery"
+                           @onchange="@(() => UpdateSaveMasteries())"
+                           disabled="@(SelectedMasteriesCount >= 4 && !Character.CharismaSaveMastery)"
+                           id="save-charisma"
+                           class="form-check-input" />
+            <label class="form-check-label" for="save-charisma">Charisma</label>
+        </div>
+        <div class="form-check">
+            <InputCheckbox @bind-Value="@Character.IntelligenceSaveMastery"
+                           @onchange="@(() => UpdateSaveMasteries())"
+                           disabled="@(SelectedMasteriesCount >= 4 && !Character.IntelligenceSaveMastery)"
+                           id="save-intelligence"
+                           class="form-check-input" />
+            <label class="form-check-label" for="save-intelligence">Intelligence</label>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Character Character { get; set; }
+
+    private int SelectedMasteriesCount =>
+        (Character.MightSaveMastery ? 1 : 0) +
+        (Character.AgilitySaveMastery ? 1 : 0) +
+        (Character.CharismaSaveMastery ? 1 : 0) +
+        (Character.IntelligenceSaveMastery ? 1 : 0);
+
+    private void UpdateSaveMasteries()
+    {
+        // This method is called whenever a checkbox is changed
+        // We don't need to do anything here, as the Character properties are directly bound
+        // But you can add any additional logic if needed
+    }
+}

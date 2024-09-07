@@ -1,0 +1,32 @@
+﻿@inject CharacterService CharacterService
+
+<h4>Step 1: Attributes & Prime Modifier</h4>
+
+<div class="form-group">
+    <label for="might">Might:</label>
+    <InputNumber id="might" @bind-Value="Character.Might" class="form-control" />
+</div>
+
+<div class="form-group">
+    <label for="agility">Agility:</label>
+    <InputNumber id="agility" @bind-Value="Character.Agility" class="form-control" />
+</div>
+
+<div class="form-group">
+    <label for="charisma">Charisma:</label>
+    <InputNumber id="charisma" @bind-Value="Character.Charisma" class="form-control" />
+</div>
+
+<div class="form-group">
+    <label for="intelligence">Intelligence:</label>
+    <InputNumber id="intelligence" @bind-Value="Character.Intelligence" class="form-control" />
+</div>
+
+<div class="form-group">
+    <label>Prime Modifier: @Character.PrimeModifier</label>
+</div>
+
+@code {
+    [Parameter]
+    public Character Character { get; set; }
+}

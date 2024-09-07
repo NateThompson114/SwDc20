@@ -1,0 +1,128 @@
+﻿<h4>Step 3: Background</h4>
+
+<div class="form-group">
+    <label for="background">Background:</label>
+    <InputText id="background" @bind-Value="Character.Background" class="form-control" />
+</div>
+
+<h5>Skills</h5>
+<div class="form-group">
+    <label for="skillName">Skill Name:</label>
+    <InputText id="skillName" @bind-Value="newSkillName" class="form-control" />
+</div>
+<div class="form-group">
+    <label for="skillBonus">Skill Bonus:</label>
+    <InputNumber id="skillBonus" @bind-Value="newSkillBonus" class="form-control" />
+</div>
+<button type="button" class="btn btn-secondary mt-2" @onclick="AddSkill">Add Skill</button>
+
+<ul class="list-group mt-2">
+    @foreach (var skill in Character.Skills)
+    {
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            @skill.Name: +@skill.Bonus
+            <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveSkill(skill)">X</button>
+        </li>
+    }
+</ul>
+
+<h5>Trades</h5>
+<div class="form-group">
+    <label for="tradeName">Trade Name:</label>
+    <InputText id="tradeName" @bind-Value="newTradeName" class="form-control" />
+</div>
+<div class="form-group">
+    <label for="tradeBonus">Trade Bonus:</label>
+    <InputNumber id="tradeBonus" @bind-Value="newTradeBonus" class="form-control" />
+</div>
+<button type="button" class="btn btn-secondary mt-2" @onclick="AddTrade">Add Trade</button>
+
+<ul class="list-group mt-2">
+    @foreach (var trade in Character.Trades)
+    {
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            @trade.Name: +@trade.Bonus
+            <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveTrade(trade)">X</button>
+        </li>
+    }
+</ul>
+
+<h5>Languages</h5>
+<div class="form-group">
+    <label for="languageName">Language Name:</label>
+    <InputText id="languageName" @bind-Value="newLanguageName" class="form-control" />
+</div>
+<div class="form-group">
+    <label for="languageProficiency">Proficiency:</label>
+    <InputSelect id="languageProficiency" @bind-Value="newLanguageProficiency" class="form-control">
+        <option value="Fluent">Fluent</option>
+        <option value="Limited">Limited</option>
+    </InputSelect>
+</div>
+<button type="button" class="btn btn-secondary mt-2" @onclick="AddLanguage">Add Language</button>
+
+<ul class="list-group mt-2">
+    @foreach (var language in Character.Languages)
+    {
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            @language.Name (@language.Proficiency)
+            <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveLanguage(language)">X</button>
+        </li>
+    }
+</ul>
+
+@code {
+    [Parameter]
+    public Character Character { get; set; }
+
+    private string newSkillName;
+    private int newSkillBonus;
+    private string newTradeName;
+    private int newTradeBonus;
+    private string newLanguageName;
+    private string newLanguageProficiency = "Fluent";
+
+    private void AddSkill()
+    {
+        if (!string.IsNullOrWhiteSpace(newSkillName))
+        {
+            Character.Skills.Add(new Skill { Name = newSkillName, Bonus = newSkillBonus });
+            newSkillName = string.Empty;
+            newSkillBonus = 0;
+        }
+    }
+
+    private void RemoveSkill(Skill skill)
+    {
+        Character.Skills.Remove(skill);
+    }
+
+    private void AddTrade()
+    {
+        if (!string.IsNullOrWhiteSpace(newTradeName))
+        {
+            Character.Trades.Add(new Trade { Name = newTradeName, Bonus = newTradeBonus });
+            newTradeName = string.Empty;
+            newTradeBonus = 0;
+        }
+    }
+
+    private void RemoveTrade(Trade trade)
+    {
+        Character.Trades.Remove(trade);
+    }
+
+    private void AddLanguage()
+    {
+        if (!string.IsNullOrWhiteSpace(newLanguageName))
+        {
+            Character.Languages.Add(new Language { Name = newLanguageName, Proficiency = newLanguageProficiency });
+            newLanguageName = string.Empty;
+        }
+    }
+
+    private void RemoveLanguage(Language language)
+    {
+        Character.Languages.Remove(language);
+    }
+}
