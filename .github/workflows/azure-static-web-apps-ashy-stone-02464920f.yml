@@ -20,6 +20,11 @@ jobs:
           submodules: true
           lfs: false
 
+      - name: List repository contents
+        run: |
+          echo "Repository contents:"
+          ls -R
+
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
@@ -28,6 +33,11 @@ jobs:
       - name: Build and publish
         run: |
           dotnet publish Src/SwDc20.BlazorApplication/SwDc20.BlazorApplication.csproj -c Release -o published
+
+      - name: List published contents
+        run: |
+          echo "Published contents:"
+          ls -R published
 
       - name: Build And Deploy
         id: builddeploy
