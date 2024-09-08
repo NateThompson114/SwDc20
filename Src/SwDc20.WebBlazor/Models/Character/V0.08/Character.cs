@@ -1,4 +1,6 @@
-﻿namespace SwDc20.WebBlazor.Models.Character.V0._08;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SwDc20.WebBlazor.Models.Character.V0._08;
 
 public class Character
 {
@@ -6,15 +8,25 @@ public class Character
 
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Version { get; set; } = CurrentVersion;
+    
+    // General Information
+    [Required]
+    public string Name { get; set; }
+    [Required]
+    public string PlayerName { get; set; }
+    
+    [Range(0, 20)]
+    public int Level { get; set; }
+    public int CombatMastery => Math.Max((Level + 1) / 2, 1);
 
-    // Step 1: Attributes & Prime Modifier
+    // ✅Step 1: Attributes & Prime Modifier
     public int Might { get; set; }
     public int Agility { get; set; }
     public int Charisma { get; set; }
     public int Intelligence { get; set; }
     public int PrimeModifier => new[] { Might, Agility, Charisma, Intelligence }.Max();
 
-    // Step 2: Save Masteries
+    // ✅Step 2: Save Masteries
     public bool MightSaveMastery { get; set; }
     public bool AgilitySaveMastery { get; set; }
     public bool CharismaSaveMastery { get; set; }
@@ -22,7 +34,7 @@ public class Character
 
     // Step 3: Background
     public string Background { get; set; }
-    public List<Skill> Skills { get; set; } = new();
+    public List<Skill> Skills { get; set; }
     public List<Trade> Trades { get; set; } = new();
     public List<Language> Languages { get; set; } = new();
 
@@ -62,10 +74,7 @@ public class Character
     public List<string> Equipment { get; set; } = new List<string>();
     public List<Weapon> Weapons { get; set; } = new List<Weapon>();
 
-    // General Information
-    public string Name { get; set; }
-    public int Level { get; set; }
-    public int CombatMastery { get; set; }
+    
 
     // Additional properties
     public int ActionPoints { get; set; }
@@ -76,18 +85,84 @@ public class Character
     {
         Id = Guid.NewGuid();
         Version = CurrentVersion;
+        Skills = SkillsStatics.DefaultSkills.Select(s => new Skill(s.Name, s.AttributeUsed)).ToList();
+    }
+    
+    public int GetSkillValue(string skillName)
+    {
+        var skill = Skills.FirstOrDefault(s => s.Name == skillName);
+        return skill?.CalculateValue(this) ?? 0;
     }
 
-    //todo: Example of calculating might, need this for all the other calculations so we can have auto help and calculations
-    public int CalculateMightSave(Character character)
+    public static class CalculateSaves
     {
-        int save = character.Might;
-        if (character.MightSaveMastery)
+        public static int CalculateMightSave(Character character)
         {
-            save += character.CombatMastery; // Assuming you have a CombatMastery property
+            var save = character.Might;
+            if (character.MightSaveMastery)
+            {
+                save += character.CombatMastery; 
+            }
+            return save;
         }
-        return save;
+        
+        public static int CalculateAgilitySave(Character character)
+        {
+            var save = character.Agility;
+            if (character.AgilitySaveMastery)
+            {
+                save += character.CombatMastery; 
+            }
+            return save;
+        }
+        
+        public static int CalculateCharismaSave(Character character)
+        {
+            var save = character.Charisma;
+            if (character.CharismaSaveMastery)
+            {
+                save += character.CombatMastery; 
+            }
+            return save;
+        }
+        
+        public static int CalculateIntelligenceSave(Character character)
+        {
+            var save = character.Intelligence;
+            if (character.IntelligenceSaveMastery)
+            {
+                save += character.CombatMastery; 
+            }
+            return save;
+        }
     }
+}
+
+public static class SkillsStatics
+{
+    public static readonly Skill Awareness = new Skill("Awareness", "Prime");
+    public static readonly Skill Athletics = new Skill("Athletics", "Might");
+    public static readonly Skill Intimidation = new Skill("Intimidation", "Might");
+    public static readonly Skill Acrobatics = new Skill("Acrobatics", "Agility");
+    public static readonly Skill Trickery = new Skill("Trickery", "Agility");
+    public static readonly Skill Stealth = new Skill("Stealth", "Agility");
+    public static readonly Skill AnimalHandling = new Skill("Animal Handling", "Charisma");
+    public static readonly Skill Influence = new Skill("Influence", "Charisma");
+    public static readonly Skill Insight = new Skill("Insight", "Charisma");
+    public static readonly Skill Investigation = new Skill("Investigation", "Intelligence");
+    public static readonly Skill Medicine = new Skill("Medicine", "Intelligence");
+    public static readonly Skill Survival = new Skill("Survival", "Intelligence");
+
+    public static List<Skill> DefaultSkills => new List<Skill>
+    {
+        Awareness, Athletics, Intimidation, Acrobatics, Trickery, Stealth,
+        AnimalHandling, Influence, Insight, Investigation, Medicine, Survival
+    };
+    
+    public static List<string> AttributeOptions => new List<string>
+    {
+        "Prime", "Might", "Agility", "Charisma", "Intelligence"
+    };
 }
 
 public class Trade
@@ -99,7 +174,34 @@ public class Trade
 public class Skill
 {
     public string Name { get; set; }
-    public int Bonus { get; set; }
+    public string AttributeUsed { get; set; }
+    public int Rank { get; set; }
+
+    public Skill(string name, string attributeUsed)
+    {
+        Name = name;
+        AttributeUsed = attributeUsed;
+        Rank = 0;
+    }
+
+    public int CalculateValue(Character character)
+    {
+        int attributeValue = GetAttributeValue(character);
+        return attributeValue + (Rank * 2);
+    }
+
+    private int GetAttributeValue(Character character)
+    {
+        return AttributeUsed switch
+        {
+            "Prime" => character.PrimeModifier,
+            "Might" => character.Might,
+            "Agility" => character.Agility,
+            "Charisma" => character.Charisma,
+            "Intelligence" => character.Intelligence,
+            _ => 0
+        };
+    }
 }
 
 public class Language

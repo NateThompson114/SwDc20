@@ -1,32 +1,124 @@
-﻿@inject CharacterService CharacterService
+﻿@using SwDc20.WebBlazor.Component
+@inject CharacterService CharacterService
 
 <h4>Step 1: Attributes & Prime Modifier</h4>
 
-<div class="form-group">
-    <label for="might">Might:</label>
-    <InputNumber id="might" @bind-Value="Character.Might" class="form-control" />
+<div class="row">
+
+    <AttributeCardWithSave
+        AttributeName="@nameof(Character.Might)"
+        @bind-AttributeValue="Character.Might"
+        @bind-SaveMastery="Character.MightSaveMastery"
+        UpdateSaveMasteries="@UpdateSaveMasteries"
+        SelectedMasteriesCount="@SelectedMasteriesCount"
+        SaveValue="@Character.CalculateSaves.CalculateMightSave(Character)" />
+    
+    <AttributeCardWithSave
+        AttributeName="@nameof(Character.Agility)"
+        @bind-AttributeValue="Character.Agility"
+        @bind-SaveMastery="Character.AgilitySaveMastery"
+        UpdateSaveMasteries="@UpdateSaveMasteries"
+        SelectedMasteriesCount="@SelectedMasteriesCount"
+        SaveValue="@Character.CalculateSaves.CalculateAgilitySave(Character)" />
+    
+    <AttributeCardWithSave
+        AttributeName="@nameof(Character.Charisma)"
+        @bind-AttributeValue="Character.Charisma"
+        @bind-SaveMastery="Character.CharismaSaveMastery"
+        UpdateSaveMasteries="@UpdateSaveMasteries"
+        SelectedMasteriesCount="@SelectedMasteriesCount"
+        SaveValue="@Character.CalculateSaves.CalculateCharismaSave(Character)" />
+    
+    <AttributeCardWithSave
+        AttributeName="@nameof(Character.Intelligence)"
+        @bind-AttributeValue="Character.Intelligence"
+        @bind-SaveMastery="Character.IntelligenceSaveMastery"
+        UpdateSaveMasteries="@UpdateSaveMasteries"
+        SelectedMasteriesCount="@SelectedMasteriesCount"
+        SaveValue="@Character.CalculateSaves.CalculateIntelligenceSave(Character)" />
+
+    <div class="col-md-2">
+        <div class="form-group">
+            <label>Prime Modifier: @Character.PrimeModifier</label>
+        </div>
+    </div>
 </div>
 
-<div class="form-group">
-    <label for="agility">Agility:</label>
-    <InputNumber id="agility" @bind-Value="Character.Agility" class="form-control" />
+<hr/>
+
+<div class="card border-success">
+    <h4 class="card-header bg-success">Information</h4>
+    <p>
+        You get your PC Attributes from one of the following methods and then assign the values to each of the 4 Attributes.
+    </p>
+    
+    <div class="card-body">
+        <h5 class="card-header">
+            Standard Array
+        </h5>
+
+        <p >
+            You start with an array of 3, 1, 0, -2 and assign each value to an Attribute of your choice. You then gain 2 additional Attribute Points to increase whichever Attributes you want, up to the Attribute Limit (3).
+        </p>
+    </div>
+    
+    <div class="card-body">
+        <h5 class="card-header">
+            Point Buy
+        </h5>
+
+        <p >
+            You start with a -2 in all of your Attributes. You then gain 12 Attribute Points to increase whichever Attributes you want, up to the Attribute Limit (3).
+        </p>
+
+        <span class="alert-info">
+            **DC Tip:** Your Prime Modifier (see later in this chapter) comes from your highest Attribute, so it is a good idea to make sure that you get a 3 in at least one of your Attributes.
+        </span>
+    </div>
+    
+    <div class="card-body">
+        <h5 class="card-header">Roll Method</h5>
+
+        <p >You determine your starting values by rolling 1d6-3 four times, and then assign each value to an Attribute of your choice. You then gain +2 Attribute Points to increase whichever Attributes you want, up to the Attribute Limit (3).</p>
+
+        <span class="alert-warning">**Prime Modifier Insurance:** If the value of your highest Attribute is less than 3 (even after adding the +2 Attribute Points), you can reduce a different Attribute value by 1 or more to increase your highest Attribute by the same amount. You can’t reduce an Attribute value below -2 or increase an Attribute above your Attribute Limit (3).</span>
+
+        <span class="alert-info">**DC Tip:** This method of determining your starting Attributes is the most risky. It offers the potential for the highest starting Attributes, but also the lowest. If you add all your Attributes together, their sum should be 2 (on average). If you get less than this, then talk to your GM about potentially rerolling your Attributes (or using a different method).</span>
+    </div>
+
+    <div class="card-body">
+        <h5 class="card-header"> Prime Modifier</h5>
+
+        <p >Your Prime Modifier is equal to your PCs highest Attribute.</p>
+
+        <span class="alert-info">**DC Tip:** You really do want to have a PC have a 3 in one of their Attributes, so that they can have a 3 for their Prime Modifier at level 1. This is going to add to a lot of the things you do in Combat, and is very important.</span>
+    </div>
+    
+    <div class="card-body">
+        <h5 class="card-header">Save Masteries</h5>
+
+        <p >You get to choose 2 Attributes to gain Save Mastery at Level 1. Choose 2 of the 4 Attributes and you are now able to add your Combat Mastery to those Saves. There is a “Saves” section on your Character Sheet next to each Attribute, bubble in the circle and write in your totals in each.</p>
+
+        <span class="alert-info">**DC Tip:** If you do not have Mastery in the Save then the value you write down will be equal to your Attribute. BUT in the 2 Saves that you chose to gain Mastery in, you add +1 to the Attribute, and that is what you write down for the Save.</span>
+    </div>
+    
 </div>
 
-<div class="form-group">
-    <label for="charisma">Charisma:</label>
-    <InputNumber id="charisma" @bind-Value="Character.Charisma" class="form-control" />
-</div>
-
-<div class="form-group">
-    <label for="intelligence">Intelligence:</label>
-    <InputNumber id="intelligence" @bind-Value="Character.Intelligence" class="form-control" />
-</div>
-
-<div class="form-group">
-    <label>Prime Modifier: @Character.PrimeModifier</label>
-</div>
 
 @code {
     [Parameter]
     public Character Character { get; set; }
+    
+    private int SelectedMasteriesCount =>
+        (Character.MightSaveMastery ? 1 : 0) +
+        (Character.AgilitySaveMastery ? 1 : 0) +
+        (Character.CharismaSaveMastery ? 1 : 0) +
+        (Character.IntelligenceSaveMastery ? 1 : 0);
+    
+    private void UpdateSaveMasteries()
+    {
+        // This method is called whenever a checkbox is changed
+        // We don't need to do anything here, as the Character properties are directly bound
+        // But you can add any additional logic if needed
+    }
 }

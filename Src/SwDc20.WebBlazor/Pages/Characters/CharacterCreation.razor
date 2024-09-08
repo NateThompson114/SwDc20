@@ -5,34 +5,67 @@
 @inject NavigationManager NavigationManager
 
 <h3>@(Id == null ? "Create" : "Edit") Character</h3>
+<h6>Character Id: @_characterWrapper.Id</h6>
 
-@if (characterWrapper == null)
+@if (_characterWrapper == null)
 {
     <p>Loading...</p>
 }
 else
 {
-    <EditForm Model="@characterWrapper.Document" OnValidSubmit="HandleValidSubmit">
+    <EditForm Model="@_characterWrapper.Document" OnValidSubmit="HandleValidSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
+        
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <InputText id="name" @bind-Value="_character.Name" class="form-control"/>
+                    <label for="name">Charater Name</label>
+                </div>
+            </div>
 
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <InputText id="player" @bind-Value="_character.PlayerName" class="form-control"/>
+                    <label for="player">Player:</label>
+                </div>
+            </div>    
+        </div>
+        <br/>
+        <div class="row">
+            <div class="form-floating">
+                <div class="input-group">
+                    <span class="input-group-text">Level:</span>
+                    <InputNumber id="level" @bind-Value="_character.Level" class="form-control" min="0" max="20"/>
+                    <span class="input-group-text">Combat Mastery: @_character.CombatMastery</span>
+                </div>
+            </div>
+
+            
+        </div>
+        
+        
+        <hr/>
+        
         @switch (currentStep)
         {
             case 1:
-                <CharacterCreationStep1 Character="@characterWrapper.Document" />
+                <CharacterCreationStep1 Character="@_characterWrapper.Document" />
                 break;
             case 2:
-                <CharacterCreationStep2 Character="@characterWrapper.Document" />
+                <CharacterCreationStep2 Character="@_characterWrapper.Document" />
                 break;
             case 3:
-                <CharacterCreationStep3 Character="@characterWrapper.Document" />
+                <CharacterCreationStep3 Character="@_characterWrapper.Document" />
                 break;
             case 4:
-                <CharacterCreationStep4 Character="@characterWrapper.Document" />
+                <CharacterCreationStep4 Character="@_characterWrapper.Document" />
                 break;
-            case 5:
-                <CharacterCreationStep5 Character="@characterWrapper.Document" />
-                break;
+            @* case 5: *@
+            @*     <CharacterCreationStep5 Character="@_characterWrapper.Document" /> *@
+            @*     break; *@
         }
 
         <div class="mt-3">
@@ -56,23 +89,25 @@ else
     [Parameter]
     public Guid? Id { get; set; }
 
-    private DocumentWrapper<Character> characterWrapper;
+    private DocumentWrapper<Character> _characterWrapper;
+    private Character _character;
     private int currentStep = 1;
-    private int totalSteps = 5;
+    private int totalSteps = 4;
+    private int combatMastery;
 
     protected override async Task OnInitializedAsync()
     {
         if (Id.HasValue)
         {
-            characterWrapper = await CharacterService.GetCharacterAsync(Id.Value);
-            if (characterWrapper == null)
+            _characterWrapper = await CharacterService.GetCharacterAsync(Id.Value);
+            if (_characterWrapper == null)
             {
                 NavigationManager.NavigateTo("/characters");
             }
         }
         else
         {
-            characterWrapper = new DocumentWrapper<Character>
+            _characterWrapper = new DocumentWrapper<Character>
             {
                 ContentId = Guid.NewGuid(),
                 DocumentType = "Character",
@@ -80,6 +115,8 @@ else
                 Document = new Character()
             };
         }
+        
+        _character = _characterWrapper.Document;
     }
 
     private void NextStep()
@@ -100,7 +137,13 @@ else
 
     private async Task HandleValidSubmit()
     {
-        await CharacterService.SaveCharacterAsync(characterWrapper);
+        await CharacterService.SaveCharacterAsync(_characterWrapper);
         NavigationManager.NavigateTo("/characters");
+    }
+    
+    private int CalculateCombatMastery()
+    {
+        var level = _characterWrapper.Document.Level;
+        return level / 2;
     }
 }

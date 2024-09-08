@@ -1,62 +1,152 @@
-﻿<h4>Step 2: Save Masteries</h4>
+﻿@using System.Linq;
+
+<h4>Step 2: Background (Skill, Trades, & Languages)</h4>
 
 <div class="form-group">
-    <label>Select 2 Save Masteries:</label>
-    @if (SelectedMasteriesCount >= 2)
-    {
-        @*todo: Confirm if this is true*@
-        <div class="alert alert-warning">You can only select two save masteries.</div>
-    }
-    <div>
-        <div class="form-check">
-            <InputCheckbox @bind-Value="@Character.MightSaveMastery"
-                           @onchange="@(() => UpdateSaveMasteries())"
-                           disabled="@(SelectedMasteriesCount >= 4 && !Character.MightSaveMastery)"
-                           id="save-might"
-                           class="form-check-input" />
-            <label class="form-check-label" for="save-might">Might</label>
-        </div>
-        <div class="form-check">
-            <InputCheckbox @bind-Value="@Character.AgilitySaveMastery"
-                           @onchange="@(() => UpdateSaveMasteries())"
-                           disabled="@(SelectedMasteriesCount >= 4 && !Character.AgilitySaveMastery)"
-                           id="save-agility"
-                           class="form-check-input" />
-            <label class="form-check-label" for="save-agility">Agility</label>
-        </div>
-        <div class="form-check">
-            <InputCheckbox @bind-Value="@Character.CharismaSaveMastery"
-                           @onchange="@(() => UpdateSaveMasteries())"
-                           disabled="@(SelectedMasteriesCount >= 4 && !Character.CharismaSaveMastery)"
-                           id="save-charisma"
-                           class="form-check-input" />
-            <label class="form-check-label" for="save-charisma">Charisma</label>
-        </div>
-        <div class="form-check">
-            <InputCheckbox @bind-Value="@Character.IntelligenceSaveMastery"
-                           @onchange="@(() => UpdateSaveMasteries())"
-                           disabled="@(SelectedMasteriesCount >= 4 && !Character.IntelligenceSaveMastery)"
-                           id="save-intelligence"
-                           class="form-check-input" />
-            <label class="form-check-label" for="save-intelligence">Intelligence</label>
-        </div>
-    </div>
+    <label for="background">Background:</label>
+    <InputText id="background" @bind-Value="Character.Background" class="form-control" />
 </div>
+
+<h5>Skills</h5>
+
+<div class="form-check mb-3">
+    <InputCheckbox @bind-Value="allowSkillChanges" id="allowSkillChanges" class="form-check-input" />
+    <label class="form-check-label" for="allowSkillChanges">Allow Skill Changes</label>
+</div>
+
+@if (allowSkillChanges)
+{
+<div class="mb-3">
+    <h6>Add New Skill</h6>
+    <div class="form-group">
+        <label for="newSkillName">Skill Name:</label>
+        <InputText id="newSkillName" @bind-Value="newSkillName" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="newSkillAttribute">Attribute:</label>
+        <InputSelect id="newSkillAttribute" @bind-Value="newSkillAttribute" class="form-control">
+            @foreach (var attr in SkillsStatics.AttributeOptions)
+            {
+            <option value="@attr">@attr</option>
+            }
+        </InputSelect>
+    </div>
+    <button class="btn btn-primary" @onclick="AddNewSkill">Add Skill</button>
+</div>
+}
+
+@foreach (var skill in Character.Skills)
+{
+<div class="form-group">
+    <label for="@skill.Name">@skill.Name (@skill.AttributeUsed):</label>
+    <InputNumber id="@skill.Name" @bind-Value="skill.Rank" class="form-control" min="0" max="5" />
+    <span>Value: @skill.CalculateValue(Character)</span>
+    @if (allowSkillChanges)
+    {
+    <button class="btn btn-danger btn-sm ml-2" @onclick="() => RemoveSkill(skill)">Remove</button>
+    }
+</div>
+}
+
+<h5>Trades</h5>
+<div class="form-group">
+    <label for="tradeName">Trade Name:</label>
+    <InputText id="tradeName" @bind-Value="newTradeName" class="form-control" />
+</div>
+<div class="form-group">
+    <label for="tradeBonus">Trade Bonus:</label>
+    <InputNumber id="tradeBonus" @bind-Value="newTradeBonus" class="form-control" />
+</div>
+<button type="button" class="btn btn-secondary mt-2" @onclick="AddTrade">Add Trade</button>
+
+<ul class="list-group mt-2">
+    @foreach (var trade in Character.Trades)
+    {
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            @trade.Name: +@trade.Bonus
+            <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveTrade(trade)">X</button>
+        </li>
+    }
+</ul>
+
+<h5>Languages</h5>
+<div class="form-group">
+    <label for="languageName">Language Name:</label>
+    <InputText id="languageName" @bind-Value="newLanguageName" class="form-control" />
+</div>
+<div class="form-group">
+    <label for="languageProficiency">Proficiency:</label>
+    <InputSelect id="languageProficiency" @bind-Value="newLanguageProficiency" class="form-control">
+        <option value="Fluent">Fluent</option>
+        <option value="Limited">Limited</option>
+    </InputSelect>
+</div>
+<button type="button" class="btn btn-secondary mt-2" @onclick="AddLanguage">Add Language</button>
+
+<ul class="list-group mt-2">
+    @foreach (var language in Character.Languages)
+    {
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            @language.Name (@language.Proficiency)
+            <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveLanguage(language)">X</button>
+        </li>
+    }
+</ul>
 
 @code {
     [Parameter]
     public Character Character { get; set; }
 
-    private int SelectedMasteriesCount =>
-        (Character.MightSaveMastery ? 1 : 0) +
-        (Character.AgilitySaveMastery ? 1 : 0) +
-        (Character.CharismaSaveMastery ? 1 : 0) +
-        (Character.IntelligenceSaveMastery ? 1 : 0);
+    private int newSkillBonus;
+    private string newTradeName;
+    private int newTradeBonus;
+    private string newLanguageName;
+    private string newLanguageProficiency = "Limited";
+    private bool allowSkillChanges = false;
+    private string newSkillName = "";
+    private string newSkillAttribute = "Intelligence";
 
-    private void UpdateSaveMasteries()
+    private void AddNewSkill()
     {
-        // This method is called whenever a checkbox is changed
-        // We don't need to do anything here, as the Character properties are directly bound
-        // But you can add any additional logic if needed
+        if (!string.IsNullOrWhiteSpace(newSkillName) && !Character.Skills.Any(s => s.Name == newSkillName))
+        {
+            Character.Skills.Add(new Skill(newSkillName, newSkillAttribute));
+            newSkillName = "";
+            newSkillAttribute = "Intelligence";
+        }
+    }
+
+    private void RemoveSkill(Skill skill)
+    {
+        Character.Skills.Remove(skill);
+    }
+
+    private void AddTrade()
+    {
+        if (!string.IsNullOrWhiteSpace(newTradeName))
+        {
+            Character.Trades.Add(new Trade { Name = newTradeName, Bonus = newTradeBonus });
+            newTradeName = string.Empty;
+            newTradeBonus = 0;
+        }
+    }
+
+    private void RemoveTrade(Trade trade)
+    {
+        Character.Trades.Remove(trade);
+    }
+
+    private void AddLanguage()
+    {
+        if (!string.IsNullOrWhiteSpace(newLanguageName))
+        {
+            Character.Languages.Add(new Language { Name = newLanguageName, Proficiency = newLanguageProficiency });
+            newLanguageName = string.Empty;
+        }
+    }
+
+    private void RemoveLanguage(Language language)
+    {
+        Character.Languages.Remove(language);
     }
 }
