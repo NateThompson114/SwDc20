@@ -1,0 +1,29 @@
+﻿@using SwDc20.WebBlazor.Services
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+
+@if (isLoggedIn)
+{
+    <span>Data synced</span>
+    <button class="nav-link btn btn-link" @onclick="LogoutAsync">Log out</button>
+}
+else
+{
+    <a href="login">Login to sync data</a>
+}
+
+@code {
+    private bool isLoggedIn;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoggedIn = await AuthService.IsLoggedInAsync();
+    }
+
+    private async Task LogoutAsync()
+    {
+        await AuthService.LogoutAsync();
+        isLoggedIn = false;
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+}

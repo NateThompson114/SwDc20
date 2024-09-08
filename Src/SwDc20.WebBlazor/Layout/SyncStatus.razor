@@ -1,0 +1,29 @@
+﻿@using SwDc20.WebBlazor.Services
+@inject AuthService AuthService
+@inject DataSyncService DataSyncService
+
+@if (isLoggedIn)
+{
+    <button class="btn btn-primary" @onclick="SyncData">Sync Data</button>
+    @if (!string.IsNullOrEmpty(syncMessage))
+    {
+        <span class="ml-2">@syncMessage</span>
+    }
+}
+
+@code {
+    private bool isLoggedIn;
+    private string syncMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoggedIn = await AuthService.IsLoggedInAsync();
+    }
+
+    private async Task SyncData()
+    {
+        syncMessage = "Syncing...";
+        var success = await DataSyncService.SyncDataAsync();
+        syncMessage = success ? "Sync completed" : "Sync failed";
+    }
+}

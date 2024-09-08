@@ -1,0 +1,78 @@
+﻿@page "/characters"
+@inject CharacterService CharacterService
+@inject NavigationManager NavigationManager
+
+<h3>Characters</h3>
+
+@if (characters == null)
+{
+    <p>Loading...</p>
+}
+else if (!characters.Any())
+{
+    <p>No characters found. Create a new one!</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Level</th>
+                <th>Ancestry</th>
+                <th>Class</th>
+                <th>Version</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var characterWrapper in characters)
+            {
+                <tr>
+                    <td>@characterWrapper.Document.Name</td>
+                    <td>@characterWrapper.Document.Level</td>
+                    <td>@characterWrapper.Document.Ancestry</td>
+                    <td>@characterWrapper.Document.Class</td>
+                    <td>@characterWrapper.ContentVersion</td>
+                    <td>
+                        <button class="btn btn-info" @onclick="() => ViewCharacter(characterWrapper.ContentId)">View</button>
+                        <button class="btn btn-primary" @onclick="() => EditCharacter(characterWrapper.ContentId)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteCharacter(characterWrapper.ContentId)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<button class="btn btn-success" @onclick="CreateNewCharacter">Create New Character</button>
+
+@code {
+    private List<DocumentWrapper<Character>> characters;
+
+    protected override async Task OnInitializedAsync()
+    {
+        characters = await CharacterService.GetCharactersAsync();
+    }
+
+    private void CreateNewCharacter()
+    {
+        NavigationManager.NavigateTo("/character/create");
+    }
+
+    private void ViewCharacter(Guid id)
+    {
+        NavigationManager.NavigateTo($"/character/{id}");
+    }
+
+    private void EditCharacter(Guid id)
+    {
+        NavigationManager.NavigateTo($"/character/edit/{id}");
+    }
+
+    private async Task DeleteCharacter(Guid id)
+    {
+        await CharacterService.DeleteCharacterAsync(id);
+        characters = await CharacterService.GetCharactersAsync();
+    }
+}

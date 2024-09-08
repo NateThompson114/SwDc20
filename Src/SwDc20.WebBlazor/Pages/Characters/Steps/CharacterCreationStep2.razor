@@ -1,0 +1,179 @@
+﻿@using System.Linq;
+
+<h4>Step 2: Background (Skill, Trades, & Languages)</h4>
+
+<div class="form-floating">
+    <InputTextArea id="background" @bind-Value="Character.Background" class="form-control" />
+    <label for="background">Background</label>
+</div>
+
+<hr/>
+
+<h5>Skills</h5>
+
+<div class="form-check mb-3">
+    <InputCheckbox @bind-Value="allowSkillChanges" id="allowSkillChanges" class="form-check-input" />
+    <label class="form-check-label" for="allowSkillChanges">Allow Skill Changes</label>
+</div>
+
+@if (allowSkillChanges)
+{
+    <div class="mb-3">
+        <h6>Add New Skill</h6>
+        <div class="input-group">
+            <label class="input-group-text" for="newSkillName">Skill Name</label>
+            <InputText id="newSkillName" @bind-Value="newSkillName" class="form-control" />
+            <label class="input-group-text" for="newSkillAttribute">Attribute</label>
+            <InputSelect id="newSkillAttribute" @bind-Value="newSkillAttribute" class="form-control">
+                @foreach (var attr in SkillsStatics.AttributeOptions)
+                {
+                    <option value="@attr">@attr</option>
+                }
+            </InputSelect>
+            <label class="input-group-text" for="newTag">Tag</label>
+            <InputText id="newTag" @bind-Value="newTagAttribute" class="form-control" />
+            <button type="button" class="btn btn-primary" @onclick="AddNewSkill">Add Skill</button>
+        </div>
+    </div>
+}
+
+@foreach (var skillGroup in Character.Skills.GroupBy(sk => sk.AttributeUsed))
+{
+    <h6>@skillGroup.Key</h6>
+    foreach (var skillTagGroup in skillGroup.GroupBy(sg => sg.Tag).OrderBy(sg => sg.Key))
+    {
+        if(skillTagGroup.Key != null)
+        {
+            <br/>
+            <p><i>@skillTagGroup.Key (@skillGroup.Key)</i></p>
+        }
+        foreach (var skill in skillTagGroup)
+        {
+            <div class="input-group">
+                <label class="input-group-text" for="@skill.Name">@skill.Name</label>
+                <InputNumber id="@skill.Name" @bind-Value="skill.Rank" class="form-control" min="0" max="5" />
+                <span class="input-group-text">Value: @skill.CalculateValue(Character)</span>
+                @if (allowSkillChanges)
+                {
+                    <button type="button" class="btn btn-danger btn-sm ml-2" @onclick="() => RemoveSkill(skill)">Remove</button>
+                }
+            </div>
+        }
+        
+    }
+    <hr/>
+}
+
+<h6>Add Knowledge Skill</h6>
+<div class="input-group">
+    <label class="input-group-text" for="newSkillName">Skill Name</label>
+    <InputText id="newSkillName" @bind-Value="newSkillName" class="form-control" />
+    <button type="button" class="btn btn-primary" @onclick="AddNewSkill">Add Skill</button>
+</div>
+
+<hr/>
+
+<h5>Trades</h5>
+<div class="input-group">
+    <label class="input-group-text" for="tradeName">Trade Name</label>
+    <InputText id="tradeName" @bind-Value="newTradeName" class="form-control" />
+    <label class="input-group-text" for="tradeBonus">Bonus</label>
+    <InputNumber id="tradeBonus" @bind-Value="newTradeBonus" class="form-control" />
+    <button type="button" class="btn btn-secondary mt-2" @onclick="AddTrade">Add Trade</button>
+</div>
+
+<ul class="list-group mt-2">
+    @foreach (var trade in Character.Trades)
+    {
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            @trade.Name: +@trade.Bonus
+            <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveTrade(trade)">X</button>
+        </li>
+    }
+</ul>
+
+<hr/>
+
+<h5>Languages</h5>
+<div class="input-group">
+    <label class="input-group-text" for="languageName">Language Name</label>
+    <InputText id="languageName" @bind-Value="newLanguageName" class="form-control" />
+    <label class="input-group-text" for="languageProficiency">Proficiency</label>
+    <InputSelect id="languageProficiency" @bind-Value="newLanguageProficiency" class="form-control">
+        <option value="Fluent">Fluent</option>
+        <option value="Limited">Limited</option>
+    </InputSelect>
+    <button type="button" class="btn btn-secondary mt-2" @onclick="AddLanguage">Add Language</button>
+</div>
+
+<ul class="list-group mt-2">
+    @foreach (var language in Character.Languages)
+    {
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            @language.Name (@language.Proficiency)
+            <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveLanguage(language)">X</button>
+        </li>
+    }
+</ul>
+
+@code {
+    [Parameter]
+    public Character Character { get; set; }
+
+    private int newSkillBonus;
+    private string newTradeName;
+    private int newTradeBonus;
+    private string newLanguageName;
+    private string newLanguageProficiency = "Limited";
+    private bool allowSkillChanges = false;
+    
+    private string newSkillName = "";
+    private string newSkillAttribute = "Intelligence";
+    private string newTagAttribute = "Knowledge";
+
+    private void AddNewSkill()
+    {
+        if (!string.IsNullOrWhiteSpace(newSkillName) && !Character.Skills.Any(s => s.Name == newSkillName))
+        {
+            Character.Skills.Add(new Skill(newSkillName, newSkillAttribute, newTagAttribute));
+            newSkillName = "";
+            newSkillAttribute = "Intelligence";
+            newTagAttribute = "Knowledge";
+            StateHasChanged(); // Ensure the UI updates
+        }
+    }
+
+    private void RemoveSkill(Skill skill)
+    {
+        Character.Skills.Remove(skill);
+    }
+
+    private void AddTrade()
+    {
+        if (!string.IsNullOrWhiteSpace(newTradeName))
+        {
+            Character.Trades.Add(new Trade { Name = newTradeName, Bonus = newTradeBonus });
+            newTradeName = string.Empty;
+            newTradeBonus = 0;
+        }
+    }
+
+    private void RemoveTrade(Trade trade)
+    {
+        Character.Trades.Remove(trade);
+    }
+
+    private void AddLanguage()
+    {
+        if (!string.IsNullOrWhiteSpace(newLanguageName))
+        {
+            Character.Languages.Add(new Language { Name = newLanguageName, Proficiency = newLanguageProficiency });
+            newLanguageName = string.Empty;
+        }
+    }
+
+    private void RemoveLanguage(Language language)
+    {
+        Character.Languages.Remove(language);
+    }
+}
