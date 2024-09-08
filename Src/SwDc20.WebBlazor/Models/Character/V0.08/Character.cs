@@ -85,7 +85,7 @@ public class Character
     {
         Id = Guid.NewGuid();
         Version = CurrentVersion;
-        Skills = SkillsStatics.DefaultSkills.Select(s => new Skill(s.Name, s.AttributeUsed)).ToList();
+        Skills = SkillsStatics.DefaultSkills.Select(s => new Skill(s.Name, s.AttributeUsed, s.Tag)).ToList();
     }
     
     public int GetSkillValue(string skillName)
@@ -152,11 +152,17 @@ public static class SkillsStatics
     public static readonly Skill Investigation = new Skill("Investigation", "Intelligence");
     public static readonly Skill Medicine = new Skill("Medicine", "Intelligence");
     public static readonly Skill Survival = new Skill("Survival", "Intelligence");
+    public static readonly Skill Arcana = new Skill("Arcana", "Intelligence", "Knowledge");
+    public static readonly Skill History = new Skill("History", "Intelligence", "Knowledge");
+    public static readonly Skill Nature = new Skill("Nature", "Intelligence", "Knowledge");
+    public static readonly Skill Occultism = new Skill("Occultism", "Intelligence", "Knowledge");
+    public static readonly Skill Religion = new Skill("Religion", "Intelligence", "Knowledge");
+    
 
     public static List<Skill> DefaultSkills => new List<Skill>
     {
         Awareness, Athletics, Intimidation, Acrobatics, Trickery, Stealth,
-        AnimalHandling, Influence, Insight, Investigation, Medicine, Survival
+        AnimalHandling, Influence, Insight, Investigation, Medicine, Survival, Arcana, History, Nature, Occultism, Religion
     };
     
     public static List<string> AttributeOptions => new List<string>
@@ -176,12 +182,15 @@ public class Skill
     public string Name { get; set; }
     public string AttributeUsed { get; set; }
     public int Rank { get; set; }
+    
+    public string? Tag { get; set; }
 
-    public Skill(string name, string attributeUsed)
+    public Skill(string name, string attributeUsed, string? tag = null)
     {
         Name = name;
         AttributeUsed = attributeUsed;
         Rank = 0;
+        Tag = tag;
     }
 
     public int CalculateValue(Character character)

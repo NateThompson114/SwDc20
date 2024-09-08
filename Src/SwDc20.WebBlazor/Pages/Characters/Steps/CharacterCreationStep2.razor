@@ -2,10 +2,12 @@
 
 <h4>Step 2: Background (Skill, Trades, & Languages)</h4>
 
-<div class="form-group">
-    <label for="background">Background:</label>
-    <InputText id="background" @bind-Value="Character.Background" class="form-control" />
+<div class="form-floating">
+    <InputTextArea id="background" @bind-Value="Character.Background" class="form-control" />
+    <label for="background">Background</label>
 </div>
+
+<hr/>
 
 <h5>Skills</h5>
 
@@ -16,48 +18,69 @@
 
 @if (allowSkillChanges)
 {
-<div class="mb-3">
-    <h6>Add New Skill</h6>
-    <div class="form-group">
-        <label for="newSkillName">Skill Name:</label>
-        <InputText id="newSkillName" @bind-Value="newSkillName" class="form-control" />
+    <div class="mb-3">
+        <h6>Add New Skill</h6>
+        <div class="input-group">
+            <label class="input-group-text" for="newSkillName">Skill Name</label>
+            <InputText id="newSkillName" @bind-Value="newSkillName" class="form-control" />
+            <label class="input-group-text" for="newSkillAttribute">Attribute</label>
+            <InputSelect id="newSkillAttribute" @bind-Value="newSkillAttribute" class="form-control">
+                @foreach (var attr in SkillsStatics.AttributeOptions)
+                {
+                    <option value="@attr">@attr</option>
+                }
+            </InputSelect>
+            <label class="input-group-text" for="newTag">Tag</label>
+            <InputText id="newTag" @bind-Value="newTagAttribute" class="form-control" />
+            <button type="button" class="btn btn-primary" @onclick="AddNewSkill">Add Skill</button>
+        </div>
     </div>
-    <div class="form-group">
-        <label for="newSkillAttribute">Attribute:</label>
-        <InputSelect id="newSkillAttribute" @bind-Value="newSkillAttribute" class="form-control">
-            @foreach (var attr in SkillsStatics.AttributeOptions)
-            {
-            <option value="@attr">@attr</option>
-            }
-        </InputSelect>
-    </div>
-    <button class="btn btn-primary" @onclick="AddNewSkill">Add Skill</button>
-</div>
 }
 
-@foreach (var skill in Character.Skills)
+@foreach (var skillGroup in Character.Skills.GroupBy(sk => sk.AttributeUsed))
 {
-<div class="form-group">
-    <label for="@skill.Name">@skill.Name (@skill.AttributeUsed):</label>
-    <InputNumber id="@skill.Name" @bind-Value="skill.Rank" class="form-control" min="0" max="5" />
-    <span>Value: @skill.CalculateValue(Character)</span>
-    @if (allowSkillChanges)
+    <h6>@skillGroup.Key</h6>
+    foreach (var skillTagGroup in skillGroup.GroupBy(sg => sg.Tag).OrderBy(sg => sg.Key))
     {
-    <button class="btn btn-danger btn-sm ml-2" @onclick="() => RemoveSkill(skill)">Remove</button>
+        if(skillTagGroup.Key != null)
+        {
+            <br/>
+            <p><i>@skillTagGroup.Key (@skillGroup.Key)</i></p>
+        }
+        foreach (var skill in skillTagGroup)
+        {
+            <div class="input-group">
+                <label class="input-group-text" for="@skill.Name">@skill.Name</label>
+                <InputNumber id="@skill.Name" @bind-Value="skill.Rank" class="form-control" min="0" max="5" />
+                <span class="input-group-text">Value: @skill.CalculateValue(Character)</span>
+                @if (allowSkillChanges)
+                {
+                    <button type="button" class="btn btn-danger btn-sm ml-2" @onclick="() => RemoveSkill(skill)">Remove</button>
+                }
+            </div>
+        }
+        
     }
-</div>
+    <hr/>
 }
+
+<h6>Add Knowledge Skill</h6>
+<div class="input-group">
+    <label class="input-group-text" for="newSkillName">Skill Name</label>
+    <InputText id="newSkillName" @bind-Value="newSkillName" class="form-control" />
+    <button type="button" class="btn btn-primary" @onclick="AddNewSkill">Add Skill</button>
+</div>
+
+<hr/>
 
 <h5>Trades</h5>
-<div class="form-group">
-    <label for="tradeName">Trade Name:</label>
+<div class="input-group">
+    <label class="input-group-text" for="tradeName">Trade Name</label>
     <InputText id="tradeName" @bind-Value="newTradeName" class="form-control" />
-</div>
-<div class="form-group">
-    <label for="tradeBonus">Trade Bonus:</label>
+    <label class="input-group-text" for="tradeBonus">Bonus</label>
     <InputNumber id="tradeBonus" @bind-Value="newTradeBonus" class="form-control" />
+    <button type="button" class="btn btn-secondary mt-2" @onclick="AddTrade">Add Trade</button>
 </div>
-<button type="button" class="btn btn-secondary mt-2" @onclick="AddTrade">Add Trade</button>
 
 <ul class="list-group mt-2">
     @foreach (var trade in Character.Trades)
@@ -69,19 +92,19 @@
     }
 </ul>
 
+<hr/>
+
 <h5>Languages</h5>
-<div class="form-group">
-    <label for="languageName">Language Name:</label>
+<div class="input-group">
+    <label class="input-group-text" for="languageName">Language Name</label>
     <InputText id="languageName" @bind-Value="newLanguageName" class="form-control" />
-</div>
-<div class="form-group">
-    <label for="languageProficiency">Proficiency:</label>
+    <label class="input-group-text" for="languageProficiency">Proficiency</label>
     <InputSelect id="languageProficiency" @bind-Value="newLanguageProficiency" class="form-control">
         <option value="Fluent">Fluent</option>
         <option value="Limited">Limited</option>
     </InputSelect>
+    <button type="button" class="btn btn-secondary mt-2" @onclick="AddLanguage">Add Language</button>
 </div>
-<button type="button" class="btn btn-secondary mt-2" @onclick="AddLanguage">Add Language</button>
 
 <ul class="list-group mt-2">
     @foreach (var language in Character.Languages)
@@ -103,16 +126,20 @@
     private string newLanguageName;
     private string newLanguageProficiency = "Limited";
     private bool allowSkillChanges = false;
+    
     private string newSkillName = "";
     private string newSkillAttribute = "Intelligence";
+    private string newTagAttribute = "Knowledge";
 
     private void AddNewSkill()
     {
         if (!string.IsNullOrWhiteSpace(newSkillName) && !Character.Skills.Any(s => s.Name == newSkillName))
         {
-            Character.Skills.Add(new Skill(newSkillName, newSkillAttribute));
+            Character.Skills.Add(new Skill(newSkillName, newSkillAttribute, newTagAttribute));
             newSkillName = "";
             newSkillAttribute = "Intelligence";
+            newTagAttribute = "Knowledge";
+            StateHasChanged(); // Ensure the UI updates
         }
     }
 

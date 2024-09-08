@@ -20,5 +20,9 @@
   <ItemGroup>
     <_ContentIncludedByDefault Remove="wwwroot\sample-data\weather.json" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="Components\**\*.razor" />
+  </ItemGroup>
 
 </Project>
