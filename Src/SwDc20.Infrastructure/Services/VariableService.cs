@@ -66,7 +66,7 @@ public class VariableService
     public async Task DeleteVariableAsync(Guid id)
     {
         var variables = await GetVariablesAsync();
-        variables.RemoveAll(v => v.ContentId == id);
+        variables.RemoveAll(v => v.ContentId == id && v.Document.Deletable);
         await _localStorage.SetItemAsync(VariablesKey, variables);
 
         // In the future, you might want to add a check for user authentication here

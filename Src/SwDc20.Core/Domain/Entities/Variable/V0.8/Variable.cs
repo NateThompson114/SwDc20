@@ -14,8 +14,9 @@ public class Variable: BaseEntity
     public List<Property>? Properties { get; set; }
     public string? Calculation { get; set; }
     public int NestedCount { get; set; } = 0;
+    public bool Deletable { get; set; } = true;
 
-    public Variable(string name, int value, int cost = 0, string description = "", List<Property> properties = null, string calculation = null)
+    public Variable(string name, int value, int cost = 0, string description = "", List<Property> properties = null, string calculation = null, bool deletable = true)
     {
         Name = name;
         Value = value;
@@ -23,6 +24,7 @@ public class Variable: BaseEntity
         Description = description;
         Properties = properties;
         Calculation = calculation;
+        Deletable = deletable;
         UpdateNestedCount();
     }
 

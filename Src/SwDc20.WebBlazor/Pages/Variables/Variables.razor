@@ -10,7 +10,7 @@
 {
 <button class="btn btn-primary mb-3 me-2" @onclick="LoadStandardVariables">Load Standard Variables</button>
 }
-<button class="btn btn-success mb-3" @onclick="() => OpenModal(new Variable { Id = Guid.NewGuid(), Version = Variable.CurrentVersion, Properties = new List<Property>() })">Add New Variable</button>
+<button class="btn btn-success mb-3" @onclick="() => OpenModal(new Variable { Id = Guid.NewGuid(), Version = Variable.CurrentVersion, Properties = new List<Property>(), Deletable = true })">Add New Variable</button>
 
 @if (variables == null)
 {
@@ -41,7 +41,10 @@ else
                 <td>@string.Join(", ", variable.Properties)</td>
                 <td>
                     <button class="btn btn-sm btn-primary me-2" @onclick="() => OpenModal(variable)">Edit</button>
-                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteVariable(variable.Id)">Delete</button>
+                    @if (variable.Deletable)
+                    {
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteVariable(variable.Id)">Delete</button>
+                    }
                 </td>
             </tr>
         }
@@ -98,6 +101,11 @@ else
                             }
                         </div>
 
+                        <div class="form-group">
+                            <InputCheckbox class="form-check-input" id="deletable" @bind-Value="editingVariable.Deletable" />
+                            <label for="deletable">Deletable</label>
+                        </div>
+                        
                         <button type="submit" class="btn btn-primary">Save</button>
                     </EditForm>
                 </div>
@@ -171,7 +179,8 @@ else
             Cost = variable.Cost,
             Description = variable.Description,
             Properties = new List<Property>(variable.Properties ?? Enumerable.Empty<Property>()),
-            Version = Variable.CurrentVersion
+            Version = Variable.CurrentVersion,
+            Deletable = variable.Deletable
         };
         showModal = true;
     }

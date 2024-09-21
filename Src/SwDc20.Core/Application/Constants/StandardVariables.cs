@@ -7,8 +7,9 @@ public static class StandardVariables
 {
     public static Variable BaseDamage = new(nameof(BaseDamage), 1, 0, "Base damage for a weapon", new() { Property.Melee, Property.Ranged })
     {
-        Id = Guid.Parse("363bd34d-02f4-44de-bec1-2314b87c36a9"),			
-        Version = "0.8"
+        Id = Guid.Parse("363bd34d-02f4-44de-bec1-2314b87c36a9"),
+        Version = "0.8",
+        Deletable = false
     };
     public static Variable Capture = new(nameof(Capture), 0, -1, "", new() { Property.Melee })
     {
@@ -43,7 +44,8 @@ public static class StandardVariables
     public static Variable None = new(nameof(None), 0, 0, "", new() { Property.Melee, Property.Ranged })
     {
         Id = Guid.Parse("52f6fbad-020f-4810-9890-bd61e8e7b5f8"),
-        Version = "0.8"
+        Version = "0.8",
+        Deletable = false
     };
     public static Variable Reach = new(nameof(Reach), 1, 0, "", new() { Property.Melee })
     {
