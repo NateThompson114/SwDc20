@@ -136,7 +136,11 @@ else
                     ContentId = Guid.NewGuid(),
                     DocumentType = "Character",
                     ContentVersion = Character.CurrentVersion,
-                    Document = new Character()
+                    Document = new Character
+                    {
+                        Id = default,
+                        Version = null
+                    }
                 };
             }
 

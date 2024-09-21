@@ -1,13 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using SwDc20.Core.Application.Constants;
 
-namespace SwDc20.WebBlazor.Models.Character.V0._08;
+namespace SwDc20.Core.Domain.Entities.Character.V0._8;
 
-public class Character
+public class Character: BaseEntity
 {
     public const string CurrentVersion = "v0.8";
-
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public string Version { get; set; } = CurrentVersion;
     
     // General Information
     [Required]
@@ -85,7 +83,7 @@ public class Character
     {
         Id = Guid.NewGuid();
         Version = CurrentVersion;
-        Skills = SkillsStatics.DefaultSkills.Select(s => new Skill(s.Name, s.AttributeUsed, s.Tag)).ToList();
+        Skills = SkillConstants.DefaultSkills.Select(s => new Skill(s.Name, s.AttributeUsed, s.Tag)).ToList();
     }
     
     public int GetSkillValue(string skillName)
@@ -136,94 +134,4 @@ public class Character
             return save;
         }
     }
-}
-
-public static class SkillsStatics
-{
-    public static readonly Skill Awareness = new Skill("Awareness", "Prime");
-    public static readonly Skill Athletics = new Skill("Athletics", "Might");
-    public static readonly Skill Intimidation = new Skill("Intimidation", "Might");
-    public static readonly Skill Acrobatics = new Skill("Acrobatics", "Agility");
-    public static readonly Skill Trickery = new Skill("Trickery", "Agility");
-    public static readonly Skill Stealth = new Skill("Stealth", "Agility");
-    public static readonly Skill AnimalHandling = new Skill("Animal Handling", "Charisma");
-    public static readonly Skill Influence = new Skill("Influence", "Charisma");
-    public static readonly Skill Insight = new Skill("Insight", "Charisma");
-    public static readonly Skill Investigation = new Skill("Investigation", "Intelligence");
-    public static readonly Skill Medicine = new Skill("Medicine", "Intelligence");
-    public static readonly Skill Survival = new Skill("Survival", "Intelligence");
-    public static readonly Skill Arcana = new Skill("Arcana", "Intelligence", "Knowledge");
-    public static readonly Skill History = new Skill("History", "Intelligence", "Knowledge");
-    public static readonly Skill Nature = new Skill("Nature", "Intelligence", "Knowledge");
-    public static readonly Skill Occultism = new Skill("Occultism", "Intelligence", "Knowledge");
-    public static readonly Skill Religion = new Skill("Religion", "Intelligence", "Knowledge");
-    
-
-    public static List<Skill> DefaultSkills => new List<Skill>
-    {
-        Awareness, Athletics, Intimidation, Acrobatics, Trickery, Stealth,
-        AnimalHandling, Influence, Insight, Investigation, Medicine, Survival, Arcana, History, Nature, Occultism, Religion
-    };
-    
-    public static List<string> AttributeOptions => new List<string>
-    {
-        "Prime", "Might", "Agility", "Charisma", "Intelligence"
-    };
-}
-
-public class Trade
-{
-    public string Name { get; set; }
-    public int Bonus { get; set; }
-}
-
-public class Skill
-{
-    public string Name { get; set; }
-    public string AttributeUsed { get; set; }
-    public int Rank { get; set; }
-    
-    public string? Tag { get; set; }
-
-    public Skill(string name, string attributeUsed, string? tag = null)
-    {
-        Name = name;
-        AttributeUsed = attributeUsed;
-        Rank = 0;
-        Tag = tag;
-    }
-
-    public int CalculateValue(Character character)
-    {
-        int attributeValue = GetAttributeValue(character);
-        return attributeValue + (Rank * 2);
-    }
-
-    private int GetAttributeValue(Character character)
-    {
-        return AttributeUsed switch
-        {
-            "Prime" => character.PrimeModifier,
-            "Might" => character.Might,
-            "Agility" => character.Agility,
-            "Charisma" => character.Charisma,
-            "Intelligence" => character.Intelligence,
-            _ => 0
-        };
-    }
-}
-
-public class Language
-{
-    public string Name { get; set; }
-    public string Proficiency { get; set; } // e.g., "Fluent", "Limited"
-}
-
-public class Weapon
-{
-    public string Name { get; set; }
-    public string Damage { get; set; }
-    public string DamageType { get; set; }
-    public string Description { get; set; }
-    public string Calculation { get; set; } // Placeholder for script
 }

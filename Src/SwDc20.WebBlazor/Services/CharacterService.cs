@@ -1,7 +1,8 @@
 ﻿using System.Net.Http.Json;
 using Blazored.LocalStorage;
+using SwDc20.Core.Domain.Entities.Character.V0._8;
 using SwDc20.WebBlazor.Models;
-using SwDc20.WebBlazor.Models.Character.V0._08;
+
 
 namespace SwDc20.WebBlazor.Services;
 
