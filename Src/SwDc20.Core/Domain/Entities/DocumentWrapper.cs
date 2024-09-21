@@ -1,4 +1,8 @@
-﻿namespace SwDc20.WebBlazor.Models;
+﻿using System.Diagnostics;
+using SwDc20.Core.Domain.Entities.Character.V0._8;
+using SwDc20.Core.Domain.Entities.Variable.V0._8;
+
+namespace SwDc20.WebBlazor.Models;
 
 public class DocumentWrapper<T> where T : class
 {
@@ -17,10 +21,16 @@ public class DocumentWrapper<T> where T : class
     public DocumentWrapper(T document)
     {
         Document = document;
-        if (document is Character.V0._08.Character character)
+        switch (document)
         {
-            ContentId = character.Id;
-            ContentVersion = character.Version;
+            case Character character:
+                ContentId = character.Id;
+                ContentVersion = character.Version;
+                break;
+            case Variable variable:
+                ContentId = variable.Id;
+                ContentVersion = variable.Version;
+                break;
         }
     }
 }

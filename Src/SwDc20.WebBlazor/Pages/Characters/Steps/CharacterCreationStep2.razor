@@ -1,4 +1,5 @@
 ﻿@using System.Linq;
+@using SwDc20.Core.Application.Constants
 
 <h4>Step 2: Background (Skill, Trades, & Languages)</h4>
 
@@ -25,7 +26,7 @@
             <InputText id="newSkillName" @bind-Value="newSkillName" class="form-control" />
             <label class="input-group-text" for="newSkillAttribute">Attribute</label>
             <InputSelect id="newSkillAttribute" @bind-Value="newSkillAttribute" class="form-control">
-                @foreach (var attr in SkillsStatics.AttributeOptions)
+                @foreach (var attr in SkillConstants.AttributeOptions)
                 {
                     <option value="@attr">@attr</option>
                 }

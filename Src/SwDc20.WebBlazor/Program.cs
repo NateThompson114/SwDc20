@@ -1,6 +1,7 @@
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using SwDc20.Infrastructure.Services;
 using SwDc20.WebBlazor;
 using SwDc20.WebBlazor.Services;
 
@@ -13,6 +14,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<DataSyncService>();
 builder.Services.AddScoped<CharacterService>();
+builder.Services.AddScoped<VariableService>();
 
 builder.Services.AddBlazoredLocalStorage();
 

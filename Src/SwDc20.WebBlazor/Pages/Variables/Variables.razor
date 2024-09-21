@@ -1,0 +1,197 @@
+﻿@page "/variables"
+@using SwDc20.Core.Domain.Entities.Variable.V0._8
+@using SwDc20.Core.Application.Constants
+@using SwDc20.Core.Domain.Enums
+@inject VariableService VariableService
+
+<h1>Variables</h1>
+
+@if (!AreAllStandardVariablesLoaded())
+{
+    <button class="btn btn-primary mb-3 me-2" @onclick="LoadStandardVariables">Load Standard Variables</button>
+}
+<button class="btn btn-success mb-3" @onclick="() => OpenModal(new Variable { Id = Guid.NewGuid(), Version = Variable.CurrentVersion, Properties = new List<Property>() })">Add New Variable</button>
+
+@if (variables == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Value</th>
+            <th>Cost</th>
+            <th>Description</th>
+            <th>Properties</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var variableWrapper in variables)
+        {
+            var variable = variableWrapper.Document;
+            <tr>
+                <td>@variable.Name</td>
+                <td>@variable.Value</td>
+                <td>@variable.Cost</td>
+                <td>@variable.Description</td>
+                <td>@string.Join(", ", variable.Properties)</td>
+                <td>
+                    <button class="btn btn-sm btn-primary me-2" @onclick="() => OpenModal(variable)">Edit</button>
+                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteVariable(variable.Id)">Delete</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@if (showModal)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(editingVariable.Id == Guid.Empty ? "Add" : "Edit") Variable</h5>
+                    <button type="button" class="close" @onclick="CloseModal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@editingVariable" OnValidSubmit="SaveVariable">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <InputText id="name" class="form-control" @bind-Value="editingVariable.Name" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="value">Value</label>
+                            <InputNumber id="value" class="form-control" @bind-Value="editingVariable.Value" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cost">Cost</label>
+                            <InputNumber id="cost" class="form-control" @bind-Value="editingVariable.Cost" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <InputTextArea id="description" class="form-control" @bind-Value="editingVariable.Description" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Properties</label>
+                            @foreach (var property in Property.List)
+                            {
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="@property.Name"
+                                           checked="@(editingVariable.Properties?.Contains(property) ?? false)"
+                                           @onchange="@(e => ToggleProperty(property))" />
+                                    <label class="form-check-label" for="@property.Name">@property.Name</label>
+                                </div>
+                            }
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    private List<DocumentWrapper<Variable>> variables;
+    private bool showModal = false;
+    private Variable editingVariable = new Variable
+    {
+        Id = default,
+        Version = null
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadVariables();
+    }
+    
+    private bool AreAllStandardVariablesLoaded()
+    {
+        var standardVariableIds = StandardVariables.ToList().Select(v => v.Id).ToHashSet();
+        var loadedVariableIds = variables.Select(v => v.Document.Id).ToHashSet();
+        return standardVariableIds.IsSubsetOf(loadedVariableIds);
+    }
+
+    private async Task LoadVariables()
+    {
+        variables = await VariableService.GetVariablesAsync();
+    }
+
+    private async Task LoadStandardVariables()
+    {
+        var standardVariables = StandardVariables.ToList();
+        var existingVariableIds = variables.Select(v => v.Document.Id).ToHashSet();
+
+        foreach (var variable in standardVariables.Where(variable => !existingVariableIds.Contains(variable.Id)))
+        {
+            await VariableService.SaveVariableAsync(variable);
+        }
+        await LoadVariables();
+    }
+
+    private async Task DeleteVariable(Guid id)
+    {
+        await VariableService.DeleteVariableAsync(id);
+        await LoadVariables();
+    }
+
+    private void OpenModal(Variable variable)
+    {
+        editingVariable = new Variable
+        {
+            Id = variable.Id,
+            Name = variable.Name,
+            Value = variable.Value,
+            Cost = variable.Cost,
+            Description = variable.Description,
+            Properties = new List<Property>(variable.Properties ?? Enumerable.Empty<Property>()),
+            Version = Variable.CurrentVersion
+        };
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+
+    private async Task SaveVariable()
+    {        
+        await VariableService.SaveVariableAsync(editingVariable);
+        await LoadVariables();
+        CloseModal();
+    }
+    
+    private void ToggleProperty(Property property)
+    {
+        if (editingVariable.Properties == null)
+        {
+            editingVariable.Properties = new List<Property>();
+        }
+
+        if (editingVariable.Properties.Contains(property))
+        {
+            editingVariable.Properties.Remove(property);
+        }
+        else
+        {
+            editingVariable.Properties.Add(property);
+        }
+    }
+}

@@ -7,4 +7,13 @@
         <RootNamespace>SwDc20.Core</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="Application\Entities\" />
+      <Folder Include="Application\ValueObjects\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Ardalis.SmartEnum" Version="8.0.0" />
+    </ItemGroup>
+
 </Project>
