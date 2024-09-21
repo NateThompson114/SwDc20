@@ -6,9 +6,9 @@
 
 <h1>Variables</h1>
 
-@if (!AreAllStandardVariablesLoaded())
+@if (variables != null && !AreAllStandardVariablesLoaded())
 {
-    <button class="btn btn-primary mb-3 me-2" @onclick="LoadStandardVariables">Load Standard Variables</button>
+<button class="btn btn-primary mb-3 me-2" @onclick="LoadStandardVariables">Load Standard Variables</button>
 }
 <button class="btn btn-success mb-3" @onclick="() => OpenModal(new Variable { Id = Guid.NewGuid(), Version = Variable.CurrentVersion, Properties = new List<Property>() })">Add New Variable</button>
 
@@ -119,12 +119,22 @@ else
     protected override async Task OnInitializedAsync()
     {
         await LoadVariables();
+        variables = await VariableService.GetVariablesAsync() ?? new List<DocumentWrapper<Variable>>();
     }
     
     private bool AreAllStandardVariablesLoaded()
     {
+        if (variables == null || !variables.Any())
+        {
+            return false;
+        }
+
         var standardVariableIds = StandardVariables.ToList().Select(v => v.Id).ToHashSet();
-        var loadedVariableIds = variables.Select(v => v.Document.Id).ToHashSet();
+        var loadedVariableIds = variables
+            .Select(v => v.Document?.Id)
+            .Where(id => id.HasValue)
+            .Select(id => id.Value)
+            .ToHashSet();
         return standardVariableIds.IsSubsetOf(loadedVariableIds);
     }
 
