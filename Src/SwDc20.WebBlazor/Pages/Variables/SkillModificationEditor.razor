@@ -1,0 +1,54 @@
+﻿@using SwDc20.Core.Domain.Entities.Character.V0._8
+@using SwDc20.Core.Domain.Entities.Variable.V0._8
+
+<h5>Skills Modified</h5>
+
+@foreach (var modification in SkillModifications)
+{
+    <div class="row mb-2">
+        <div class="col">
+            <select class="form-control" @bind="modification.ItemBeingModified.Name">
+                @foreach (var skill in AvailableSkills)
+                {
+                    <option value="@skill.Name">@skill.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col">
+            <input type="number" class="form-control" @bind="modification.Value" />
+        </div>
+        <div class="col-auto">
+            <button type="button" class="btn btn-danger" @onclick="() => RemoveModification(modification)">Remove</button>
+        </div>
+    </div>
+}
+
+<button type="button" class="btn btn-secondary" @onclick="AddModification">Add Skill Modification</button>
+
+@code {
+    [Parameter]
+    public List<VariableModification<Skill>> SkillModifications { get; set; }
+
+    [Parameter]
+    public EventCallback<List<VariableModification<Skill>>> SkillModificationsChanged { get; set; }
+
+    private List<Skill> AvailableSkills = new List<Skill>
+    {
+        new Skill("Acrobatics", "Agility"),
+        new Skill("Athletics", "Might"),
+        new Skill("Deception", "Charisma"),
+        // Add more skills as needed
+    };
+
+    private async Task AddModification()
+    {
+        SkillModifications.Add(new VariableModification<Skill>(AvailableSkills[0], 0));
+        await SkillModificationsChanged.InvokeAsync(SkillModifications);
+    }
+
+    private async Task RemoveModification(VariableModification<Skill> modification)
+    {
+        SkillModifications.Remove(modification);
+        await SkillModificationsChanged.InvokeAsync(SkillModifications);
+    }
+}

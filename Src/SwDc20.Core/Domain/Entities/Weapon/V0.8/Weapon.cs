@@ -2,12 +2,10 @@
 
 namespace SwDc20.Core.Domain.Entities.Weapon.V0._8;
 
-public class Weapon
+public class Weapon : BaseEntity
 {
     private const string CurrentVersion = "v0.8";
     
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public string Version { get; set; } = CurrentVersion;
     public string Name { get; set; }
     // private string Calculation { get; set; }
     public int Points { get; set; }

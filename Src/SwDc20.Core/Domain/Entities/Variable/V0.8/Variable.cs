@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using SwDc20.Core.Application.Constants;
+using SwDc20.Core.Domain.Entities.Character.V0._8;
 using SwDc20.Core.Domain.Enums;
 
 namespace SwDc20.Core.Domain.Entities.Variable.V0._8;
@@ -8,27 +9,34 @@ public class Variable: BaseEntity
 {
     public const string CurrentVersion = "0.8";
     public string Name { get; set; }
-    public int Value { get; set; }
     public int Cost { get; set; }
+    public int DamageIncrease { get; set; }
+    public int TwoHandedDamageIncrease { get; set; }
+    public int BonusToHit { get; set; }
+    public int TwoHandedBonusToHit { get; set; }
     public string Description { get; set; }
     public List<Property>? Properties { get; set; }
     public string? Calculation { get; set; }
     public int NestedCount { get; set; } = 0;
     public bool Deletable { get; set; } = true;
+    
+    public List<VariableModification<Skill>> SkillsModified { get; set; }
+    public int MightModification { get; set; }
+    public int AgilityModification { get; set; }
+    public int CharismaModification { get; set; }
+    public int IntelligenceModification { get; set; }
+    public int PhysicalDefenseModification { get; set; }
+    public string RangeModification { get; set; }
+    public int ReachModification { get; set; }
+    public int WeaponStyleCountModification { get; set; }
+    public int HeavyHitDamageIncrease { get; set; }
+    public int BrutalHitDamageIncrease { get; set; }
 
-    public Variable(string name, int value, int cost = 0, string description = "", List<Property> properties = null, string calculation = null, bool deletable = true)
+    public Variable()
     {
-        Name = name;
-        Value = value;
-        Cost = cost;
-        Description = description;
-        Properties = properties;
-        Calculation = calculation;
-        Deletable = deletable;
+        SkillsModified = new List<VariableModification<Skill>>();
         UpdateNestedCount();
     }
-
-    public Variable() { }
 
     private void UpdateNestedCount()
     {
@@ -54,4 +62,16 @@ public class Variable: BaseEntity
 
         NestedCount = maxNestedCount;
     }
+}
+
+public class VariableModification<TMod>
+{
+    public VariableModification(TMod itemBeingModified, int value)
+    {
+        ItemBeingModified = itemBeingModified;
+        Value = value;
+    }
+
+    public TMod ItemBeingModified { get; set; }
+	public int Value { get; set; }
 }

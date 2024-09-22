@@ -28,8 +28,8 @@ public class CalculationService
 				return new CalculationResult
 				{
 					Variable = variable,
-					Value = variable.Value,
-					ExpandedCalculation = variable.Value.ToString()
+					Value = variable.DamageIncrease,
+					ExpandedCalculation = variable.DamageIncrease.ToString()
 				};
 			}
 
@@ -76,7 +76,7 @@ public class CalculationService
 
 					if (!string.IsNullOrWhiteSpace(variable.Calculation))
 						return $"({ExpandVariables(variable.Calculation)})";
-					return variable.Value.ToString();
+					return variable.DamageIncrease.ToString();
 				}
 				throw new ArgumentException($"Unknown variable: {variableName}");
 			});

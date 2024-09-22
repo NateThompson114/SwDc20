@@ -1,14 +1,16 @@
 ﻿@page "/variables"
 @using SwDc20.Core.Domain.Entities.Variable.V0._8
+@using SwDc20.WebBlazor.Models
 @using SwDc20.Core.Application.Constants
 @using SwDc20.Core.Domain.Enums
+@using SwDc20.Core.Domain.Entities.Character.V0._8
 @inject VariableService VariableService
 
 <h1>Variables</h1>
 
-@if (variables != null && !AreAllStandardVariablesLoaded())
+@if (!AreAllStandardVariablesLoaded())
 {
-<button class="btn btn-primary mb-3 me-2" @onclick="LoadStandardVariables">Load Standard Variables</button>
+    <button class="btn btn-primary mb-3 me-2" @onclick="LoadStandardVariables">Load Standard Variables</button>
 }
 <button class="btn btn-success mb-3" @onclick="() => OpenModal(new Variable { Id = Guid.NewGuid(), Version = Variable.CurrentVersion, Properties = new List<Property>(), Deletable = true })">Add New Variable</button>
 
@@ -20,34 +22,32 @@ else
 {
     <table class="table">
         <thead>
-        <tr>
-            <th>Name</th>
-            <th>Value</th>
-            <th>Cost</th>
-            <th>Description</th>
-            <th>Properties</th>
-            <th>Actions</th>
-        </tr>
+            <tr>
+                <th>Name</th>
+                <th>Cost</th>
+                <th>Description</th>
+                <th>Properties</th>
+                <th>Actions</th>
+            </tr>
         </thead>
         <tbody>
-        @foreach (var variableWrapper in variables)
-        {
-            var variable = variableWrapper.Document;
-            <tr>
-                <td>@variable.Name</td>
-                <td>@variable.Value</td>
-                <td>@variable.Cost</td>
-                <td>@variable.Description</td>
-                <td>@string.Join(", ", variable.Properties)</td>
-                <td>
-                    <button class="btn btn-sm btn-primary me-2" @onclick="() => OpenModal(variable)">Edit</button>
-                    @if (variable.Deletable)
-                    {
-                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteVariable(variable.Id)">Delete</button>
-                    }
-                </td>
-            </tr>
-        }
+            @foreach (var variableWrapper in variables)
+            {
+                var variable = variableWrapper.Document;
+                <tr>
+                    <td>@variable.Name</td>
+                    <td>@variable.Cost</td>
+                    <td>@variable.Description</td>
+                    <td>@string.Join(", ", variable.Properties)</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-2" @onclick="() => OpenModal(variable)">Edit</button>
+                        @if (variable.Deletable)
+                        {
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteVariable(variable.Id)">Delete</button>
+                        }
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 }
@@ -55,7 +55,7 @@ else
 @if (showModal)
 {
     <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">@(editingVariable.Id == Guid.Empty ? "Add" : "Edit") Variable</h5>
@@ -64,7 +64,7 @@ else
                     </button>
                 </div>
                 <div class="modal-body">
-                    <EditForm Model="@editingVariable" OnValidSubmit="SaveVariable">
+                    <EditForm Model="@editingVariable" OnValidSubmit="SaveVariable" @onsubmit:preventDefault>
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
@@ -74,13 +74,28 @@ else
                         </div>
 
                         <div class="form-group">
-                            <label for="value">Value</label>
-                            <InputNumber id="value" class="form-control" @bind-Value="editingVariable.Value" />
+                            <label for="cost">Cost</label>
+                            <InputNumber id="cost" class="form-control" @bind-Value="editingVariable.Cost" />
                         </div>
 
                         <div class="form-group">
-                            <label for="cost">Cost</label>
-                            <InputNumber id="cost" class="form-control" @bind-Value="editingVariable.Cost" />
+                            <label for="damageIncrease">Damage Increase</label>
+                            <InputNumber id="damageIncrease" class="form-control" @bind-Value="editingVariable.DamageIncrease" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="twoHandedDamageIncrease">Two-Handed Damage Increase</label>
+                            <InputNumber id="twoHandedDamageIncrease" class="form-control" @bind-Value="editingVariable.TwoHandedDamageIncrease" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bonusToHit">Bonus To Hit</label>
+                            <InputNumber id="bonusToHit" class="form-control" @bind-Value="editingVariable.BonusToHit" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="twoHandedBonusToHit">Two-Handed Bonus To Hit</label>
+                            <InputNumber id="twoHandedBonusToHit" class="form-control" @bind-Value="editingVariable.TwoHandedBonusToHit" />
                         </div>
 
                         <div class="form-group">
@@ -89,11 +104,16 @@ else
                         </div>
 
                         <div class="form-group">
+                            <label for="calculation">Calculation</label>
+                            <InputText id="calculation" class="form-control" @bind-Value="editingVariable.Calculation" />
+                        </div>
+
+                        <div class="form-group">
                             <label>Properties</label>
                             @foreach (var property in Property.List)
                             {
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="@property.Name"
+                                    <input type="checkbox" class="form-check-input" id="@property.Name" 
                                            checked="@(editingVariable.Properties?.Contains(property) ?? false)"
                                            @onchange="@(e => ToggleProperty(property))" />
                                     <label class="form-check-label" for="@property.Name">@property.Name</label>
@@ -102,10 +122,67 @@ else
                         </div>
 
                         <div class="form-group">
-                            <InputCheckbox class="form-check-input" id="deletable" @bind-Value="editingVariable.Deletable" />
                             <label for="deletable">Deletable</label>
+                            <InputSelect id="deletable" class="form-control" @bind-Value="editingVariable.Deletable">
+                                <option value="true">True</option>
+                                <option value="false">False</option>
+                            </InputSelect>
                         </div>
-                        
+
+                        <div class="form-group">
+                            <label for="mightModification">Might Modification</label>
+                            <InputNumber id="mightModification" class="form-control" @bind-Value="editingVariable.MightModification" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="agilityModification">Agility Modification</label>
+                            <InputNumber id="agilityModification" class="form-control" @bind-Value="editingVariable.AgilityModification" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="charismaModification">Charisma Modification</label>
+                            <InputNumber id="charismaModification" class="form-control" @bind-Value="editingVariable.CharismaModification" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="intelligenceModification">Intelligence Modification</label>
+                            <InputNumber id="intelligenceModification" class="form-control" @bind-Value="editingVariable.IntelligenceModification" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="physicalDefenseModification">Physical Defense Modification</label>
+                            <InputNumber id="physicalDefenseModification" class="form-control" @bind-Value="editingVariable.PhysicalDefenseModification" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="rangeModification">Range Modification</label>
+                            <InputText id="rangeModification" class="form-control" @bind-Value="editingVariable.RangeModification" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reachModification">Reach Modification</label>
+                            <InputNumber id="reachModification" class="form-control" @bind-Value="editingVariable.ReachModification" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="weaponStyleCountModification">Weapon Style Count Modification</label>
+                            <InputNumber id="weaponStyleCountModification" class="form-control" @bind-Value="editingVariable.WeaponStyleCountModification" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="heavyHitDamageIncrease">Heavy Hit Damage Increase</label>
+                            <InputNumber id="heavyHitDamageIncrease" class="form-control" @bind-Value="editingVariable.HeavyHitDamageIncrease" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="brutalHitDamageIncrease">Brutal Hit Damage Increase</label>
+                            <InputNumber id="brutalHitDamageIncrease" class="form-control" @bind-Value="editingVariable.BrutalHitDamageIncrease" />
+                        </div>
+
+                        <div class="form-group">
+                            <SkillModificationEditor @bind-SkillModifications="editingVariable.SkillsModified" />
+                        </div>
+
                         <button type="submit" class="btn btn-primary">Save</button>
                     </EditForm>
                 </div>
@@ -120,16 +197,20 @@ else
     private bool showModal = false;
     private Variable editingVariable = new Variable
     {
-        Id = default,
-        Version = null
+        Id = Guid.NewGuid(),
+        Version = Variable.CurrentVersion
     };
 
     protected override async Task OnInitializedAsync()
     {
         await LoadVariables();
-        variables = await VariableService.GetVariablesAsync() ?? new List<DocumentWrapper<Variable>>();
     }
-    
+
+    private async Task LoadVariables()
+    {
+        variables = await VariableService.GetVariablesAsync();
+    }
+
     private bool AreAllStandardVariablesLoaded()
     {
         if (variables == null || !variables.Any())
@@ -146,17 +227,10 @@ else
         return standardVariableIds.IsSubsetOf(loadedVariableIds);
     }
 
-    private async Task LoadVariables()
-    {
-        variables = await VariableService.GetVariablesAsync();
-    }
-
     private async Task LoadStandardVariables()
     {
         var standardVariables = StandardVariables.ToList();
-        var existingVariableIds = variables.Select(v => v.Document.Id).ToHashSet();
-
-        foreach (var variable in standardVariables.Where(variable => !existingVariableIds.Contains(variable.Id)))
+        foreach (var variable in standardVariables)
         {
             await VariableService.SaveVariableAsync(variable);
         }
@@ -175,12 +249,34 @@ else
         {
             Id = variable.Id,
             Name = variable.Name,
-            Value = variable.Value,
             Cost = variable.Cost,
+            DamageIncrease = variable.DamageIncrease,
+            TwoHandedDamageIncrease = variable.TwoHandedDamageIncrease,
+            BonusToHit = variable.BonusToHit,
+            TwoHandedBonusToHit = variable.TwoHandedBonusToHit,
             Description = variable.Description,
             Properties = new List<Property>(variable.Properties ?? Enumerable.Empty<Property>()),
-            Version = Variable.CurrentVersion,
-            Deletable = variable.Deletable
+            Calculation = variable.Calculation,
+            Deletable = variable.Deletable,
+            MightModification = variable.MightModification,
+            AgilityModification = variable.AgilityModification,
+            CharismaModification = variable.CharismaModification,
+            IntelligenceModification = variable.IntelligenceModification,
+            PhysicalDefenseModification = variable.PhysicalDefenseModification,
+            RangeModification = variable.RangeModification,
+            ReachModification = variable.ReachModification,
+            WeaponStyleCountModification = variable.WeaponStyleCountModification,
+            HeavyHitDamageIncrease = variable.HeavyHitDamageIncrease,
+            BrutalHitDamageIncrease = variable.BrutalHitDamageIncrease,
+            SkillsModified = new List<VariableModification<Skill>>(
+                variable.SkillsModified?.Select(sm => 
+                    new VariableModification<Skill>(
+                        new Skill(sm.ItemBeingModified.Name, sm.ItemBeingModified.AttributeUsed, sm.ItemBeingModified.Tag),
+                        sm.Value
+                    )
+                ) ?? Enumerable.Empty<VariableModification<Skill>>()
+            ),
+            Version = Variable.CurrentVersion
         };
         showModal = true;
     }
@@ -191,12 +287,12 @@ else
     }
 
     private async Task SaveVariable()
-    {        
+    {
         await VariableService.SaveVariableAsync(editingVariable);
         await LoadVariables();
         CloseModal();
     }
-    
+
     private void ToggleProperty(Property property)
     {
         if (editingVariable.Properties == null)
