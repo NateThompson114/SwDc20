@@ -1,0 +1,59 @@
+﻿@using SwDc20.Core.Domain.Entities.Character.V0._8
+@using SwDc20.Core.Domain.Entities.Variable.V0._8
+@inject SkillService SkillService
+
+<h5>Skills Modified</h5>
+@foreach (var modification in SkillModifications)
+{
+    <div class="input-group mb-2">
+        <select class="form-control" @bind="modification.ItemBeingModifiedId">
+            @foreach (var skill in AvailableSkills)
+            {
+                <option value="@skill.Id">@skill.Name</option>
+            }
+        </select>
+        <input type="number" class="form-control" @bind="modification.Value" />
+        <button class="btn btn-danger" @onclick="@(() => RemoveModification(modification))">Remove</button>
+    </div>
+}
+<button class="btn btn-primary" @onclick="@AddModification" @onclick:preventDefault @onclick:stopPropagation>Add Skill Modification</button>
+
+@code {
+    [Parameter]
+    public List<VariableModification<Skill>> SkillModifications { get; set; } = new List<VariableModification<Skill>>();
+
+    [Parameter]
+    public EventCallback<List<VariableModification<Skill>>> SkillModificationsChanged { get; set; }
+
+    private List<Skill> AvailableSkills = new List<Skill>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var localSkills = await SkillService.GetSkillsAsync();
+        AvailableSkills = localSkills.Any()
+            ? localSkills.Select(s => s.Document).ToList()
+            : SkillService.GetDefaultSkills();
+
+        // Update ItemBeingModified based on ItemBeingModifiedId
+        foreach (var modification in SkillModifications)
+        {
+            modification.ItemBeingModified = AvailableSkills.FirstOrDefault(s => s.Id == modification.ItemBeingModifiedId) ?? modification.ItemBeingModified;
+        }
+    }
+
+    private async Task AddModification()
+    {
+        if (AvailableSkills.Any())
+        {
+            var firstSkill = AvailableSkills[0];
+            SkillModifications.Add(new VariableModification<Skill>(firstSkill, 0));
+            await SkillModificationsChanged.InvokeAsync(SkillModifications);
+        }
+    }
+
+    private async Task RemoveModification(VariableModification<Skill> modification)
+    {
+        SkillModifications.Remove(modification);
+        await SkillModificationsChanged.InvokeAsync(SkillModifications);
+    }
+}

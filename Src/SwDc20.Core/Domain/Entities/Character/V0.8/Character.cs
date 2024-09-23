@@ -32,7 +32,7 @@ public class Character: BaseEntity
 
     // Step 3: Background
     public string Background { get; set; }
-    public List<Skill> Skills { get; set; }
+    public List<Skill> Skills { get; set; } = new();
     public List<Trade> Trades { get; set; } = new();
     public List<Language> Languages { get; set; } = new();
 
@@ -83,7 +83,11 @@ public class Character: BaseEntity
     {
         Id = Guid.NewGuid();
         Version = CurrentVersion;
-        Skills = SkillConstants.DefaultSkills.Select(s => new Skill(s.Name, s.AttributeUsed, s.Tag)).ToList();
+        // Skills = SkillConstants.DefaultSkills.Select(s => new Skill(s.Name, s.AttributeUsed, s.Tag)
+        // {
+        //     Id = s.Id,
+        //     Version = s.Version
+        // }).ToList();
     }
     
     public int GetSkillValue(string skillName)

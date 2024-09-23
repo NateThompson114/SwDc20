@@ -1,0 +1,116 @@
+﻿@page "/skills"
+@inject SkillService SkillService
+@* @inject IToastService ToastService *@
+
+<h3>Skill Management</h3>
+
+<div class="mb-3">
+    <button class="btn btn-primary mr-2" @onclick="() => OpenModal(new Skill { Id = Guid.NewGuid(), Version = Skill.CurrentVersion })">Add New Skill</button>
+    <button class="btn btn-secondary" @onclick="AddMissingDefaultSkills">Add Missing Default Skills</button>
+</div>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Attribute Used</th>
+        <th>Tag</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var skillWrapper in skills)
+    {
+        <tr>
+            <td>@skillWrapper.Document.Name</td>
+            <td>@skillWrapper.Document.AttributeUsed</td>
+            <td>@skillWrapper.Document.Tag</td>
+            <td>
+                <button class="btn btn-sm btn-info" @onclick="() => OpenModal(skillWrapper.Document)">Edit</button>
+                <button class="btn btn-sm btn-danger" @onclick="() => DeleteSkill(skillWrapper.ContentId)">Delete</button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<SkillModal @ref="skillModal" Skill="currentSkill" OnSave="SaveSkill" OnClose="CloseModal" />
+
+@code {
+    private List<DocumentWrapper<Skill>> skills = new List<DocumentWrapper<Skill>>();
+    private SkillModal skillModal;
+    private Skill currentSkill = new Skill
+    {
+        Id = Guid.NewGuid(),
+        Version = Skill.CurrentVersion
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSkills();
+    }
+
+    private async Task LoadSkills()
+    {
+        skills = await SkillService.GetSkillsAsync();
+    }
+
+    private void OpenModal(Skill skill)
+    {
+        currentSkill = new Skill
+        {
+            Id = skill.Id,
+            Name = skill.Name,
+            AttributeUsed = skill.AttributeUsed,
+            Tag = skill.Tag,
+            Version = skill.Version
+        };
+        skillModal.Open();
+    }
+
+    private void CloseModal()
+    {
+        currentSkill = new Skill
+        {
+            Id = Guid.NewGuid(),
+            Version = Skill.CurrentVersion
+        };
+    }
+
+    private async Task SaveSkill(Skill skill)
+    {
+        await SkillService.SaveSkillAsync(skill);
+        await LoadSkills();
+        // ToastService.ShowSuccess("Skill saved successfully!");
+    }
+
+    private async Task DeleteSkill(Guid id)
+    {
+        await SkillService.DeleteSkillAsync(id);
+        await LoadSkills();
+        // ToastService.ShowSuccess("Skill deleted successfully!");
+    }
+
+    private async Task AddMissingDefaultSkills()
+    {
+        var defaultSkills = SkillService.GetDefaultSkills();
+        var existingSkillNames = skills.Select(s => s.Document.Name).ToHashSet();
+        var missingSkills = defaultSkills.Where(s => !existingSkillNames.Contains(s.Name)).ToList();
+
+        foreach (var skill in missingSkills)
+        {
+            await SkillService.SaveSkillAsync(skill);
+        }
+
+        await LoadSkills();
+
+        if (missingSkills.Any())
+        {
+            // ToastService.ShowSuccess($"Added {missingSkills.Count} missing default skills.");
+        }
+        else
+        {
+            // ToastService.ShowInfo("All default skills are already present.");
+        }
+    }
+}
