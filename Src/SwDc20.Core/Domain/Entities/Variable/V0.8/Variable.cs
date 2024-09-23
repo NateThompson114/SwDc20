@@ -70,8 +70,21 @@ public class VariableModification<TMod>
     {
         ItemBeingModified = itemBeingModified;
         Value = value;
+        ItemBeingModifiedId = GetIdFromItem(itemBeingModified);
     }
 
     public TMod ItemBeingModified { get; set; }
-	public int Value { get; set; }
+    public Guid ItemBeingModifiedId { get; set; }
+    public int Value { get; set; }
+
+    private Guid GetIdFromItem(TMod item)
+    {
+        var idProperty = item?.GetType().GetProperty("Id");
+        if (idProperty != null && idProperty.PropertyType == typeof(Guid))
+        {
+            return (Guid)idProperty.GetValue(item);
+        }
+        return Guid.Empty;
+    }
 }
+

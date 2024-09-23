@@ -5,6 +5,7 @@
 @using SwDc20.Core.Domain.Enums
 @using SwDc20.Core.Domain.Entities.Character.V0._8
 @inject VariableService VariableService
+@inject SkillService SkillService
 
 <h1>Variables</h1>
 
@@ -200,10 +201,20 @@ else
         Id = Guid.NewGuid(),
         Version = Variable.CurrentVersion
     };
+    private List<Skill> availableSkills = new List<Skill>();
 
     protected override async Task OnInitializedAsync()
     {
         await LoadVariables();
+        await LoadAvailableSkills();
+    }
+
+    private async Task LoadAvailableSkills()
+    {
+        var localSkills = await SkillService.GetSkillsAsync();
+        availableSkills = localSkills.Any() 
+            ? localSkills.Select(s => s.Document).ToList() 
+            : SkillService.GetDefaultSkills();
     }
 
     private async Task LoadVariables()
@@ -270,11 +281,15 @@ else
             BrutalHitDamageIncrease = variable.BrutalHitDamageIncrease,
             SkillsModified = new List<VariableModification<Skill>>(
                 variable.SkillsModified?.Select(sm => 
-                    new VariableModification<Skill>(
-                        new Skill(sm.ItemBeingModified.Name, sm.ItemBeingModified.AttributeUsed, sm.ItemBeingModified.Tag),
-                        sm.Value
-                    )
-                ) ?? Enumerable.Empty<VariableModification<Skill>>()
+                {
+                    var skill = availableSkills.FirstOrDefault(s => s.Id == sm.ItemBeingModifiedId) ?? 
+                                new Skill(sm.ItemBeingModified.Name, sm.ItemBeingModified.AttributeUsed, sm.ItemBeingModified.Tag)
+                                {
+                                    Id = sm.ItemBeingModifiedId,
+                                    Version = Skill.CurrentVersion
+                                };
+                    return new VariableModification<Skill>(skill, sm.Value);
+                }) ?? Enumerable.Empty<VariableModification<Skill>>()
             ),
             Version = Variable.CurrentVersion
         };

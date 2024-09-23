@@ -15,6 +15,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<DataSyncService>();
 builder.Services.AddScoped<CharacterService>();
 builder.Services.AddScoped<VariableService>();
+builder.Services.AddScoped<SkillService>();
 
 builder.Services.AddBlazoredLocalStorage();
 

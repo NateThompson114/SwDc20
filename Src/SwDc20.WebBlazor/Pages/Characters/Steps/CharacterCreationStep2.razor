@@ -1,5 +1,7 @@
 ﻿@using System.Linq;
 @using SwDc20.Core.Application.Constants
+@inject SkillService SkillService
+
 
 <h4>Step 2: Background (Skill, Trades, & Languages)</h4>
 
@@ -17,25 +19,27 @@
     <label class="form-check-label" for="allowSkillChanges">Allow Skill Changes</label>
 </div>
 
+<button class="btn btn-secondary mb-3" @onclick="AlignSkills">Align Skills with Current List</button>
+
 @if (allowSkillChanges)
 {
-    <div class="mb-3">
-        <h6>Add New Skill</h6>
-        <div class="input-group">
-            <label class="input-group-text" for="newSkillName">Skill Name</label>
-            <InputText id="newSkillName" @bind-Value="newSkillName" class="form-control" />
-            <label class="input-group-text" for="newSkillAttribute">Attribute</label>
-            <InputSelect id="newSkillAttribute" @bind-Value="newSkillAttribute" class="form-control">
-                @foreach (var attr in SkillConstants.AttributeOptions)
-                {
-                    <option value="@attr">@attr</option>
-                }
-            </InputSelect>
-            <label class="input-group-text" for="newTag">Tag</label>
-            <InputText id="newTag" @bind-Value="newTagAttribute" class="form-control" />
-            <button type="button" class="btn btn-primary" @onclick="AddNewSkill">Add Skill</button>
-        </div>
+<div class="mb-3">
+    <h6>Add New Skill</h6>
+    <div class="input-group">
+        <label class="input-group-text" for="newSkillName">Skill Name</label>
+        <InputText id="newSkillName" @bind-Value="newSkillName" class="form-control" />
+        <label class="input-group-text" for="newSkillAttribute">Attribute</label>
+        <InputSelect id="newSkillAttribute" @bind-Value="newSkillAttribute" class="form-control">
+            @foreach (var attr in SkillConstants.AttributeOptions)
+            {
+            <option value="@attr">@attr</option>
+            }
+        </InputSelect>
+        <label class="input-group-text" for="newTag">Tag</label>
+        <InputText id="newTag" @bind-Value="newTagAttribute" class="form-control" />
+        <button type="button" class="btn btn-primary" @onclick="AddNewSkill">Add Skill</button>
     </div>
+</div>
 }
 
 @foreach (var skillGroup in Character.Skills.GroupBy(sk => sk.AttributeUsed))
@@ -121,32 +125,83 @@
     [Parameter]
     public Character Character { get; set; }
 
+    private List<Skill> availableSkills = new List<Skill>();
+    private bool allowSkillChanges = false;
+    private string newSkillName = "";
+    private string newSkillAttribute = "Intelligence";
+    private string newTagAttribute = "Knowledge";
+    
     private int newSkillBonus;
     private string newTradeName;
     private int newTradeBonus;
     private string newLanguageName;
     private string newLanguageProficiency = "Limited";
-    private bool allowSkillChanges = false;
     
-    private string newSkillName = "";
-    private string newSkillAttribute = "Intelligence";
-    private string newTagAttribute = "Knowledge";
 
+    protected override async Task OnInitializedAsync()
+    {
+        var localSkills = await SkillService.GetSkillsAsync();
+        availableSkills = localSkills.Any() 
+            ? localSkills.Select(s => s.Document).ToList() 
+            : SkillService.GetDefaultSkills();
+
+        if (!Character.Skills.Any())
+        {
+            Character.Skills = new List<Skill>(availableSkills.Select(s => new Skill(s.Name, s.AttributeUsed, s.Tag)
+            {
+                Id = Guid.NewGuid(),
+                Version = Skill.CurrentVersion
+            }));
+        }
+    }
+    
     private void AddNewSkill()
     {
         if (!string.IsNullOrWhiteSpace(newSkillName) && !Character.Skills.Any(s => s.Name == newSkillName))
         {
-            Character.Skills.Add(new Skill(newSkillName, newSkillAttribute, newTagAttribute));
+            var newSkill = new Skill(newSkillName, newSkillAttribute, newTagAttribute)
+            {
+                Id = Guid.NewGuid(),
+                Version = Skill.CurrentVersion
+            };
+            Character.Skills.Add(newSkill);
+            availableSkills.Add(newSkill);
+            SkillService.SaveSkillAsync(newSkill);
+
             newSkillName = "";
             newSkillAttribute = "Intelligence";
             newTagAttribute = "Knowledge";
-            StateHasChanged(); // Ensure the UI updates
+            StateHasChanged();
         }
     }
 
     private void RemoveSkill(Skill skill)
     {
         Character.Skills.Remove(skill);
+    }
+
+    private async Task AlignSkills()
+    {
+        var localSkills = await SkillService.GetSkillsAsync();
+        availableSkills = localSkills.Any() 
+            ? localSkills.Select(s => s.Document).ToList() 
+            : SkillService.GetDefaultSkills();
+
+        foreach (var availableSkill in availableSkills)
+        {
+            if (!Character.Skills.Any(s => s.Name == availableSkill.Name))
+            {
+                Character.Skills.Add(new Skill(availableSkill.Name, availableSkill.AttributeUsed, availableSkill.Tag)
+                {
+                    Id = Guid.NewGuid(),
+                    Version = Skill.CurrentVersion
+                });
+            }
+        }
+
+        Character.Skills = Character.Skills.Where(s => availableSkills.Any(a => a.Name == s.Name)).ToList();
+
+        StateHasChanged();
     }
 
     private void AddTrade()
