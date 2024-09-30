@@ -56,17 +56,6 @@ public static class StandardVariables
 			Description = "When you Miss a Ranged Attack with the Weapon, it returns to your hand.",
 			Properties = new() { Property.Melee }
 		};
-		public static Variable Thrown = new()
-		{
-			Id = Guid.Parse("a318a0e0-fd89-4d68-bf74-4550b49e939e"),
-			Version = "0.8",
-			Name = nameof(Thrown),
-			Cost = 1,
-			Description = "You can throw the Weapon to make a Ranged Martial Attack (10/20).",
-			Properties = new() { Property.Melee },
-			
-			RangeModification = "(10/20)"
-		};
 		public static Variable Toss = new()
 		{
 			Id = Guid.Parse("4e3f3d2d-e643-4d48-95da-47b156045ad9"),
@@ -76,7 +65,19 @@ public static class StandardVariables
 			Description = "You can throw the Weapon to make a Ranged Martial Attack (5/10).",
 			Properties = new() { Property.Melee },
 			
-			RangeModification = "(5/10)"
+			RangeModification = 5
+		};
+		public static Variable Thrown = new()
+		{
+			Id = Guid.Parse("a318a0e0-fd89-4d68-bf74-4550b49e939e"),
+			Version = "0.8",
+			Name = nameof(Thrown),
+			Cost = 1,
+			Description = "You can throw the Weapon to make a Ranged Martial Attack (10/20).",
+			Properties = new() { Property.Melee },
+			
+			RangeModification = 10,
+			Requires = new List<Variable>(){Toss}
 		};
 		public static Variable Versatile = new()
 		{
@@ -102,7 +103,8 @@ public static class StandardVariables
 			Description = "Base damage for a weapon",
 			Properties = new() { Property.Melee, Property.Ranged },
 			
-			Deletable = false
+			Deletable = false,
+			CountsTowardsMaximumProperties = false
 		};
 		public static Variable Concealable = new()
 		{
@@ -134,15 +136,6 @@ public static class StandardVariables
 			
 			HeavyHitDamageIncrease = 1
 		};
-		public static Variable None = new()
-		{
-			Id = Guid.Parse("52f6fbad-020f-4810-9890-bd61e8e7b5f8"),
-			Version = "0.8",
-			Name = nameof(None),
-			Description = "Default Property",
-			Properties = new() { Property.Melee, Property.Ranged },
-			Deletable = false
-		};
 		public static Variable TwoHanded = new()
 		{
 			Id = Guid.Parse("78b0cd8b-8112-4708-826c-800b4f293feb"),
@@ -150,7 +143,10 @@ public static class StandardVariables
 			Name = nameof(TwoHanded),
 			Cost = -1,
 			Description = "The Weapon requires 2 hands when you Attack with it.",
-			Properties = new() { Property.Melee, Property.Ranged }
+			Properties = new() { Property.Melee, Property.Ranged },
+			
+			CountsTowardsMaximumProperties = false,
+			DefaultVariableForProperties = new (){ Property.Melee, Property.Ranged }
 		};
 		public static Variable Unwieldy = new()
 		{
@@ -159,7 +155,10 @@ public static class StandardVariables
 			Name = nameof(Unwieldy),
 			Cost = -1,
 			Description = "You have DisADV on Attacks made with the Weapon against targets within 1 Space of you.",
-			Properties = new() { Property.Melee, Property.Ranged }
+			Properties = new() { Property.Melee, Property.Ranged },
+			
+			CountsTowardsMaximumProperties = false,
+			DefaultVariableForProperties = { Property.Melee, Property.Ranged }
 		};
 
 
@@ -174,7 +173,7 @@ public static class StandardVariables
 			Description = "Your Range increases to 30/90.",
 			Properties = new() { Property.Ranged },
 			
-			RangeModification = "30/90"
+			RangeModification = 30
 		};
 		public static Variable Ammo = new()
 		{

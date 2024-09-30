@@ -2,6 +2,7 @@
 using SwDc20.Core.Application.Constants;
 using SwDc20.Core.Domain.Entities.Character.V0._8;
 using SwDc20.Core.Domain.Enums;
+using SwDc20.WebBlazor.Models;
 
 namespace SwDc20.Core.Domain.Entities.Variable.V0._8;
 
@@ -10,6 +11,8 @@ public class Variable: BaseEntity
     public const string CurrentVersion = "0.8";
     public string Name { get; set; }
     public int Cost { get; set; }
+    public bool CountsTowardsMaximumProperties { get; set; } = true;
+    public bool IsStackable { get; set; } = false;
     public int DamageIncrease { get; set; }
     public int TwoHandedDamageIncrease { get; set; }
     public int BonusToHit { get; set; }
@@ -26,15 +29,20 @@ public class Variable: BaseEntity
     public int CharismaModification { get; set; }
     public int IntelligenceModification { get; set; }
     public int PhysicalDefenseModification { get; set; }
-    public string RangeModification { get; set; }
+    public int RangeModification { get; set; }
     public int ReachModification { get; set; }
     public int WeaponStyleCountModification { get; set; }
     public int HeavyHitDamageIncrease { get; set; }
     public int BrutalHitDamageIncrease { get; set; }
 
+    public List<Variable> Requires { get; set; }
+    public List<Property> DefaultVariableForProperties { get; set; }
+
     public Variable()
     {
         SkillsModified = new List<VariableModification<Skill>>();
+        Requires = new List<Variable>();
+        DefaultVariableForProperties = new List<Property>();
         UpdateNestedCount();
     }
 
@@ -61,6 +69,16 @@ public class Variable: BaseEntity
         }
 
         NestedCount = maxNestedCount;
+    }
+    
+    public DocumentWrapper<Variable> GetWrapper()
+    {
+        return new DocumentWrapper<Variable>(this)
+        {
+            DocumentType = "Variable",
+            ContentId = Id,
+            ContentVersion = Version
+        };
     }
 }
 

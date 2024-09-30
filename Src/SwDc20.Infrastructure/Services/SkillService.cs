@@ -27,8 +27,11 @@ public class SkillService
     
     public async Task<List<DocumentWrapper<Skill>>> GetSkillsAsync()
     {
-        var skills = await _localStorage.GetItemAsync<List<DocumentWrapper<Skill>>>(SkillsKey) 
-            ?? SkillConstants.DefaultSkills.Select(s => new DocumentWrapper<Skill>(s)).ToList();
+        // var skills = await _localStorage.GetItemAsync<List<DocumentWrapper<Skill>>>(SkillsKey) 
+        //     ?? SkillConstants.DefaultSkills.Select(s => new DocumentWrapper<Skill>(s)).ToList();
+
+        var skills = await _localStorage.GetItemAsync<List<DocumentWrapper<Skill>>>(SkillsKey) ?? new List<DocumentWrapper<Skill>>(); 
+                     
         return skills;
     }
 
