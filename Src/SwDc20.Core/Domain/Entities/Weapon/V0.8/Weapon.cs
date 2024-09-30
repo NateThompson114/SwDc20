@@ -1,23 +1,30 @@
-﻿using Ardalis.SmartEnum;
+﻿using System.ComponentModel.DataAnnotations;
+using SwDc20.Core.Application.Constants;
+using SwDc20.Core.Domain.Enums;
 
 namespace SwDc20.Core.Domain.Entities.Weapon.V0._8;
 
 public class Weapon : BaseEntity
 {
-    private const string CurrentVersion = "v0.8";
+    public const string CurrentVersion = "v0.8";
     
+    [Required]
     public string Name { get; set; }
-    // private string Calculation { get; set; }
+    
+    [Range(0, 100, ErrorMessage = "Points must be 0 or higher"), Required]
     public int Points { get; set; }
     public List<Variable.V0._8.Variable> Properties { get; set; } = new();
+    
+    [Range(0, int.MaxValue, ErrorMessage = "Property Limit must be 0 or higher"), Required]
     public int PropertyLimit { get; set; }
+    
+    [Required]
+    public Property PrimaryType { get; set; }
     
     public string GetVersion()
     {
         return CurrentVersion;
     }
-    
-    
     
     public static List<MeleeWeapon> CreateMeleeWeapons()
     {
@@ -44,7 +51,14 @@ public class MeleeWeapon : Weapon
 
     public MeleeWeapon()
     {
+        Points = 2;
         PropertyLimit = 4;
+        PrimaryType = Property.Melee;
+        Reach = 1;
+        Properties = new()
+        {
+            StandardVariables.BaseDamage,
+        };
     }
 }
 
@@ -57,6 +71,15 @@ public class RangedWeapon : Weapon
 
     public RangedWeapon()
     {
+        Points = 0;
         PropertyLimit = 3;
+        PrimaryType = Property.Ranged;
+        Range = 15;
+        Properties = new()
+        {
+            StandardVariables.BaseDamage,
+            StandardVariables.Unwieldy,
+            StandardVariables.TwoHanded
+        };
     }
 }

@@ -1,0 +1,578 @@
+﻿@page "/weapons"
+@using SwDc20.Core.Domain.Entities.Weapon.V0._8
+@using SwDc20.Core.Domain.Entities.Variable.V0._8
+@using SwDc20.Core.Domain.Enums
+@using Weapon = SwDc20.Core.Domain.Entities.Weapon.V0._8.Weapon
+@inject WeaponService WeaponService
+@inject VariableService VariableService
+@inject ILogger<Weapons> Logger
+@inject IJSRuntime JSRuntime
+
+<h3>Weapons</h3>
+
+<button class="btn btn-primary" @onclick="() => OpenWeaponModal(true)">Create Melee Weapon</button>
+<button class="btn btn-secondary" @onclick="() => OpenWeaponModal(false)">Create Ranged Weapon</button>
+
+<h4>Weapons List</h4>
+@if (_weapons != null && _weapons.Any())
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Points Remaining</th>
+            <th>Properties Remaining</th>
+            <th>Damage</th>
+            <th>Properties</th>
+            <th>1h/2h Hit Bonus</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var weapon in _weapons)
+        {
+            <tr>
+                <td>@weapon.Document.Name</td>
+                <td>@weapon.Document.PrimaryType.Name</td>
+                <td>@(weapon.Document.Points - weapon.Document.Properties.Sum(p => p.Cost))</td>
+                <td>@(weapon.Document.PropertyLimit - weapon.Document.Properties.Count(pr => pr.CountsTowardsMaximumProperties))</td>
+                <td>@weapon.Document.Properties.Sum(p => p.DamageIncrease)</td>
+                <td>@(string.Join(", ", weapon.Document.Properties.Select(p => p.Name)))</td>
+                <td>
+                    <span>1h:@GetOneHandedHitBonus(weapon.Document)</span>
+                    <span>/</span>
+                    <span>2h:@GetTwoHandedHitBonus(weapon.Document)</span>
+                </td>
+                <td>
+                    <button class="btn btn-primary btn-sm" @onclick="() => EditWeapon(weapon)">Edit</button>
+                    <button class="btn btn-danger btn-sm" @onclick="() => DeleteWeapon(weapon)">Delete</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No weapons created yet.</p>
+}
+
+<Modal Show="showModal" Title="@modalTitle" OnClose="CloseModal">
+    @if (CurrentWeaponWrapper?.Document is MeleeWeapon meleeWeapon)
+    {
+        <EditForm Model="@meleeWeapon" OnValidSubmit="SaveWeapon">
+            <DataAnnotationsValidator/>
+            <ValidationSummary></ValidationSummary>
+
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <InputText id="name" @bind-Value="meleeWeapon.Name" class="form-control"/>
+            </div>
+
+            @* <div class="form-group"> *@
+            @*     <label for="hitBonus">Hit Bonus:</label> *@
+            @*     <InputNumber id="hitBonus" @bind-Value="meleeWeapon.HitBonus" class="form-control"/> *@
+            @* </div> *@
+
+            <div class="input-group d-flex flex-nowrap">
+                <span class="input-group-text flex-fill">1h Hit Bonus: @GetOneHandedHitBonus(meleeWeapon)</span>
+                <span class="input-group-text flex-fill">2h Hit Bonus: @GetTwoHandedHitBonus(meleeWeapon)</span>
+            </div>
+
+            <hr/>
+
+            <div class="input-group">
+                <span class="input-group-text">Points</span>
+                <InputNumber id="points" @bind-Value="meleeWeapon.Points" class="form-control"/>
+                <span class="input-group-text">Remaining Points: @(CurrentWeaponWrapper.Document.Points - CurrentWeaponWrapper.Document.Properties.Sum(p => p.Cost))</span>
+            </div>
+
+            <div class="input-group d-flex flex-nowrap flex-fill">
+                <span class="input-group-text flex-fill">Reach: @GetReach(meleeWeapon)</span>
+                <span class="input-group-text flex-fill">Throw Range: @GetThrowRange(meleeWeapon)</span>
+            </div>
+
+            <hr/>
+
+            <h5>Properties</h5>
+
+            <div class="input-group">
+                <span class="input-group-text">Property Limit:</span>
+                <InputNumber id="propertyLimit" @bind-Value="meleeWeapon.PropertyLimit" class="form-control"/>
+                <span class="input-group-text">Remaining Property: @(CurrentWeaponWrapper.Document.PropertyLimit - CurrentWeaponWrapper.Document.Properties.Count(pr => pr.CountsTowardsMaximumProperties))</span>
+            </div>
+
+            <hr/>
+
+            <div class="form-group">
+                @foreach (var defaultProperty in DefaultProperties)
+                {
+                    <div class="form-check">
+                        <input type="checkbox"
+                               checked="@CurrentWeaponWrapper.Document.Properties.Any(p => p.Id == defaultProperty.Id)"
+                               @onchange="() => ToggleDefaultProperty(defaultProperty)"
+                               id="@defaultProperty.Id.ToString()"
+                               class="form-check-input"/>
+                        <label class="form-check-label" for="@defaultProperty.Id.ToString()"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="top"
+                               title="@defaultProperty.Description">
+                            @defaultProperty.Name
+                        </label>
+                    </div>
+                }
+            </div>
+
+            <hr/>
+
+           
+            @foreach (var property in meleeWeapon.Properties)
+            {
+                if (property != StandardVariables.BaseDamage
+                    && !property.DefaultVariableForProperties.Any())
+                {
+            
+            
+                    <div class="input-group d-flex flex-nowrap">
+                    
+                        <span class="input-group-text btn-success"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="top"
+                              title="@property.Description">
+                            @property.Name
+                        </span>
+                        <span class="input-group-text flex-fill overflow-hidden"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="top"
+                              title="@property.Description">
+                            @property.Description)
+                        </span>
+                    
+                        <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemovePropertyWithConfirmation(property)">X</button>
+                    </div>
+                }
+            }
+            
+            <br/>
+
+            <h6>Add Property</h6>
+            <div class="input-group">
+                <select id="newProperty" @bind="SelectedPropertyId" class="form-control">
+                    <option value="">Select a property</option>
+                    @foreach (var property in FilteredAvailableProperties)
+                    {
+                        var requiredProperties = property.Document.Requires;
+                        var hasAllRequiredProperties = !requiredProperties.Any() || requiredProperties.All(r => CurrentWeaponWrapper.Document.Properties.Select(pr => pr.Id).Contains(r.Id));
+
+                        <option value="@property.ContentId" disabled="@(!hasAllRequiredProperties)">
+                            @property.Document.Name (Cost: @property.Document.Cost)
+                            @if (!hasAllRequiredProperties)
+                            {
+                                var missingProperties = requiredProperties.Where(r => !CurrentWeaponWrapper.Document.Properties.Contains(r));
+                                <text> - Requires: @string.Join(", ", missingProperties.Select(r => r.Name))</text>
+                            }
+                        </option>
+                    }
+                </select>
+                <button type="button" class="btn btn-secondary" @onclick="AddProperty">Add Property</button>
+            </div>
+
+            <hr/>
+
+            <div class="form-group">
+                <label>Damage: @(meleeWeapon.Properties.Sum(d => d.DamageIncrease))</label>
+            </div>
+
+            <hr/>
+
+            <button type="submit" class="btn btn-primary">Save Weapon</button>
+        </EditForm>
+    }
+    else if (CurrentWeaponWrapper?.Document is RangedWeapon rangedWeapon)
+    {
+        <EditForm Model="@rangedWeapon" OnValidSubmit="SaveWeapon">
+            <DataAnnotationsValidator/>
+
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <InputText id="name" @bind-Value="rangedWeapon.Name" class="form-control"/>
+            </div>
+            
+            <hr/>
+
+            <div class="input-group">
+                <span class="input-group-text">Points</span>
+                <InputNumber id="points" @bind-Value="rangedWeapon.Points" class="form-control"/>
+                <span class="input-group-text">Remaining Points: @(CurrentWeaponWrapper.Document.Points - CurrentWeaponWrapper.Document.Properties.Sum(p => p.Cost))</span>
+            </div>
+            
+            <div class="input-group d-flex flex-nowrap">
+                <span class="input-group-text flex-fill">Range: @GetRange(rangedWeapon)</span>
+            </div>
+
+            <h5>Properties</h5>
+
+            <div class="input-group">
+                <span class="input-group-text">Property Limit:</span>
+                <InputNumber id="propertyLimit" @bind-Value="rangedWeapon.PropertyLimit" class="form-control"/>
+                <span class="input-group-text">Remaining Property: @(CurrentWeaponWrapper.Document.PropertyLimit - CurrentWeaponWrapper.Document.Properties.Count(pr => pr.CountsTowardsMaximumProperties))</span>
+            </div>
+
+            <hr/>
+
+            <div class="form-group">
+                @foreach (var defaultProperty in DefaultProperties)
+                {
+                <div class="form-check">
+                    <input type="checkbox"
+                           checked="@CurrentWeaponWrapper.Document.Properties.Any(p => p.Id == defaultProperty.Id)"
+                           @onchange="() => ToggleDefaultProperty(defaultProperty)"
+                           id="@defaultProperty.Id.ToString()"
+                           class="form-check-input"/>
+                    <label class="form-check-label" for="@defaultProperty.Id.ToString()"
+                           data-bs-toggle="tooltip"
+                           data-bs-placement="top"
+                           title="@defaultProperty.Description">
+                        @defaultProperty.Name
+                    </label>
+                </div>
+                }
+            </div>
+
+            <hr/>
+
+
+            @foreach (var property in rangedWeapon.Properties)
+            {
+            if (property != StandardVariables.BaseDamage
+            && !property.DefaultVariableForProperties.Any())
+            {
+
+
+            <div class="input-group d-flex flex-nowrap">
+                    
+                        <span class="input-group-text btn-success"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="top"
+                              title="@property.Description">
+                            @property.Name
+                        </span>
+                <span class="input-group-text flex-fill overflow-hidden"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      title="@property.Description">
+                            @property.Description
+                        </span>
+
+                <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemovePropertyWithConfirmation(property)">X</button>
+            </div>
+            }
+            }
+
+            <br/>
+
+            <h6>Add Property</h6>
+            <div class="input-group">
+                <select id="newProperty" @bind="SelectedPropertyId" class="form-control">
+                    <option value="">Select a property</option>
+                    @foreach (var property in FilteredAvailableProperties)
+                    {
+                    var requiredProperties = property.Document.Requires;
+                    var hasAllRequiredProperties = !requiredProperties.Any() || requiredProperties.All(r => CurrentWeaponWrapper.Document.Properties.Select(pr => pr.Id).Contains(r.Id));
+
+                    <option value="@property.ContentId" disabled="@(!hasAllRequiredProperties)">
+                        @property.Document.Name (Cost: @property.Document.Cost)
+                        @if (!hasAllRequiredProperties)
+                        {
+                        var missingProperties = requiredProperties.Where(r => !CurrentWeaponWrapper.Document.Properties.Contains(r));
+                        <text> - Requires: @string.Join(", ", missingProperties.Select(r => r.Name))</text>
+                        }
+                    </option>
+                    }
+                </select>
+                <button type="button" class="btn btn-secondary" @onclick="AddProperty">Add Property</button>
+            </div>
+
+            <hr/>
+
+            <div class="form-group">
+                <label>Damage: @(CurrentWeaponWrapper.Document.Properties.Sum(d => d.DamageIncrease))</label>
+            </div>
+
+            <hr/>
+
+            <button type="submit" class="btn btn-primary">Save Weapon</button>
+        </EditForm>
+    }
+</Modal>
+
+@code {
+    private List<DocumentWrapper<Weapon>> _weapons = new List<DocumentWrapper<Weapon>>();
+    private DocumentWrapper<Weapon> CurrentWeaponWrapper { get; set; }
+    private List<DocumentWrapper<Variable>> AvailableProperties { get; set; } = new List<DocumentWrapper<Variable>>();
+    private Dictionary<Guid, bool> defaultPropertyCheckedState = new Dictionary<Guid, bool>();
+    private Guid SelectedPropertyId { get; set; }
+    private bool showModal = false;
+    private string modalTitle = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _weapons = await WeaponService.GetWeaponsAsync();
+        await LoadAvailableProperties();
+    }
+
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (firstRender)
+    //     {
+    //         await JSRuntime.InvokeVoidAsync("enableTooltips");
+    //     }
+    // }
+
+    private string GetRange(RangedWeapon weapon)
+    {
+        var range = Math.Max(weapon.Properties.Sum(p => p.RangeModification), weapon.Range);
+
+        return $"{range} / {range * 3} Spaces";
+    }
+
+    private string GetReach(MeleeWeapon meleeWeapon)
+    {
+        var reach = meleeWeapon.Reach + meleeWeapon.Properties.Sum(p => p.ReachModification);
+        return $"{reach} Space{(reach == 1 ? "" : "s")}";
+    }
+
+    private string GetThrowRange(MeleeWeapon meleeWeapon)
+    {
+        var throwRange = Math.Max(meleeWeapon.ThrowRange, meleeWeapon.Properties.Max(p => p.RangeModification));
+        return $"{throwRange} / {Math.Max(throwRange * 2, 5)} Spaces";
+    }
+
+    private string GetOneHandedHitBonus(Weapon weapon)
+    {
+        return $"+{weapon.Properties.Sum(p => p.BonusToHit)}";
+    }
+
+    private string GetTwoHandedHitBonus(Weapon weapon)
+    {
+        return $"+{weapon.Properties.Sum(p => p.TwoHandedBonusToHit)}";
+    }
+
+    private async Task LoadAvailableProperties()
+    {
+        AvailableProperties = await VariableService.GetVariablesAsync();
+        if (!AvailableProperties.Any())
+        {
+            AvailableProperties = VariableService.GetDefaultVariables().Select(v => v.GetWrapper()).ToList();
+        }
+    }
+
+    private void OpenWeaponModal(bool isMelee)
+    {
+        Weapon newWeapon = isMelee
+            ? new MeleeWeapon { Id = Guid.NewGuid(), Version = Weapon.CurrentVersion, PrimaryType = Property.Melee }
+            : new RangedWeapon { Id = Guid.NewGuid(), Version = Weapon.CurrentVersion, PrimaryType = Property.Ranged };
+
+        CurrentWeaponWrapper = new DocumentWrapper<Weapon>(newWeapon)
+        {
+            ContentId = Guid.NewGuid(),
+            DocumentType = isMelee ? "MeleeWeapon" : "RangedWeapon"
+        };
+
+        modalTitle = isMelee ? "Create Melee Weapon" : "Create Ranged Weapon";
+        showModal = true;
+    }
+
+    private void EditWeapon(DocumentWrapper<Weapon> weaponWrapper)
+    {
+        Weapon specificWeapon;
+        if (weaponWrapper.Document.PrimaryType == Property.Melee)
+        {
+            specificWeapon = new MeleeWeapon
+            {
+                Id = weaponWrapper.Document.Id,
+                Version = weaponWrapper.Document.Version,
+                Name = weaponWrapper.Document.Name,
+                Points = weaponWrapper.Document.Points,
+                PrimaryType = weaponWrapper.Document.PrimaryType,
+                Properties = new List<Variable>(weaponWrapper.Document.Properties ?? new List<Variable>()),
+                Reach = (weaponWrapper.Document as MeleeWeapon)?.Reach ?? 0,
+                HitBonus = (weaponWrapper.Document as MeleeWeapon)?.HitBonus ?? 0,
+                ThrowRange = (weaponWrapper.Document as MeleeWeapon)?.ThrowRange ?? 0,
+                AddUnwieldy = (weaponWrapper.Document as MeleeWeapon)?.AddUnwieldy ?? false,
+                AddTwoHanded = (weaponWrapper.Document as MeleeWeapon)?.AddTwoHanded ?? false
+            };
+        }
+        else if (weaponWrapper.Document.PrimaryType == Property.Ranged)
+        {
+            specificWeapon = new RangedWeapon
+            {
+                Id = weaponWrapper.Document.Id,
+                Version = weaponWrapper.Document.Version,
+                Name = weaponWrapper.Document.Name,
+                Points = weaponWrapper.Document.Points,
+                PrimaryType = weaponWrapper.Document.PrimaryType,
+                Properties = new List<Variable>(weaponWrapper.Document.Properties ?? new List<Variable>()),
+                Range = (weaponWrapper.Document as RangedWeapon)?.Range ?? 0,
+                RemoveUnwieldy = (weaponWrapper.Document as RangedWeapon)?.RemoveUnwieldy ?? false,
+                RemoveTwoHanded = (weaponWrapper.Document as RangedWeapon)?.RemoveTwoHanded ?? false
+            };
+        }
+        else
+        {
+            Console.WriteLine($"Unexpected weapon type: {weaponWrapper.Document.GetType().Name}");
+            return;
+        }
+
+        CurrentWeaponWrapper = new DocumentWrapper<Weapon>(specificWeapon)
+        {
+            ContentId = weaponWrapper.ContentId,
+            DocumentType = weaponWrapper.DocumentType,
+            ContentVersion = weaponWrapper.ContentVersion,
+            DateCreated = weaponWrapper.DateCreated,
+            DateUpdated = weaponWrapper.DateUpdated
+        };
+
+        modalTitle = $"Edit {weaponWrapper.Document.PrimaryType.Name} Weapon";
+        showModal = true;
+    }
+
+    private async Task SaveWeapon()
+    {
+        await WeaponService.SaveWeaponAsync(CurrentWeaponWrapper);
+        _weapons = await WeaponService.GetWeaponsAsync();
+        CloseModal();
+    }
+
+    private async Task DeleteWeapon(DocumentWrapper<Weapon> weaponWrapper)
+    {
+        await WeaponService.DeleteWeaponAsync(weaponWrapper.ContentId);
+        _weapons = await WeaponService.GetWeaponsAsync();
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        CurrentWeaponWrapper = null;
+    }
+
+    private void AddProperty()
+    {
+        if (SelectedPropertyId != Guid.Empty && CurrentWeaponWrapper != null)
+        {
+            var propertyToAdd = AvailableProperties.FirstOrDefault(p => p.ContentId == SelectedPropertyId)?.Document;
+            if (propertyToAdd != null)
+            {
+                int currentCost = CurrentWeaponWrapper.Document.Properties.Sum(p => p.Cost);
+                int propertyCount = CurrentWeaponWrapper.Document.Properties.Count(pr => pr.CountsTowardsMaximumProperties);
+                if (currentCost + propertyToAdd.Cost <= CurrentWeaponWrapper.Document.PropertyLimit && propertyCount < CurrentWeaponWrapper.Document.PropertyLimit)
+                {
+                    CurrentWeaponWrapper.Document.Properties.Add(propertyToAdd);
+                    SelectedPropertyId = Guid.Empty; // Reset selected property
+                    StateHasChanged();
+                }
+                else
+                {
+                    // Show an error message that there are not enough points
+                    // You can use a toast notification or set an error message property to display in the UI
+                }
+            }
+        }
+    }
+
+    private void RemoveProperty(Variable property)
+    {
+        if (CurrentWeaponWrapper != null)
+        {
+            var propertiesToRemove = new HashSet<Guid> { property.Id };
+            bool continueChecking = true;
+
+            while (continueChecking)
+            {
+                continueChecking = false;
+                var newDependents = CurrentWeaponWrapper.Document.Properties
+                    .Where(p => p.Requires.Any(r => propertiesToRemove.Contains(r.Id)) && !propertiesToRemove.Contains(p.Id))
+                    .Select(p => p.Id)
+                    .ToList();
+
+                if (newDependents.Any())
+                {
+                    propertiesToRemove.UnionWith(newDependents);
+                    continueChecking = true;
+                }
+            }
+
+            CurrentWeaponWrapper.Document.Properties.RemoveAll(p => propertiesToRemove.Contains(p.Id));
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task RemovePropertyWithConfirmation(Variable property)
+    {
+        var dependentProperties = CurrentWeaponWrapper.Document.Properties
+            .Where(p => p.Requires.Any(r => r.Id == property.Id))
+            .ToList();
+
+        if (dependentProperties.Any())
+        {
+            var message = $"Removing {property.Name} will also remove the following dependent properties: {string.Join(", ", dependentProperties.Select(p => p.Name))}. Are you sure you want to proceed?";
+            var confirm = await JSRuntime.InvokeAsync<bool>("confirm", message);
+            if (!confirm) return;
+        }
+
+        RemoveProperty(property);
+    }
+
+    private void ToggleDefaultProperty(Variable property)
+    {
+        var existingProperty = CurrentWeaponWrapper.Document.Properties.FirstOrDefault(p => p.Id == property.Id);
+
+        if (existingProperty != null)
+        {
+            CurrentWeaponWrapper.Document.Properties.Remove(existingProperty);
+        }
+        else
+        {
+            CurrentWeaponWrapper.Document.Properties.Add(property);
+        }
+
+        StateHasChanged();
+    }
+
+    private List<DocumentWrapper<Variable>> FilteredAvailableProperties =>
+        AvailableProperties
+            .Where(p => p.Document.Properties.Contains(CurrentWeaponWrapper.Document.PrimaryType))
+            .Where(p => !CurrentWeaponWrapper.Document.Properties.Any(wp => wp.Id == p.Document.Id))
+            .Where(p => p.Document.Cost <= (CurrentWeaponWrapper.Document.Points - CurrentWeaponWrapper.Document.Properties.Sum(pr => pr.Cost)))
+            .Where(p => (CurrentWeaponWrapper.Document.PropertyLimit - CurrentWeaponWrapper.Document.Properties.Count(pr => pr.CountsTowardsMaximumProperties)) > 0)
+            .Where(p => p.Document.DefaultVariableForProperties == null ||
+                        !p.Document.DefaultVariableForProperties.Contains(CurrentWeaponWrapper.Document.PrimaryType))
+            .ToList();
+
+    private List<Variable> DefaultProperties =>
+        AvailableProperties
+            .Where(p => p.Document.DefaultVariableForProperties != null &&
+                        p.Document.DefaultVariableForProperties.Contains(CurrentWeaponWrapper.Document.PrimaryType))
+            .Select(p => p.Document)
+            .ToList();
+
+    // private void OnPointsChanged(int newPoints)
+    // {
+    //     CurrentWeaponWrapper.Document.Points = newPoints;
+    //     // Remove properties if the new point value is less than the current total cost
+    //     int currentCost = CurrentWeaponWrapper.Document.Properties.Sum(p => p.Cost);
+    //     while (currentCost > newPoints && CurrentWeaponWrapper.Document.Properties.Any())
+    //     {
+    //         var lastProperty = CurrentWeaponWrapper.Document.Properties.Last();
+    //         CurrentWeaponWrapper.Document.Properties.Remove(lastProperty);
+    //         currentCost -= lastProperty.Cost;
+    //     }
+    //     StateHasChanged();
+    // }
+
+
+    
+
+}

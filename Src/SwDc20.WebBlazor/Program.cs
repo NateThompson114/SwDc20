@@ -1,4 +1,6 @@
 using Blazored.LocalStorage;
+using Blazored.Modal;
+using Blazored.Toast;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using SwDc20.Infrastructure.Services;
@@ -16,7 +18,10 @@ builder.Services.AddScoped<DataSyncService>();
 builder.Services.AddScoped<CharacterService>();
 builder.Services.AddScoped<VariableService>();
 builder.Services.AddScoped<SkillService>();
+builder.Services.AddScoped<WeaponService>();
 
+builder.Services.AddBlazoredToast();
+builder.Services.AddBlazoredModal();
 builder.Services.AddBlazoredLocalStorage();
 
 await builder.Build().RunAsync();

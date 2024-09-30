@@ -123,8 +123,54 @@ else
                         </div>
 
                         <div class="form-group">
+                            <label>Required Variables</label>
+                            @if (variables != null)
+                            {
+                                foreach (var variableWrapper in variables)
+                                {
+                                    var variable = variableWrapper.Document;
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="@($"required-{variable.Id}")"
+                                               checked="@editingVariable.Requires.Any(r => r.Id == variable.Id)"
+                                               @onchange="@(e => ToggleRequiredVariable(variable))"/>
+                                        <label class="form-check-label" for="@($"required-{variable.Id}")">@variable.Name</label>
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        <div class="form-group">
+                            <label>Default Variable For Properties</label>
+                            @foreach (var property in Property.List)
+                            {
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="@($"default-{property.Name}")"
+                                       checked="@(editingVariable.DefaultVariableForProperties?.Contains(property) ?? false)"
+                                       @onchange="@(e => ToggleDefaultProperty(property))" />
+                                <label class="form-check-label" for="@($"default-{property.Name}")">@property.Name</label>
+                            </div>
+                            }
+                        </div>
+
+                        <div class="form-group">
                             <label for="deletable">Deletable</label>
                             <InputSelect id="deletable" class="form-control" @bind-Value="editingVariable.Deletable">
+                                <option value="true">True</option>
+                                <option value="false">False</option>
+                            </InputSelect>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="isStackable">IsStackable</label>
+                            <InputSelect id="isStackable" class="form-control" @bind-Value="editingVariable.IsStackable">
+                                <option value="true">True</option>
+                                <option value="false">False</option>
+                            </InputSelect>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="countsTowardsMaximumProperties">Counts Towards Property Maximum</label>
+                            <InputSelect id="countsTowardsMaximumProperties" class="form-control" @bind-Value="editingVariable.Deletable">
                                 <option value="true">True</option>
                                 <option value="false">False</option>
                             </InputSelect>
@@ -157,7 +203,7 @@ else
 
                         <div class="form-group">
                             <label for="rangeModification">Range Modification</label>
-                            <InputText id="rangeModification" class="form-control" @bind-Value="editingVariable.RangeModification" />
+                            <InputNumber id="rangeModification" class="form-control" @bind-Value="editingVariable.RangeModification" />
                         </div>
 
                         <div class="form-group">
@@ -269,6 +315,8 @@ else
             Properties = new List<Property>(variable.Properties ?? Enumerable.Empty<Property>()),
             Calculation = variable.Calculation,
             Deletable = variable.Deletable,
+            IsStackable = variable.IsStackable,
+            CountsTowardsMaximumProperties = variable.CountsTowardsMaximumProperties,
             MightModification = variable.MightModification,
             AgilityModification = variable.AgilityModification,
             CharismaModification = variable.CharismaModification,
@@ -291,8 +339,13 @@ else
                     return new VariableModification<Skill>(skill, sm.Value);
                 }) ?? Enumerable.Empty<VariableModification<Skill>>()
             ),
+            Requires = variable.Requires,
+            DefaultVariableForProperties = variable.DefaultVariableForProperties,
             Version = Variable.CurrentVersion
         };
+        
+        Console.WriteLine($"OpenModal: editingVariable.Requires is {(editingVariable.Requires == null ? "null" : "not null")}");
+        
         showModal = true;
     }
 
@@ -322,6 +375,32 @@ else
         else
         {
             editingVariable.Properties.Add(property);
+        }
+    }
+    
+    private void ToggleRequiredVariable(Variable variable)
+    {
+        var existingVariable = editingVariable.Requires.FirstOrDefault(r => r.Id == variable.Id);
+        
+        if (existingVariable != null)
+        {
+            editingVariable.Requires.Remove(existingVariable);
+        }
+        else
+        {
+            editingVariable.Requires.Add(variable);
+        }
+    }
+
+    private void ToggleDefaultProperty(Property property)
+    {
+        if (editingVariable.DefaultVariableForProperties.Contains(property))
+        {
+            editingVariable.DefaultVariableForProperties.Remove(property);
+        }
+        else
+        {
+            editingVariable.DefaultVariableForProperties.Add(property);
         }
     }
 }
