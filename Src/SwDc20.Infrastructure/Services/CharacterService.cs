@@ -3,8 +3,7 @@ using Blazored.LocalStorage;
 using SwDc20.Core.Domain.Entities.Character.V0._8;
 using SwDc20.WebBlazor.Models;
 
-
-namespace SwDc20.WebBlazor.Services;
+namespace SwDc20.Infrastructure.Services;
 
 public class CharacterService
 {

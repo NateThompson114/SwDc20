@@ -1,0 +1,56 @@
+﻿@using SwDc20.Core.Domain.Entities.Character
+@inject IModalService ModalService
+
+<EditForm Model="@TransferData" OnValidSubmit="TransferItem">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label>Item to Transfer:</label>
+        <input type="text" class="form-control" value="@Item.Name" readonly />
+    </div>
+
+    <div class="form-group">
+        <label>Quantity to Transfer:</label>
+        <InputNumber @bind-Value="TransferData.Quantity" class="form-control" min="1" max="@Item.Quantity" />
+    </div>
+
+    <div class="form-group">
+        <label>Destination:</label>
+        <select @bind="TransferData.DestinationId" class="form-control">
+            <option value="">Main Inventory</option>
+            @foreach (var container in Containers)
+            {
+                <option value="@container.Id">@container.Name</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Transfer</button>
+    <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+</EditForm>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    [Parameter] public CharacterInventory Item { get; set; }
+    [Parameter] public CharacterInventory SourceContainer { get; set; }
+    [Parameter] public List<CharacterInventory> Containers { get; set; }
+
+    private TransferData TransferData { get; set; } = new TransferData();
+
+    protected override void OnInitialized()
+    {
+        TransferData.ItemId = Item.Id;
+        TransferData.Quantity = 1;
+    }
+
+    private async Task TransferItem()
+    {
+        await BlazoredModal.CloseAsync(ModalResult.Ok(TransferData));
+    }
+
+    private async Task Cancel()
+    {
+        await BlazoredModal.CancelAsync();
+    }
+}

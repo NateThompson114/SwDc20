@@ -1,8 +1,7 @@
 ﻿namespace SwDc20.Core.Domain.Entities.Character.V0._8;
 
-public class Trade
+public class CharacterResource
 {
     public string Name { get; set; }
-    public string Description { get; set; }
-    public int Bonus { get; set; }
+    public int MaxValue { get; set; }
 }

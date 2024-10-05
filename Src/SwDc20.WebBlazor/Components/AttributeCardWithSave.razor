@@ -1,24 +1,22 @@
-﻿<div class="col-md-2">
-    <div class="card">
-        <h4 class="card-header">@AttributeName</h4>
-        <div class="card-body">
-            <div class="form-floating">
-                <InputNumber id="@AttributeName.ToLower()" @bind-Value="AttributeValue" @bind-Value:after="OnAttributeValueChanged" class="form-control" />
-                <label for="@AttributeName.ToLower()">@AttributeName</label>
-            </div>
+﻿<div class="card">
+    <h4 class="card-header">@AttributeName</h4>
+    <div class="card-body">
+        <div class="form-floating">
+            <InputNumber id="@AttributeName.ToLower()" @bind-Value="AttributeValue" @bind-Value:after="OnAttributeValueChanged" class="form-control" />
+            <label for="@AttributeName.ToLower()">@AttributeName</label>
         </div>
-        <div class="card-footer">
-            <div class="input-group">
-                <span class="input-group-text">Save</span>
-                <div class="input-group-text">
-                    <InputCheckbox @bind-Value="SaveMastery"
-                                   @bind-Value:after="OnSaveMasteryChanged"
-                                   disabled="@(SelectedMasteriesCount >= 4 && !SaveMastery)"
-                                   id="@SaveCheckboxId"
-                                   class="form-check-input"/>
-                </div>
-                <span class="input-group-text">Value: @SaveValue</span>
+    </div>
+    <div class="card-footer">
+        <div class="input-group">
+            <span class="input-group-text">Save</span>
+            <div class="input-group-text">
+                <InputCheckbox @bind-Value="SaveMastery"
+                               @bind-Value:after="OnSaveMasteryChanged"
+                               disabled="@(SelectedMasteriesCount >= 4 && !SaveMastery)"
+                               id="@SaveCheckboxId"
+                               class="form-check-input"/>
             </div>
+            <span class="input-group-text">Value: @SaveValue</span>
         </div>
     </div>
 </div>

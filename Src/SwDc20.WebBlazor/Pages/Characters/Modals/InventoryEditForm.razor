@@ -1,0 +1,77 @@
+﻿@inject IModalService ModalService
+
+<EditForm Model="@InventoryItem" OnValidSubmit="SaveInventoryItem">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="InventoryItem.Name" />
+    </div>
+
+    <div class="form-group">
+        <label for="quantity">Quantity</label>
+        <InputNumber id="quantity" class="form-control" @bind-Value="InventoryItem.Quantity" />
+    </div>
+
+    <div class="form-group">
+        <label for="weight">Weight (per item)</label>
+        <InputNumber id="weight" class="form-control" @bind-Value="InventoryItem.Weight" />
+    </div>
+
+    <div class="form-group">
+        <label for="value">Value (per item)</label>
+        <InputNumber id="value" class="form-control" @bind-Value="InventoryItem.Value" />
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <InputTextArea id="description" class="form-control" @bind-Value="InventoryItem.Description" />
+    </div>
+
+    <div class="form-group">
+        <label for="type">Type</label>
+        <InputText id="type" class="form-control" @bind-Value="InventoryItem.Type" />
+    </div>
+
+    <div class="form-group">
+        <label for="isContainer">Is Container?</label>
+        <InputCheckbox id="isContainer" @bind-Value="InventoryItem.IsContainer" />
+    </div>
+
+    @if (InventoryItem.IsContainer)
+    {
+        <div class="form-group">
+            <label for="capacity">Capacity</label>
+            <InputNumber id="capacity" class="form-control" @bind-Value="InventoryItem.WeightCapacity" />
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary">Save Item</button>
+    <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+</EditForm>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    [Parameter] public CharacterInventory InventoryItem { get; set; }
+    [Parameter] public double? RemainingCapacity { get; set; }
+
+
+    private async Task SaveInventoryItem()
+    {
+        if (RemainingCapacity.HasValue && InventoryItem.Weight * InventoryItem.Quantity > RemainingCapacity.Value)
+        {
+            await BlazoredModal.CloseAsync(ModalResult.Cancel($"Item exceeds remaining capacity of {RemainingCapacity.Value}"));
+        }
+        else
+        {
+            await BlazoredModal.CloseAsync(ModalResult.Ok(InventoryItem));
+        }
+    }
+
+    private async Task Cancel()
+    {
+        await BlazoredModal.CancelAsync();
+    }
+}

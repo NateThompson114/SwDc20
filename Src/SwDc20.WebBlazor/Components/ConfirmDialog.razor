@@ -1,0 +1,19 @@
+﻿@inject IModalService ModalService
+
+<div class="modal-body">
+    <p>@Message</p>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary" @onclick="Close">OK</button>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    [Parameter] public string Message { get; set; }
+
+    private async Task Close()
+    {
+        await BlazoredModal.CloseAsync();
+    }
+}

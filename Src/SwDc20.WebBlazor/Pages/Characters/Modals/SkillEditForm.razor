@@ -1,0 +1,61 @@
+﻿@inject SkillService SkillService
+
+<EditForm Model="@Skill" OnValidSubmit="SaveSkill">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="Skill.Name" />
+    </div>
+
+    <div class="form-group">
+        <label for="attributeUsed">Attribute Used</label>
+        <InputSelect id="attributeUsed" class="form-control" @bind-Value="Skill.AttributeUsed">
+            @foreach (var attributeOption in AttributeOptions)
+            {
+                <option value="@attributeOption">@attributeOption</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="form-group">
+        <label for="rank">Rank</label>
+        <InputNumber id="rank" class="form-control" @bind-Value="Skill.Rank" />
+    </div>
+
+    <div class="form-group">
+        <label for="tag">Tag</label>
+        <InputText id="tag" class="form-control" @bind-Value="Skill.Tag" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Skill</button>
+    <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+</EditForm>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    [Parameter] public Skill Skill { get; set; }
+
+    private List<string> AttributeOptions { get; set; }
+
+    protected override void OnInitialized()
+    {
+        AttributeOptions = SkillService.GetAttributeOptions();
+        if (string.IsNullOrEmpty(Skill.AttributeUsed))
+        {
+            Skill.AttributeUsed = AttributeOptions.FirstOrDefault();
+        }
+    }
+
+    private async Task SaveSkill()
+    {
+        await BlazoredModal.CloseAsync(ModalResult.Ok(Skill));
+    }
+
+    private async Task Cancel()
+    {
+        await BlazoredModal.CancelAsync();
+    }
+}

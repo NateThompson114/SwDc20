@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using SwDc20.Infrastructure.Services;
 using SwDc20.WebBlazor;
-using SwDc20.WebBlazor.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -16,6 +15,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<DataSyncService>();
 builder.Services.AddScoped<CharacterService>();
+builder.Services.AddScoped<CurrentCharacterService>();
 builder.Services.AddScoped<VariableService>();
 builder.Services.AddScoped<SkillService>();
 builder.Services.AddScoped<WeaponService>();

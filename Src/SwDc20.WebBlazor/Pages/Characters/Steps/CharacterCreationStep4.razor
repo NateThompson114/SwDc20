@@ -1,141 +1,150 @@
-﻿<h4>Step 8-10: Ancestry, Class, and Equipment</h4>
-
-<div class="form-group">
-    <label for="ancestry">Ancestry:</label>
-    <InputText id="ancestry" @bind-Value="Character.Ancestry" class="form-control" />
-</div>
-
-<div class="form-group">
-    <label for="class">Class:</label>
-    <InputText id="class" @bind-Value="Character.Class" class="form-control" />
-</div>
-
-<div class="form-group">
-    <label for="subclass">Subclass:</label>
-    <InputText id="subclass" @bind-Value="Character.Subclass" class="form-control" />
-</div>
-
-<h5>Class Features</h5>
-<div class="form-group">
-    <label for="classFeature">Class Feature:</label>
-    <InputText id="classFeature" @bind-Value="newClassFeature" class="form-control" />
-    <button type="button" class="btn btn-secondary mt-2" @onclick="AddClassFeature">Add Class Feature</button>
-</div>
-<ul class="list-group mt-2">
-    @foreach (var feature in Character.ClassFeatures)
-    {
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-        @feature
-        <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveClassFeature(feature)">X</button>
-    </li>
-    }
-</ul>
-
-<h5>Equipment</h5>
-<div class="form-group">
-    <label for="equipment">Equipment:</label>
-    <InputText id="equipment" @bind-Value="newEquipment" class="form-control" />
-    <button type="button" class="btn btn-secondary mt-2" @onclick="AddEquipment">Add Equipment</button>
-</div>
-<ul class="list-group mt-2">
-    @foreach (var item in Character.Equipment)
-    {
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-        @item
-        <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveEquipment(item)">X</button>
-    </li>
-    }
-</ul>
-
-<div class="form-group">
-    <label for="currency">Currency:</label>
-    <InputNumber id="currency" @bind-Value="Character.Currency" class="form-control" />
-</div>
-
-<h5>Weapons</h5>
-<div class="form-group">
-    <label for="weaponName">Weapon Name:</label>
-    <InputText id="weaponName" @bind-Value="newWeapon.Name" class="form-control" />
-</div>
-<div class="form-group">
-    <label for="weaponDamage">Damage:</label>
-    <InputText id="weaponDamage" @bind-Value="newWeapon.Damage" class="form-control" />
-</div>
-<div class="form-group">
-    <label for="weaponDamageType">Damage Type:</label>
-    <InputText id="weaponDamageType" @bind-Value="newWeapon.DamageType" class="form-control" />
-</div>
-<div class="form-group">
-    <label for="weaponDescription">Description:</label>
-    <InputTextArea id="weaponDescription" @bind-Value="newWeapon.Description" class="form-control" />
-</div>
-<div class="form-group">
-    <label for="weaponCalculation">Calculation:</label>
-    <InputText id="weaponCalculation" @bind-Value="newWeapon.Calculation" class="form-control" />
-</div>
-<button type="button" class="btn btn-secondary mt-2" @onclick="AddWeapon">Add Weapon</button>
-
-<ul class="list-group mt-2">
-    @foreach (var weapon in Character.Weapons)
-    {
-    <li class="list-group-item">
-        <h6>@weapon.Name</h6>
-        <p>Damage: @weapon.Damage (@weapon.DamageType)</p>
-        <p>Description: @weapon.Description</p>
-        <p>Calculation: @weapon.Calculation</p>
-        <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveWeapon(weapon)">X</button>
-    </li>
-    }
-</ul>
-
-
-@code {
-[Parameter]
-public Character Character { get; set; }
-
-private string newClassFeature;
-private string newEquipment;
-private Weapon newWeapon = new Weapon();
-
-private void AddWeapon()
-{
-if (!string.IsNullOrWhiteSpace(newWeapon.Name))
-{
-Character.Weapons.Add(newWeapon);
-newWeapon = new Weapon();
-}
-}
-
-private void RemoveWeapon(Weapon weapon)
-{
-Character.Weapons.Remove(weapon);
-}
-
-private void AddClassFeature()
-{
-if (!string.IsNullOrWhiteSpace(newClassFeature))
-{
-Character.ClassFeatures.Add(newClassFeature);
-newClassFeature = string.Empty;
-}
-}
-
-private void RemoveClassFeature(string feature)
-{
-Character.ClassFeatures.Remove(feature);
-}
-
-private void AddEquipment()
-{
-if (!string.IsNullOrWhiteSpace(newEquipment))
-{
-Character.Equipment.Add(newEquipment);
-newEquipment = string.Empty;
-}
-}
-
-private void RemoveEquipment(string item)
-{
-Character.Equipment.Remove(item);
-}
-}
+﻿@* @using SwDc20.Core.Domain.Entities.Weapon.V0._8 *@
+@* <h4>Step 8-10: Ancestry, Class, and Equipment</h4> *@
+@* *@
+@* <div class="form-group"> *@
+@*     <label for="ancestry">Ancestry:</label> *@
+@*     <InputText id="ancestry" @bind-Value="Character.Ancestry" class="form-control"/> *@
+@* </div> *@
+@* *@
+@* <div class="form-group"> *@
+@*     <label for="class">Class:</label> *@
+@*     <InputText id="class" @bind-Value="Character.Class" class="form-control"/> *@
+@* </div> *@
+@* *@
+@* <div class="form-group"> *@
+@*     <label for="subclass">Subclass:</label> *@
+@*     <InputText id="subclass" @bind-Value="Character.Subclass" class="form-control"/> *@
+@* </div> *@
+@* *@
+@* <h5>Class Features</h5> *@
+@* <div class="form-group"> *@
+@*     <label for="classFeature">Class Feature:</label> *@
+@*     <InputText id="classFeature" @bind-Value="newClassFeature" class="form-control"/> *@
+@*     <button type="button" class="btn btn-secondary mt-2" @onclick="AddClassFeature">Add Class Feature</button> *@
+@* </div> *@
+@* <ul class="list-group mt-2"> *@
+@*     @foreach (var feature in Character.ClassFeatures) *@
+@*     { *@
+@*         <li class="list-group-item d-flex justify-content-between align-items-center"> *@
+@*             @feature *@
+@*             <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveClassFeature(feature)">X</button> *@
+@*         </li> *@
+@*     } *@
+@* </ul> *@ 
+@* *@
+@* <h5>Equipment</h5> *@
+@* <div class="form-group"> *@
+@*     <label for="equipment">Equipment:</label> *@
+@*     <InputText id="equipment" @bind-Value="newEquipment" class="form-control"/> *@
+@*     <button type="button" class="btn btn-secondary mt-2" @onclick="AddEquipment">Add Equipment</button> *@
+@* </div> *@
+@* <ul class="list-group mt-2"> *@
+@*     @foreach (var item in Character.Inventory) *@
+@*     { *@
+@*         <li class="list-group-item d-flex justify-content-between align-items-center"> *@
+@*             @item *@
+@*             <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveEquipment(item)">X</button> *@
+@*         </li> *@
+@*     } *@
+@* </ul> *@
+@* *@
+@* <div class="form-group"> *@
+@*     <label for="currency">Currency:</label> *@
+@*     <InputNumber id="currency" @bind-Value="Character.Currency" class="form-control"/> *@
+@* </div> *@
+@* *@
+@* $1$ <h5>Weapons</h5> #1# *@
+@* $1$ <div class="form-group"> #1# *@
+@* $1$     <label for="weaponName">Weapon Name:</label> #1# *@
+@* $1$     <InputText id="weaponName" @bind-Value="newWeapon.Name" class="form-control"/> #1# *@
+@* $1$ </div> #1# *@
+@* $1$ <div class="form-group"> #1# *@
+@* $1$     <label for="weaponDamage">Damage:</label> #1# *@
+@* $1$     <InputText id="weaponDamage" @bind-Value="newWeapon.Damage" class="form-control"/> #1# *@
+@* $1$ </div> #1# *@
+@* $1$ <div class="form-group"> #1# *@
+@* $1$     <label for="weaponDamageType">Damage Type:</label> #1# *@
+@* $1$     <InputText id="weaponDamageType" @bind-Value="newWeapon.DamageType" class="form-control"/> #1# *@
+@* $1$ </div> #1# *@
+@* $1$ <div class="form-group"> #1# *@
+@* $1$     <label for="weaponDescription">Description:</label> #1# *@
+@* $1$     <InputTextArea id="weaponDescription" @bind-Value="newWeapon.Description" class="form-control"/> #1# *@
+@* $1$ </div> #1# *@
+@* $1$ <div class="form-group"> #1# *@
+@* $1$     <label for="weaponCalculation">Calculation:</label> #1# *@
+@* $1$     <InputText id="weaponCalculation" @bind-Value="newWeapon.Calculation" class="form-control"/> #1# *@
+@* $1$ </div> #1# *@
+@* $1$ <button type="button" class="btn btn-secondary mt-2" @onclick="AddWeapon">Add Weapon</button> #1# *@
+@* $1$ #1# *@
+@* $1$ <ul class="list-group mt-2"> #1# *@
+@* $1$     @foreach (var weapon in Character.Weapons) #1# *@
+@* $1$     { #1# *@
+@* $1$         <li class="list-group-item"> #1# *@
+@* $1$             <h6>@weapon.Name</h6> #1# *@
+@* $1$             <p>Damage: @weapon.Damage (@weapon.DamageType)</p> #1# *@
+@* $1$             <p>Description: @weapon.Description</p> #1# *@
+@* $1$             <p>Calculation: @weapon.Calculation</p> #1# *@
+@* $1$             <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveWeapon(weapon)">X</button> #1# *@
+@* $1$         </li> #1# *@
+@* $1$     } #1# *@
+@* $1$ </ul> #1# *@
+@* *@
+@* *@
+@* @code { *@
+@*     [Parameter] public Character Character { get; set; } *@
+@* *@
+@*     private string newClassFeature; *@
+@*     private string newEquipment; *@
+@*     private Weapon newWeapon = new Weapon *@
+@*     { *@
+@*         Id = Guid.NewGuid(), *@
+@*         Version = Weapon.CurrentVersion *@
+@*     }; *@
+@* *@
+@*     private void AddWeapon() *@
+@*     { *@
+@*         if (!string.IsNullOrWhiteSpace(newWeapon.Name)) *@
+@*         { *@
+@*             Character.Weapons.Add(newWeapon); *@
+@*             newWeapon = new Weapon *@
+@*             { *@
+@*                 Id = default, *@
+@*                 Version = null *@
+@*             }; *@
+@*         } *@
+@*     } *@
+@* *@
+@*     private void RemoveWeapon(Weapon weapon) *@
+@*     { *@
+@*         Character.Weapons.Remove(weapon); *@
+@*     } *@
+@* *@
+@*     private void AddClassFeature() *@
+@*     { *@
+@*         if (!string.IsNullOrWhiteSpace(newClassFeature)) *@
+@*         { *@
+@*             Character.ClassFeatures.Add(newClassFeature); *@
+@*             newClassFeature = string.Empty; *@
+@*         } *@
+@*     } *@
+@* *@
+@*     private void RemoveClassFeature(string feature) *@
+@*     { *@
+@*         Character.ClassFeatures.Remove(feature); *@
+@*     } *@
+@* *@
+@*     private void AddEquipment() *@
+@*     { *@
+@*         if (!string.IsNullOrWhiteSpace(newEquipment)) *@
+@*         { *@
+@*             Character.Inventory.Add(newEquipment); *@
+@*             newEquipment = string.Empty; *@
+@*         } *@
+@*     } *@
+@* *@
+@*     private void RemoveEquipment(string item) *@
+@*     { *@
+@*         Character.Inventory.Remove(item); *@
+@*     } *@
+@* *@
+@* } *@

@@ -1,0 +1,92 @@
+﻿@using SwDc20.Core.Domain.Entities.GameInfo.V0._8
+@inject CurrentCharacterService CurrentCharacterService
+
+<div class="container">
+    <h3>
+        @CurrentCharacter.Character.Name
+        @if (showSaveIndicator)
+        {
+            <span class="save-indicator text-sm-center"> ✅saved</span>
+        }
+    </h3>
+
+    <div class="form-group">
+        <label for="currentHp">Current HP</label>
+        <InputNumber id="currentHp" class="form-control" @bind-Value="CurrentCharacter.CurrentHp" @bind-Value:after="SaveChanges"/>
+        <p>Max: @CurrentCharacter.Character.MaxHitPoints</p>
+    </div>
+
+    <div class="form-group">
+        <label for="currentStamina">Current Stamina</label>
+        <InputNumber id="currentStamina" class="form-control" @bind-Value="CurrentCharacter.CurrentStamina" @bind-Value:after="SaveChanges"/>
+    </div>
+
+    <div class="form-group">
+        <label for="currentManaPoints">Current Mana Points</label>
+        <InputNumber id="currentManaPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentManaPoints" @bind-Value:after="SaveChanges"/>
+    </div>
+
+    <div class="form-group">
+        <label for="temporaryHp">Temporary HP</label>
+        <InputNumber id="temporaryHp" class="form-control" @bind-Value="CurrentCharacter.TemporaryHp" @bind-Value:after="SaveChanges"/>
+    </div>
+
+    <div class="form-group">
+        <label for="currentActionPoints">Current Action Points</label>
+        <InputNumber id="currentActionPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentActionPoints" @bind-Value:after="SaveChanges"/>
+    </div>
+
+    <div class="form-group">
+        <label for="currentExhaustion">Current Exhaustion</label>
+        <InputNumber id="currentExhaustion" class="form-control" @bind-Value="CurrentCharacter.CurrentExhaustion" @bind-Value:after="SaveChanges"/>
+    </div>
+
+    <div class="form-group">
+        <label for="currentRestPoints">Current Rest Points</label>
+        <InputNumber id="currentRestPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentRestPoints" @bind-Value:after="SaveChanges"/>
+    </div>
+
+    <div class="form-group">
+        <label for="currentGritPoints">Current Grit Points</label>
+        <InputNumber id="currentGritPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentGritPoints" @bind-Value:after="SaveChanges"/>
+    </div>
+
+    <h4>Current Resources</h4>
+    @foreach (var resource in CurrentCharacter.CurrentResources)
+    {
+        <div class="form-group">
+            <label for="@($"resource_{resource.CharacterResource.Name}")">@resource.CharacterResource.Name</label>
+            <InputNumber id="@($"resource_{resource.CharacterResource.Name}")" class="form-control" @bind-Value="resource.CurrentResourceAvailable" @bind-Value:after="SaveChanges"/>
+        </div>
+    }
+
+    <button class="btn btn-primary" @onclick="CloseModal">Close</button>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    [Parameter] public CurrentCharacter CurrentCharacter { get; set; }
+
+    private bool showSaveIndicator = false;
+
+    private async Task SaveChanges()
+    {
+        await CurrentCharacterService.SetCurrentCharacterAsync(CurrentCharacter);
+        await CurrentCharacterService.SetCharacterSetupAsync(true);
+        await ShowSaveIndicator();
+    }
+
+    private async Task ShowSaveIndicator()
+    {
+        showSaveIndicator = true;
+        StateHasChanged();
+        await Task.Delay(2000);  // Wait for 2 seconds
+        showSaveIndicator = false;
+        StateHasChanged();
+    }
+
+    private async Task CloseModal()
+    {
+        await BlazoredModal.CloseAsync(ModalResult.Ok(CurrentCharacter));
+    }
+}
