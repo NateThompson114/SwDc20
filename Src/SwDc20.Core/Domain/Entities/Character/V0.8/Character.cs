@@ -68,7 +68,7 @@ public class Character: BaseEntity
     // Step 9: Class
     public string Class { get; set; }
     public string Subclass { get; set; }
-    public List<string> ClassFeatures { get; set; } = new List<string>();
+    public List<CharacterFeature> Features { get; set; } = new List<CharacterFeature>();
 
     // Step 10: Weapons & Inventory
     public List<CharacterInventory> Inventory { get; set; } = new List<CharacterInventory>();

@@ -28,6 +28,11 @@
         <label for="tag">Tag</label>
         <InputText id="tag" class="form-control" @bind-Value="Skill.Tag" />
     </div>
+    
+    <div class="form-group">
+        <InputCheckbox id="useForMartialCheck" @bind-Value="Skill.UseForMartialCheck"></InputCheckbox>
+        <label for="useForMartialCheck">Use for Martial Check</label>
+    </div>
 
     <button type="submit" class="btn btn-primary">Save Skill</button>
     <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>

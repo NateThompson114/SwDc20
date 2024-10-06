@@ -16,6 +16,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<DataSyncService>();
 builder.Services.AddScoped<CharacterService>();
 builder.Services.AddScoped<CurrentCharacterService>();
+builder.Services.AddScoped<GamesService>();
 builder.Services.AddScoped<VariableService>();
 builder.Services.AddScoped<SkillService>();
 builder.Services.AddScoped<WeaponService>();
