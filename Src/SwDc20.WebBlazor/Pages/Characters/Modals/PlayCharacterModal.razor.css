@@ -1,0 +1,16 @@
+﻿.save-indicator {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 2px 5px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 3px;
+    font-size: 0.8em;
+    animation: fadeOut 2s forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { opacity: 0; }
+}

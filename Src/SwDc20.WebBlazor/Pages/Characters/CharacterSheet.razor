@@ -1,6 +1,8 @@
 ﻿@page "/character/{Id:guid}"
+@using SwDc20.Core.Domain.Entities.Weapon.V0._8
 @inject CharacterService CharacterService
 @inject NavigationManager NavigationManager
+@inject WeaponService WeaponService
 
 <h3>Character Sheet</h3>
 
@@ -48,7 +50,7 @@ else
 
         <h5>Class Features</h5>
         <ul>
-            @foreach (var feature in characterWrapper.Document.ClassFeatures)
+            @foreach (var feature in characterWrapper.Document.Features)
             {
                 <li>@feature</li>
             }
@@ -56,24 +58,60 @@ else
 
         <h5>Equipment</h5>
         <ul>
-            @foreach (var item in characterWrapper.Document.Equipment)
+            @foreach (var item in characterWrapper.Document.Inventory)
             {
                 <li>@item</li>
             }
         </ul>
 
-        <h5>Weapons</h5>
-        <ul class="list-group">
-            @foreach (var weapon in characterWrapper.Document.Weapons)
-            {
-                <li class="list-group-item">
-                    <h6>@weapon.Name</h6>
-                    <p>Damage: @weapon.Damage (@weapon.DamageType)</p>
-                    <p>Description: @weapon.Description</p>
-                    <p>Calculation: @weapon.Calculation</p>
-                </li>
-            }
-        </ul>
+        @* <h5>Weapons</h5> *@
+        @* <table class="table"> *@
+        @*     <thead> *@
+        @*     <tr> *@
+        @*         <th>Name</th> *@
+        @*         <th>Type</th> *@
+        @*         <th>Points Remaining</th> *@
+        @*         <th>Properties Remaining</th> *@
+        @*         <th>Damage</th> *@
+        @*         <th>Properties</th> *@
+        @*         <th>1h/2h Hit Bonus</th> *@
+        @*         <th>Actions</th> *@
+        @*     </tr> *@
+        @*     </thead> *@
+        @*     <tbody> *@
+        @*     @foreach (var weapon in _weapons) *@
+        @*     { *@
+        @*     <tr> *@
+        @*         <td>@weapon.Document.Name</td> *@
+        @*         <td>@weapon.Document.PrimaryType.Name</td> *@
+        @*         <td>@(weapon.Document.Points - weapon.Document.Properties.Sum(p => p.Cost))</td> *@
+        @*         <td>@(weapon.Document.PropertyLimit - weapon.Document.Properties.Count(pr => pr.CountsTowardsMaximumProperties))</td> *@
+        @*         <td>@weapon.Document.Properties.Sum(p => p.DamageIncrease)</td> *@
+        @*         <td>@(string.Join(", ", weapon.Document.Properties.Select(p => p.Name)))</td> *@
+        @*         <td> *@
+        @*             <span>1h:@GetOneHandedHitBonus(weapon.Document)</span> *@
+        @*             <span>/</span> *@
+        @*             <span>2h:@GetTwoHandedHitBonus(weapon.Document)</span> *@
+        @*         </td> *@
+        @*         <td> *@
+        @*             <button class="btn btn-primary btn-sm" @onclick="() => EditWeapon(weapon)">Edit</button> *@
+        @*             <button class="btn btn-danger btn-sm" @onclick="() => DeleteWeapon(weapon)">Delete</button> *@
+        @*         </td> *@
+        @*     </tr> *@
+        @*     } *@
+        @*     </tbody> *@
+        @* </table> *@
+        @* <ul class="list-group"> *@
+        @*     @foreach (var weapon in characterWrapper.Document.Weapons) *@
+        @*     { *@
+        @*         <li class="list-group-item"> *@
+        @*             <h6>@weapon.Name</h6> *@
+        @*             <p>Damage: @weapon.Damage (@weapon.DamageType)</p> *@
+        @*             <p>Description: @weapon.Description</p> *@
+        @*             <p>Calculation: @weapon.Calculation</p> *@
+        @*         </li> *@
+        @*     } *@
+        @* </ul> *@
 
         <p>Currency: @characterWrapper.Document.Currency</p>
     </div>
@@ -85,6 +123,7 @@ else
 @code {
     [Parameter]
     public Guid Id { get; set; }
+    private List<DocumentWrapper<Weapon>> _weapons = new List<DocumentWrapper<Weapon>>();
 
     private DocumentWrapper<Character> characterWrapper;
 

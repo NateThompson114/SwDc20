@@ -21,6 +21,10 @@ public class Weapon : BaseEntity
     [Required]
     public Property PrimaryType { get; set; }
     
+    public List<string> DamageTypes { get; set; } = new();
+
+    public string Description { get; set; }
+    
     public string GetVersion()
     {
         return CurrentVersion;

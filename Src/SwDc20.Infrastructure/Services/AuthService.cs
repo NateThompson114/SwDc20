@@ -2,7 +2,7 @@
 using System.Text.Json;
 using Blazored.LocalStorage;
 
-namespace SwDc20.WebBlazor.Services;
+namespace SwDc20.Infrastructure.Services;
 
 public class AuthService
 {

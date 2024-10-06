@@ -1,0 +1,104 @@
+﻿@inject WeaponService WeaponService
+
+<EditForm Model="@CharacterWeapon" OnValidSubmit="SaveWeapon">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="CharacterWeapon.Name" />
+    </div>
+
+    <div class="form-group">
+        <label for="damage">Damage</label>
+        <InputNumber id="damage" class="form-control" @bind-Value="CharacterWeapon.Damage" />
+    </div>
+
+    <div class="form-group">
+        <label for="damageType">Damage Type</label>
+        <InputText id="damageType" class="form-control" @bind-Value="CharacterWeapon.DamageType" />
+    </div>
+
+    <div class="form-group">
+        <label for="weaponType">Weapon Type</label>
+        <InputText id="weaponType" class="form-control" @bind-Value="CharacterWeapon.WeaponType" />
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <InputTextArea id="description" class="form-control" @bind-Value="CharacterWeapon.Description" />
+    </div>
+
+    <div class="form-group">
+        <label for="quantity">Quantity</label>
+        <InputNumber id="quantity" class="form-control" @bind-Value="CharacterWeapon.Quantity" />
+    </div>
+
+    <div class="form-check">
+        <InputCheckbox id="equipped" class="form-check-input" @bind-Value="CharacterWeapon.Equipped" />
+        <label class="form-check-label" for="equipped">Equipped</label>
+    </div>
+
+    <div class="form-check">
+        <InputCheckbox id="isPrimary" class="form-check-input" @bind-Value="CharacterWeapon.IsPrimary" />
+        <label class="form-check-label" for="isPrimary">Primary</label>
+    </div>
+
+    <div class="form-check">
+        <InputCheckbox id="isSecondary" class="form-check-input" @bind-Value="CharacterWeapon.IsSecondary" />
+        <label class="form-check-label" for="isSecondary">Secondary</label>
+    </div>
+
+    @if (CharacterWeapon.Weapon != null && !WeaponMatchesOriginal())
+    {
+        <div class="alert alert-warning mt-3">
+            The weapon details have been modified. Do you want to realign with the original weapon?
+            <button type="button" class="btn btn-warning ml-2" @onclick="RealignWeapon">Realign</button>
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary mt-3">Save Weapon</button>
+    <button type="button" class="btn btn-secondary mt-3" @onclick="Cancel">Cancel</button>
+</EditForm>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    [Parameter] public CharacterWeapon CharacterWeapon { get; set; }
+
+    private bool WeaponMatchesOriginal()
+    {
+        if (CharacterWeapon.Weapon == null) return true;
+
+        return CharacterWeapon.Name == CharacterWeapon.Weapon.Name &&
+               CharacterWeapon.Damage == CharacterWeapon.Weapon.Properties.Sum(w => w.DamageIncrease) &&
+               CharacterWeapon.DamageType == string.Join(", ", CharacterWeapon.Weapon.DamageTypes) &&
+               CharacterWeapon.WeaponType == CharacterWeapon.Weapon.PrimaryType.ToString() &&
+               CharacterWeapon.Description == CharacterWeapon.GetDescriptionFromProperties();
+    }
+
+    private void RealignWeapon()
+    {
+        if (CharacterWeapon.Weapon != null)
+        {
+            CharacterWeapon.Name = CharacterWeapon.Weapon.Name;
+            CharacterWeapon.Damage = CharacterWeapon.Weapon.Properties.Sum(w => w.DamageIncrease);
+            CharacterWeapon.DamageType = string.Join(", ", CharacterWeapon.Weapon.DamageTypes);
+            CharacterWeapon.WeaponType = CharacterWeapon.Weapon.PrimaryType.ToString();
+            CharacterWeapon.Description = !string.IsNullOrWhiteSpace(CharacterWeapon.Weapon.Description) ? CharacterWeapon.Weapon.Description : CharacterWeapon.GetDescriptionFromProperties();
+        }
+        
+        BlazoredModal.Options.Size = ModalSize.Large;
+        BlazoredModal.Options.Position = ModalPosition.Middle;
+    }
+
+    private async Task SaveWeapon()
+    {
+        await BlazoredModal.CloseAsync(ModalResult.Ok(CharacterWeapon));
+    }
+
+    private async Task Cancel()
+    {
+        await BlazoredModal.CancelAsync();
+    }
+}

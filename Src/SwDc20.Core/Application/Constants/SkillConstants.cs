@@ -17,7 +17,8 @@ public static class SkillConstants
         Id = new Guid("b9e59cc8-91ff-486c-8637-ac9507c81fb7"),
         Version = Skill.CurrentVersion,
         Name = nameof(Athletics),
-        AttributeUsed = Attribute.Might.Name
+        AttributeUsed = Attribute.Might.Name,
+        UseForMartialCheck = true
     };
     public static readonly Skill Intimidation = new()
     {
@@ -31,7 +32,8 @@ public static class SkillConstants
         Id = new Guid("293fc737-15d4-479a-8dd9-135c9f251c57"),
         Version = Skill.CurrentVersion,
         Name = nameof(Acrobatics),
-        AttributeUsed = Attribute.Agility.Name
+        AttributeUsed = Attribute.Agility.Name,
+        UseForMartialCheck = true
     };
     public static readonly Skill Trickery = new()
     {

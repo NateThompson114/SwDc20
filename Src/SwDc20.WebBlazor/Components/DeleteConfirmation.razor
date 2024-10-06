@@ -1,0 +1,21 @@
+﻿@inject IModalService ModalService
+
+<div>
+    <p>Are you sure you want to delete this character?</p>
+    <button class="btn btn-danger" @onclick="Confirm">Delete</button>
+    <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    private async Task Confirm()
+    {
+        await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+    }
+
+    private async Task Cancel()
+    {
+        await BlazoredModal.CancelAsync();
+    }
+}

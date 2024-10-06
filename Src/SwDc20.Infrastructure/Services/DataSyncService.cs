@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Headers;
 
-namespace SwDc20.WebBlazor.Services
+namespace SwDc20.Infrastructure.Services
 {
     public class DataSyncService
     {

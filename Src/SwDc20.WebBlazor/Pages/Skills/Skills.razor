@@ -15,6 +15,7 @@
         <th>Name</th>
         <th>Attribute Used</th>
         <th>Tag</th>
+        <th>Use for Martial Check</th>
         <th>Actions</th>
     </tr>
     </thead>
@@ -25,6 +26,7 @@
             <td>@skillWrapper.Document.Name</td>
             <td>@skillWrapper.Document.AttributeUsed</td>
             <td>@skillWrapper.Document.Tag</td>
+            <td>@skillWrapper.Document.UseForMartialCheck</td>
             <td>
                 <button class="btn btn-sm btn-info" @onclick="() => OpenModal(skillWrapper.Document)">Edit</button>
                 <button class="btn btn-sm btn-danger" @onclick="() => DeleteSkill(skillWrapper.ContentId)">Delete</button>
@@ -63,6 +65,7 @@
             Name = skill.Name,
             AttributeUsed = skill.AttributeUsed,
             Tag = skill.Tag,
+            UseForMartialCheck = skill.UseForMartialCheck,
             Version = skill.Version
         };
         skillModal.Open();

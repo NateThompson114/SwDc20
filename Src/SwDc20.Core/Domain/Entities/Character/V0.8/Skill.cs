@@ -6,8 +6,8 @@ public class Skill: BaseEntity
     public string Name { get; set; }
     public string AttributeUsed { get; set; }
     public int Rank { get; set; }
-    
     public string? Tag { get; set; }
+    public bool UseForMartialCheck { get; set; }
 
     public Skill(string name, string attributeUsed, string? tag = null, Guid? id = default)
     {

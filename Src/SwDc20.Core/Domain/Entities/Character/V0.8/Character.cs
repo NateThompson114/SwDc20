@@ -13,6 +13,8 @@ public class Character: BaseEntity
     [Required]
     public string PlayerName { get; set; }
     
+    public string ImageUrl { get; set; }
+    
     [Range(0, 20)]
     public int Level { get; set; }
     public int CombatMastery => Math.Max((Level + 1) / 2, 1);
@@ -37,11 +39,11 @@ public class Character: BaseEntity
     public List<Language> Languages { get; set; } = new();
 
     // Step 4: Health Points
-    public int MaxHP { get; set; }
+    public int MaxHitPoints { get; set; }
 
     // Step 5: Stamina & Mana Points
-    public int MaxSP { get; set; }
-    public int MaxMP { get; set; }
+    public int MaxStaminaPoints { get; set; }
+    public int MaxManaPoints { get; set; }
 
     // Step 6: Defense
     public int PhysicalDefense { get; set; }
@@ -51,7 +53,7 @@ public class Character: BaseEntity
 
     // Step 7: Combat Modifiers
     public int AttackSpellCheck { get; set; }
-    public int SaveDC { get; set; }
+    public int SaveDifficultyCheck { get; set; }
     public int MartialCheck { get; set; }
     public int DeathThreshold { get; set; }
     public int MoveSpeed { get; set; }
@@ -66,17 +68,16 @@ public class Character: BaseEntity
     // Step 9: Class
     public string Class { get; set; }
     public string Subclass { get; set; }
-    public List<string> ClassFeatures { get; set; } = new List<string>();
+    public List<CharacterFeature> Features { get; set; } = new List<CharacterFeature>();
 
     // Step 10: Weapons & Inventory
-    public List<string> Equipment { get; set; } = new List<string>();
-    public List<Weapon> Weapons { get; set; } = new List<Weapon>();
-
-    
+    public List<CharacterInventory> Inventory { get; set; } = new List<CharacterInventory>();
+    public List<CharacterWeapon> Weapons { get; set; } = new List<CharacterWeapon>();
 
     // Additional properties
     public int ActionPoints { get; set; }
-    public List<string> Attacks { get; set; } = new List<string>();
+    public List<CharacterAttack> Attacks { get; set; } = new List<CharacterAttack>();
+    public List<CharacterResource> Resources { get; set; } = new List<CharacterResource>();
     public int Currency { get; set; }
 
     public Character()

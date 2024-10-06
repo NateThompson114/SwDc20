@@ -20,7 +20,7 @@ public class SkillService
         _logger = logger;
     }
     
-    public List<Skill> GetDefaultSkills()
+    public static List<Skill> GetDefaultSkills()
     {
         return SkillConstants.DefaultSkills.ToList();
     }
