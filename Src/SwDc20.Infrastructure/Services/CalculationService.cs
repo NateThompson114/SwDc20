@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using SwDc20.Core.Application.Constants;
+using SwDc20.Core.Application.Constants.Dc20;
 using SwDc20.Core.Domain.Entities;
 using SwDc20.Core.Domain.Entities.Variable.V0._8;
 
@@ -84,7 +85,7 @@ public class CalculationService
 
 		private Variable? GetVariableByName(string name)
 		{
-			var variablesType = typeof(StandardVariables);
+			var variablesType = typeof(Dc20StandardVariables);
 			var field = variablesType.GetField(name);
 			return field?.GetValue(null) as Variable;
 		}

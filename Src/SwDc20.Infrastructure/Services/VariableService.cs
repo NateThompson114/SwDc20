@@ -1,6 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.Extensions.Logging;
-using SwDc20.Core.Application.Constants;
+using SwDc20.Core.Application.Constants.Dc20;
 using SwDc20.Core.Domain.Entities.Variable.V0._8;
 using SwDc20.WebBlazor.Models;
 
@@ -22,7 +22,7 @@ public class VariableService
     
     public List<Variable> GetDefaultVariables()
     {
-        return StandardVariables.ToList();
+        return Dc20StandardVariables.ToList();
     }
     
     public async Task<List<DocumentWrapper<Variable>>> GetVariablesAsync()

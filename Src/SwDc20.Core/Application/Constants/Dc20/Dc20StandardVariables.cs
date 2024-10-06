@@ -1,9 +1,9 @@
 ﻿using SwDc20.Core.Domain.Entities.Variable.V0._8;
 using SwDc20.Core.Domain.Enums;
 
-namespace SwDc20.Core.Application.Constants;
+namespace SwDc20.Core.Application.Constants.Dc20;
 
-public static class StandardVariables
+public static class Dc20StandardVariables
 {
     public static Variable Capture = new()
 		{
@@ -204,7 +204,7 @@ public static class StandardVariables
 
     public static List<Variable> ToList()
     {
-        return typeof(StandardVariables)
+        return typeof(Dc20StandardVariables)
             .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
             .Where(f => f.FieldType == typeof(Variable))
             .Select(f => (Variable)f.GetValue(null))

@@ -23,5 +23,4 @@ public class GamesService(ILocalStorageService localStorage)
     {
         await localStorage.SetItemAsync(GameKey, game);
     }
-    
 }

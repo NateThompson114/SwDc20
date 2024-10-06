@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using SwDc20.Core.Application.Constants;
+using SwDc20.Core.Application.Constants.Dc20;
 using SwDc20.Core.Domain.Enums;
 
 namespace SwDc20.Core.Domain.Entities.Weapon.V0._8;
@@ -61,7 +61,7 @@ public class MeleeWeapon : Weapon
         Reach = 1;
         Properties = new()
         {
-            StandardVariables.BaseDamage,
+            Dc20StandardVariables.BaseDamage,
         };
     }
 }
@@ -81,9 +81,9 @@ public class RangedWeapon : Weapon
         Range = 15;
         Properties = new()
         {
-            StandardVariables.BaseDamage,
-            StandardVariables.Unwieldy,
-            StandardVariables.TwoHanded
+            Dc20StandardVariables.BaseDamage,
+            Dc20StandardVariables.Unwieldy,
+            Dc20StandardVariables.TwoHanded
         };
     }
 }

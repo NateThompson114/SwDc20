@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using SwDc20.Core.Application.Constants;
+
 
 namespace SwDc20.Core.Domain.Entities.Character.V0._8;
 
@@ -62,6 +62,7 @@ public class Character: BaseEntity
     public int GritPoints { get; set; }
 
     // Step 8: Ancestry
+    public List<AncestryOption> AncestryOptions { get; set; } = new List<AncestryOption>();
     public string Ancestry { get; set; }
     public List<string> AncestryTraits { get; set; } = new List<string>();
 
@@ -84,11 +85,6 @@ public class Character: BaseEntity
     {
         Id = Guid.NewGuid();
         Version = CurrentVersion;
-        // Skills = SkillConstants.DefaultSkills.Select(s => new Skill(s.Name, s.AttributeUsed, s.Tag)
-        // {
-        //     Id = s.Id,
-        //     Version = s.Version
-        // }).ToList();
     }
     
     public int GetSkillValue(string skillName)
@@ -139,4 +135,13 @@ public class Character: BaseEntity
             return save;
         }
     }
+}
+
+public class AncestryOption
+{
+    public string AncestryGroup { get; set; }
+    public string Name { get; set; }
+    public int Cost { get; set; }
+    public string Description { get; set; }
+    public List<Variable.V0._8.Variable> Variables { get; set; } = new List<Variable.V0._8.Variable>();
 }

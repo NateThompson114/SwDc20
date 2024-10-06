@@ -1,6 +1,7 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.Extensions.Logging;
 using SwDc20.Core.Application.Constants;
+using SwDc20.Core.Application.Constants.Dc20;
 using SwDc20.Core.Domain.Entities.Character.V0._8;
 using SwDc20.WebBlazor.Models;
 
@@ -22,7 +23,7 @@ public class SkillService
     
     public static List<Skill> GetDefaultSkills()
     {
-        return SkillConstants.DefaultSkills.ToList();
+        return Dc20StandardSkills.DefaultSkills.ToList();
     }
     
     public async Task<List<DocumentWrapper<Skill>>> GetSkillsAsync()
@@ -104,6 +105,6 @@ public class SkillService
 
     public List<string> GetAttributeOptions()
     {
-        return SkillConstants.AttributeOptions;
+        return Dc20StandardSkills.AttributeOptions;
     }
 }

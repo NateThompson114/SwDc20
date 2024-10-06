@@ -1,5 +1,5 @@
 ﻿using System.Text.RegularExpressions;
-using SwDc20.Core.Application.Constants;
+using SwDc20.Core.Application.Constants.Dc20;
 using SwDc20.Core.Domain.Entities.Character.V0._8;
 using SwDc20.Core.Domain.Enums;
 using SwDc20.WebBlazor.Models;
@@ -22,7 +22,6 @@ public class Variable: BaseEntity
     public string? Calculation { get; set; }
     public int NestedCount { get; set; } = 0;
     public bool Deletable { get; set; } = true;
-    
     public List<VariableModification<Skill>> SkillsModified { get; set; }
     public int MightModification { get; set; }
     public int AgilityModification { get; set; }
@@ -55,7 +54,7 @@ public class Variable: BaseEntity
 
         if (matches.Count == 0) return;
 
-        var variables = StandardVariables.ToList();
+        var variables = Dc20StandardVariables.ToList();
         int maxNestedCount = 0;
 
         foreach (Match match in matches)

@@ -1,4 +1,5 @@
 ﻿@page "/weapons"
+@using SwDc20.Core.Application.Constants.Dc20
 @using SwDc20.Core.Domain.Entities.Weapon.V0._8
 @using SwDc20.Core.Domain.Entities.Variable.V0._8
 @using SwDc20.Core.Domain.Enums
@@ -129,7 +130,7 @@ else
            
             @foreach (var property in meleeWeapon.Properties)
             {
-                if (property != StandardVariables.BaseDamage
+                if (property != Dc20StandardVariables.BaseDamage
                     && !property.DefaultVariableForProperties.Any())
                 {
             
@@ -245,7 +246,7 @@ else
 
             @foreach (var property in rangedWeapon.Properties)
             {
-            if (property != StandardVariables.BaseDamage
+            if (property != Dc20StandardVariables.BaseDamage
             && !property.DefaultVariableForProperties.Any())
             {
 

@@ -2,6 +2,7 @@
 @using SwDc20.Core.Domain.Entities.Variable.V0._8
 @using SwDc20.WebBlazor.Models
 @using SwDc20.Core.Application.Constants
+@using SwDc20.Core.Application.Constants.Dc20
 @using SwDc20.Core.Domain.Enums
 @using SwDc20.Core.Domain.Entities.Character.V0._8
 @inject VariableService VariableService
@@ -275,7 +276,7 @@ else
             return false;
         }
 
-        var standardVariableIds = StandardVariables.ToList().Select(v => v.Id).ToHashSet();
+        var standardVariableIds = Dc20StandardVariables.ToList().Select(v => v.Id).ToHashSet();
         var loadedVariableIds = variables
             .Select(v => v.Document?.Id)
             .Where(id => id.HasValue)
@@ -286,7 +287,7 @@ else
 
     private async Task LoadStandardVariables()
     {
-        var standardVariables = StandardVariables.ToList();
+        var standardVariables = Dc20StandardVariables.ToList();
         foreach (var variable in standardVariables)
         {
             await VariableService.SaveVariableAsync(variable);
