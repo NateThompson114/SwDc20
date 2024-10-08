@@ -372,8 +372,8 @@ else
     private void OpenWeaponModal(bool isMelee)
     {
         Weapon newWeapon = isMelee
-            ? new MeleeWeapon { Id = Guid.NewGuid(), Version = Weapon.CurrentVersion, PrimaryType = Property.Melee }
-            : new RangedWeapon { Id = Guid.NewGuid(), Version = Weapon.CurrentVersion, PrimaryType = Property.Ranged };
+            ? new MeleeWeapon { Id = Guid.NewGuid(), Version = Weapon.CurrentVersion, PrimaryType = VariableProperty.Melee }
+            : new RangedWeapon { Id = Guid.NewGuid(), Version = Weapon.CurrentVersion, PrimaryType = VariableProperty.Ranged };
 
         CurrentWeaponWrapper = new DocumentWrapper<Weapon>(newWeapon)
         {
@@ -388,7 +388,7 @@ else
     private void EditWeapon(DocumentWrapper<Weapon> weaponWrapper)
     {
         Weapon specificWeapon;
-        if (weaponWrapper.Document.PrimaryType == Property.Melee)
+        if (weaponWrapper.Document.PrimaryType == VariableProperty.Melee)
         {
             specificWeapon = new MeleeWeapon
             {
@@ -405,7 +405,7 @@ else
                 AddTwoHanded = (weaponWrapper.Document as MeleeWeapon)?.AddTwoHanded ?? false
             };
         }
-        else if (weaponWrapper.Document.PrimaryType == Property.Ranged)
+        else if (weaponWrapper.Document.PrimaryType == VariableProperty.Ranged)
         {
             specificWeapon = new RangedWeapon
             {

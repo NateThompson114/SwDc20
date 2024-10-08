@@ -14,7 +14,7 @@
 {
     <button class="btn btn-primary mb-3 me-2" @onclick="LoadStandardVariables">Load Standard Variables</button>
 }
-<button class="btn btn-success mb-3" @onclick="() => OpenModal(new Variable { Id = Guid.NewGuid(), Version = Variable.CurrentVersion, Properties = new List<Property>(), Deletable = true })">Add New Variable</button>
+<button class="btn btn-success mb-3" @onclick="() => OpenModal(new Variable { Id = Guid.NewGuid(), Version = Variable.CurrentVersion, Properties = new List<VariableProperty>(), Deletable = true })">Add New Variable</button>
 
 @if (variables == null)
 {
@@ -112,7 +112,7 @@ else
 
                         <div class="form-group">
                             <label>Properties</label>
-                            @foreach (var property in Property.List)
+                            @foreach (var property in VariableProperty.List)
                             {
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="@property.Name" 
@@ -142,7 +142,7 @@ else
 
                         <div class="form-group">
                             <label>Default Variable For Properties</label>
-                            @foreach (var property in Property.List)
+                            @foreach (var property in VariableProperty.List)
                             {
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" id="@($"default-{property.Name}")"
@@ -313,7 +313,7 @@ else
             BonusToHit = variable.BonusToHit,
             TwoHandedBonusToHit = variable.TwoHandedBonusToHit,
             Description = variable.Description,
-            Properties = new List<Property>(variable.Properties ?? Enumerable.Empty<Property>()),
+            Properties = new List<VariableProperty>(variable.Properties ?? Enumerable.Empty<VariableProperty>()),
             Calculation = variable.Calculation,
             Deletable = variable.Deletable,
             IsStackable = variable.IsStackable,
@@ -362,20 +362,20 @@ else
         CloseModal();
     }
 
-    private void ToggleProperty(Property property)
+    private void ToggleProperty(VariableProperty variableProperty)
     {
         if (editingVariable.Properties == null)
         {
-            editingVariable.Properties = new List<Property>();
+            editingVariable.Properties = new List<VariableProperty>();
         }
 
-        if (editingVariable.Properties.Contains(property))
+        if (editingVariable.Properties.Contains(variableProperty))
         {
-            editingVariable.Properties.Remove(property);
+            editingVariable.Properties.Remove(variableProperty);
         }
         else
         {
-            editingVariable.Properties.Add(property);
+            editingVariable.Properties.Add(variableProperty);
         }
     }
     
@@ -393,15 +393,15 @@ else
         }
     }
 
-    private void ToggleDefaultProperty(Property property)
+    private void ToggleDefaultProperty(VariableProperty variableProperty)
     {
-        if (editingVariable.DefaultVariableForProperties.Contains(property))
+        if (editingVariable.DefaultVariableForProperties.Contains(variableProperty))
         {
-            editingVariable.DefaultVariableForProperties.Remove(property);
+            editingVariable.DefaultVariableForProperties.Remove(variableProperty);
         }
         else
         {
-            editingVariable.DefaultVariableForProperties.Add(property);
+            editingVariable.DefaultVariableForProperties.Add(variableProperty);
         }
     }
 }

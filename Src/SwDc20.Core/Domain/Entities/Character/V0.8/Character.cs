@@ -136,12 +136,3 @@ public class Character: BaseEntity
         }
     }
 }
-
-public class AncestryOption
-{
-    public string AncestryGroup { get; set; }
-    public string Name { get; set; }
-    public int Cost { get; set; }
-    public string Description { get; set; }
-    public List<Variable.V0._8.Variable> Variables { get; set; } = new List<Variable.V0._8.Variable>();
-}

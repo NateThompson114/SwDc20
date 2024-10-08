@@ -19,7 +19,7 @@ public class Weapon : BaseEntity
     public int PropertyLimit { get; set; }
     
     [Required]
-    public Property PrimaryType { get; set; }
+    public VariableProperty PrimaryType { get; set; }
     
     public List<string> DamageTypes { get; set; } = new();
 
@@ -57,7 +57,7 @@ public class MeleeWeapon : Weapon
     {
         Points = 2;
         PropertyLimit = 4;
-        PrimaryType = Property.Melee;
+        PrimaryType = VariableProperty.Melee;
         Reach = 1;
         Properties = new()
         {
@@ -77,7 +77,7 @@ public class RangedWeapon : Weapon
     {
         Points = 0;
         PropertyLimit = 3;
-        PrimaryType = Property.Ranged;
+        PrimaryType = VariableProperty.Ranged;
         Range = 15;
         Properties = new()
         {
