@@ -110,6 +110,7 @@ public static class Dc20StandardVariables
         DamageIncrease = 1,
         Description = "Base damage for a weapon",
         Properties = new() { VariableProperty.Melee, VariableProperty.Ranged },
+        CoreVariable = true,
 
         Deletable = false,
         CountsTowardsMaximumProperties = false

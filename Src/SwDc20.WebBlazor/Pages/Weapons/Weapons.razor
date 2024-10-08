@@ -39,7 +39,7 @@
                 <td>@(weapon.Document.Points - weapon.Document.Properties.Sum(p => p.Cost))</td>
                 <td>@(weapon.Document.PropertyLimit - weapon.Document.Properties.Count(pr => pr.CountsTowardsMaximumProperties))</td>
                 <td>@weapon.Document.Properties.Sum(p => p.DamageIncrease)</td>
-                <td>@(string.Join(", ", weapon.Document.Properties.Select(p => p.Name)))</td>
+                <td>@(string.Join(", ", weapon.Document.Properties.Where(p => !p.CoreVariable).Select(p => p.Name)))</td>
                 <td>
                     <span>1h:@GetOneHandedHitBonus(weapon.Document)</span>
                     <span>/</span>
@@ -128,7 +128,7 @@ else
             <hr/>
 
            
-            @foreach (var property in meleeWeapon.Properties)
+            @foreach (var property in meleeWeapon.Properties.Where(p => !p.CoreVariable))
             {
                 if (property != Dc20StandardVariables.BaseDamage
                     && !property.DefaultVariableForProperties.Any())
@@ -558,22 +558,4 @@ else
                         p.Document.DefaultVariableForProperties.Contains(CurrentWeaponWrapper.Document.PrimaryType))
             .Select(p => p.Document)
             .ToList();
-
-    // private void OnPointsChanged(int newPoints)
-    // {
-    //     CurrentWeaponWrapper.Document.Points = newPoints;
-    //     // Remove properties if the new point value is less than the current total cost
-    //     int currentCost = CurrentWeaponWrapper.Document.Properties.Sum(p => p.Cost);
-    //     while (currentCost > newPoints && CurrentWeaponWrapper.Document.Properties.Any())
-    //     {
-    //         var lastProperty = CurrentWeaponWrapper.Document.Properties.Last();
-    //         CurrentWeaponWrapper.Document.Properties.Remove(lastProperty);
-    //         currentCost -= lastProperty.Cost;
-    //     }
-    //     StateHasChanged();
-    // }
-
-
-    
-
 }

@@ -11,6 +11,16 @@ public class VariableProperty(string name, int value) : SmartEnum<VariableProper
     public static readonly VariableProperty Magic = new(nameof(Magic), 3);
     
     public static readonly VariableProperty Ancestry = new(nameof(Ancestry), 1000);
+    public static readonly VariableProperty Condition = new(nameof(Condition), 2000);
+
+    public static List<VariableProperty> ToList()
+    {
+        return typeof(VariableProperty)
+            .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
+            .Where(f => f.FieldType == typeof(VariableProperty))
+            .Select(f => (VariableProperty)f.GetValue(null))
+            .ToList();
+    }
 }
 
 // public static class VariableProperty

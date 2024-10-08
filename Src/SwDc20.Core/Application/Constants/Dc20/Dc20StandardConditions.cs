@@ -1,5 +1,6 @@
 ﻿using SwDc20.Core.Domain.Entities.GameInfo.V0._8;
 using SwDc20.Core.Domain.Entities.Variable.V0._8;
+using SwDc20.Core.Domain.Enums;
 
 namespace SwDc20.Core.Application.Constants.Dc20;
 
@@ -474,6 +475,7 @@ public static class ConditionVariables
 		Id = Guid.Parse("30ca034a-53fb-4b4a-9188-4609379d33b9"),
 		Version = Variable.CurrentVersion,
 		Name = nameof(LowerDeathThreshold),
+		Properties = [VariableProperty.Condition],
 		DeathModification = new() { 
 			DeathDoorThresholdChange = -1
 		}
@@ -483,6 +485,7 @@ public static class ConditionVariables
 		Id = Guid.Parse("828bde53-85f8-4531-835f-d0652398f1d3"),
 		Version = Variable.CurrentVersion,
 		Name = nameof(Exhaustion),
+		Properties = [VariableProperty.Condition],
 
 		AllChecksModification = -1,
 		AllSavesModification = -1,
@@ -494,6 +497,7 @@ public static class ConditionVariables
 		Id = Guid.Parse("aafbbbf1-ae2c-45bd-9c8f-8cd1c3ca9d47"),
 		Version = Variable.CurrentVersion,
 		Name = nameof(DisAdvantageOnAttacks),
+		Properties = [VariableProperty.Condition],
 		Disadvantages = new()
 		{
 			Attack = 1
@@ -504,6 +508,7 @@ public static class ConditionVariables
 		Id = Guid.Parse("c67f1791-5605-43c5-a470-ef5354e7080d"),
 		Version = Variable.CurrentVersion,
 		Name = nameof(DisAdvantageOnMentalChecks),
+		Properties = [VariableProperty.Condition],
 		Disadvantages = new()
 		{
 			MentalChecks = 1
@@ -514,6 +519,7 @@ public static class ConditionVariables
 		Id = Guid.Parse("4b7be7c7-ce56-4f7c-9a3f-10a109846a20"),
 		Version = Variable.CurrentVersion,
 		Name = nameof(DisAdvantageOnMentalSaves),
+		Properties = [VariableProperty.Condition],
 		Disadvantages = new()
 		{
 			MentalSaves = 1
@@ -524,6 +530,7 @@ public static class ConditionVariables
 		Id = Guid.Parse("cf718362-6ef3-46bd-9d6e-47d60887528e"),
 		Version = Variable.CurrentVersion,
 		Name = nameof(DisadvantageOnAgilitySaves),
+		Properties = [VariableProperty.Condition],
 		Disadvantages = new()
 		{
 			Agility = 1
@@ -534,6 +541,7 @@ public static class ConditionVariables
 		Id = Guid.Parse("30d52647-69ed-4d84-8998-d19e1013ccc8"),
 		Version = Variable.CurrentVersion,
 		Name = nameof(DisAdvantageOnPhysicalChecks),
+		Properties = [VariableProperty.Condition],
 		Disadvantages = new()
 		{
 			PhysicalChecks = 1
@@ -544,6 +552,7 @@ public static class ConditionVariables
 		Id = Guid.Parse("a2fdcbfa-6dbe-416a-81c4-3db70815a93e"),
 		Version = Variable.CurrentVersion,
 		Name = nameof(DisAdvantageOnPhysicalSaves),
+		Properties = [VariableProperty.Condition],
 		Disadvantages = new()
 		{
 			PhysicalSaves = 1
@@ -554,6 +563,7 @@ public static class ConditionVariables
 		Id = Guid.Parse("e2826d7d-27cc-44c2-9b04-a1d28aaf0831"),
 		Version = Variable.CurrentVersion,
 		Name = nameof(SituationalDisAdvantageOnAllChecks),
+		Properties = [VariableProperty.Condition],
 		Disadvantages = new()
 		{
 			Situational = true,
@@ -565,6 +575,7 @@ public static class ConditionVariables
 		Id = Guid.Parse("d36a9018-5d11-4b06-990b-b3ba6ac41387"),
 		Version = Variable.CurrentVersion,
 		Name = nameof(CanNotSpendActionPoints),
+		Properties = [VariableProperty.Condition],
 		CanNotSpendActionPoints = true
 	};
 	public static Variable SlowedMovement = new()
@@ -572,6 +583,7 @@ public static class ConditionVariables
 		Id = Guid.Parse("f1f3b1b4-4b3b-4b3b-8b3b-4b3b4b3b4b3b"),
 		Version = Variable.CurrentVersion,
 		Name = nameof(SlowedMovement),
+		Properties = [VariableProperty.Condition],
 		SpeedModification = -1
 	};
 	public static Variable MovementHalfed = new()
@@ -579,6 +591,7 @@ public static class ConditionVariables
 		Id = Guid.Parse("2fd141e8-8bd4-40fe-8aee-f86c1f900919"),
 		Version = Variable.CurrentVersion,
 		Name = nameof(MovementHalfed),
+		Properties = [VariableProperty.Condition],
 		SpeedHalfed = true
 	};
 	public static Variable AutoFailPhysicalSaves = new()
@@ -586,6 +599,7 @@ public static class ConditionVariables
 		Id = Guid.Parse("04925c01-3cdd-406c-8a92-731c7caaea8f"),		
 		Version = Variable.CurrentVersion,
 		Name = nameof(AutoFailPhysicalSaves),
+		Properties = [VariableProperty.Condition],
 		AutoFailure = new()
 		{
 			PhysicalSaves = 1
@@ -596,6 +610,7 @@ public static class ConditionVariables
 		Id = Guid.Parse("7bf6548f-25ab-4e82-90d0-846a0bb9400e"),
 		Version = Variable.CurrentVersion,
 		Name = nameof(SituationalDisAdvantageOnAllAttacks),
+		Properties = [VariableProperty.Condition],
 		Disadvantages = new()
 		{
 			Situational = true,

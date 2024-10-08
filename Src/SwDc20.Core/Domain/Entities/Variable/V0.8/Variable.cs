@@ -10,6 +10,7 @@ public class Variable: BaseEntity
 {
     public const string CurrentVersion = "0.8";
     public string Name { get; set; }
+    public bool CoreVariable { get; set; }
     public int Cost { get; set; }
     public bool CountsTowardsMaximumProperties { get; set; } = true;
     public bool IsStackable { get; set; } = false;
