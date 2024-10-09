@@ -5,12 +5,26 @@
     <div class="sidebar">
         <NavMenu />
     </div>
-
+    
     <main>
         <div class="top-row px-4">
             @* <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a> *@
             <a>Sign In (disabled)</a>
             <a>Sync Status (disabled)</a>
+            @* <a><button onclick={init()}>Initialize</button></a> *@
+            <a><button disabled="disabled" onclick={roll()}>DDDice Roll Dice</button></a>
+            <a><button disabled="disabled" onclick={join()}>DDDice Join Room</button></a>
+            @* <ol> *@
+            @*     <li> *@
+            @*         <button onclick={init()}>Initialize</button> *@
+            @*     </li> *@
+            @*     <li> *@
+            @*         <button onclick={join()}>Join Room</button> *@
+            @*     </li> *@
+            @*     <li> *@
+            @*         <button onclick={roll()}>Roll Dice</button> *@
+            @*     </li> *@
+            @* </ol> *@
         </div>
 
         <CascadingBlazoredModal>
@@ -19,12 +33,44 @@
         @* <article class="content px-4"> *@
         @*     @Body *@
         @* </article> *@
+        <canvas id="dddice" height="600" width="800"></canvas>
     </main>
 </div>
-
 <BlazoredToasts Position="ToastPosition.BottomRight"
                 Timeout="5"
                 IconType="IconType.FontAwesome"
                 SuccessClass="success-toast-override"
                 SuccessIcon="fa fa-thumbs-up"
                 ErrorIcon="fa fa-bug" />
+
+<script src="https://cdn.dddice.com/js/dddice-latest.js"></script>
+<script>
+    
+    // With a proper key this is failing?
+    //const dddice = new ThreeDDice(document.getElementById("dddice"), "");
+    //dddice.start();
+    
+    // A room is required?
+    //dddice.connect("");
+    // Join a room
+    function join() {
+    //    if (!dddice) {
+    //        alert('dddice is not initialized');
+    //    }
+
+    //    const input = prompt('Enter Room Slug');
+    //    if (input) {
+    //        dddice.connect(input);
+    //    }
+    }
+    
+    // Roll dice
+    function roll() {
+
+        //dddice.roll([{
+        //    theme: "dddice-standard",
+        //    type: "d20",
+        //}]);
+    }
+
+</script>

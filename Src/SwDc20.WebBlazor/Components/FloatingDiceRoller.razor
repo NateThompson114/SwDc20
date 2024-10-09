@@ -1,0 +1,134 @@
+﻿@inject DiceRollerService DiceRollerService
+
+<div class="fdr-floating-dice-roller">
+    <div class="fdr-input-group">
+        <label class="fdr-input-group-text" for="diceSize">d</label>
+        <input id="diceSize" type="number" @bind="DiceSize" min="2" max="100" class="fdr-form-control fdr-form-control-sm" placeholder="Size"/>
+        <label class="fdr-input-group-text" for="quantity">X</label>
+        <input id="quantity" type="number" @bind="Quantity" min="1" max="500" class="fdr-form-control fdr-form-control-sm" placeholder="Qty"/>
+        <select id="rollType" @bind="CurrentRollType" class="fdr-form-select fdr-form-select-sm">
+            <option value="@RollType.Normal">Normal</option>
+            <option value="@RollType.High">High</option>
+            <option value="@RollType.Low">Low</option>
+        </select>
+        <button @onclick="RollDice" class="fdr-btn fdr-btn-primary fdr-btn-sm">Roll</button>
+    </div>
+</div>
+
+<style>
+    .fdr-floating-dice-roller {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        z-index: 1000;
+    }
+
+    .fdr-input-group {
+        display: flex;
+        align-items: stretch;
+    }
+
+    .fdr-input-group-text {
+        display: flex;
+        align-items: center;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        text-align: center;
+        white-space: nowrap;
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+        border-radius: 0.2rem;
+    }
+
+    .fdr-form-control-sm, .fdr-form-select-sm {
+        flex: 0 0 auto;
+        width: 60px;
+        min-width: 0;
+        display: block;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: 0.2rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .fdr-form-select-sm {
+        width: 80px;
+        padding-right: 1.75rem;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+        background-size: 16px 12px;
+        appearance: none;
+    }
+
+    .fdr-btn {
+        display: inline-block;
+        font-weight: 400;
+        line-height: 1.5;
+        text-align: center;
+        text-decoration: none;
+        vertical-align: middle;
+        cursor: pointer;
+        user-select: none;
+        border-radius: 0.2rem;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .fdr-btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .fdr-btn-primary {
+        color: #fff;
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .fdr-btn-primary:hover {
+        color: #fff;
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+    }
+</style>
+
+@code {
+    private int _diceSize = 20;
+
+    private int DiceSize
+    {
+        get => _diceSize;
+        set => _diceSize = Math.Clamp(value, 2, 100);
+    }
+
+    private int _quantity = 1;
+
+    private int Quantity
+    {
+        get => _quantity;
+        set => _quantity = Math.Clamp(value, 1, 500);
+    }
+
+    private RollType CurrentRollType { get; set; } = RollType.Normal;
+
+    private void RollDice()
+    {
+        DiceRollerService.RollDice(DiceSize, Quantity, CurrentRollType);
+    }
+
+}

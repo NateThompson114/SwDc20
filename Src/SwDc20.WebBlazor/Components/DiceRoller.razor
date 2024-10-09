@@ -1,0 +1,48 @@
+﻿@inject DiceRollerService DiceRollerService
+
+<div class="dice-roller">
+    <div class="form-group">
+        <label for="diceSize">Dice Size:</label>
+        <input id="diceSize" type="number" @bind="DiceSize" min="2" class="form-control"/>
+    </div>
+    <div class="form-group">
+        <label for="quantity">Quantity:</label>
+        <input id="quantity" type="number" @bind="Quantity" min="1" class="form-control"/>
+    </div>
+    <div class="form-group">
+        <label>
+            <input type="radio" name="rollType" value="@RollType.Normal" checked="@(CurrentRollType == RollType.Normal)" @onchange="@(() => CurrentRollType = RollType.Normal)"/>
+            Normal
+        </label>
+        <label>
+            <input type="radio" name="rollType" value="@RollType.High" checked="@(CurrentRollType == RollType.High)" @onchange="@(() => CurrentRollType = RollType.High)"/>
+            Take High
+        </label>
+        <label>
+            <input type="radio" name="rollType" value="@RollType.Low" checked="@(CurrentRollType == RollType.Low)" @onchange="@(() => CurrentRollType = RollType.Low)"/>
+            Take Low
+        </label>
+    </div>
+    <button @onclick="RollDice" class="btn btn-primary">Roll Dice</button>
+    <button @onclick="Roll2d20Highest" class="btn btn-secondary mt-2">Roll 2d20 (Highest)</button>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; }
+    [Parameter] public string Description { get; set; }
+
+    private int DiceSize { get; set; } = 6;
+    private int Quantity { get; set; } = 1;
+    private RollType CurrentRollType { get; set; } = RollType.Normal;
+
+    private void RollDice()
+    {
+        DiceRollerService.RollDice(DiceSize, Quantity, CurrentRollType, Title, Description);
+    }
+
+    private void Roll2d20Highest()
+    {
+        DiceRollerService.RollDice(20, 2, RollType.High, Title, Description);
+    }
+
+}

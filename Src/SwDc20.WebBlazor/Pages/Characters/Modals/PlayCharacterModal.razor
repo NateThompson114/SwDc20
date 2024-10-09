@@ -1,5 +1,6 @@
 ﻿@using SwDc20.Core.Domain.Entities.GameInfo.V0._8
 @inject CurrentCharacterService CurrentCharacterService
+@inject DiceRollerService DiceRollerService
 
 <div class="container">
     <h3>
@@ -10,6 +11,15 @@
         }
     </h3>
 
+    <FloatingDiceRoller />
+    @* <DiceRoller/> *@
+    @* *@
+    @* <button @onclick="() => DiceRollerService.RollDice(20, 2, RollType.High)" class="btn btn-primary">Roll 2d20 (Highest)</button> *@
+    @* <button @onclick="() => DiceRollerService.RollDice(20, 2, RollType.Low)" class="btn btn-primary">Roll 2d20 (Lowest)</button> *@
+    @* <button @onclick="() => DiceRollerService.RollDice(6, 6)" class="btn btn-primary">Roll 6d6</button> *@
+    @* <button @onclick="RollMightCheck" class="btn btn-primary">Might Check</button> *@
+    @* <button @onclick="RollAgilityCheck" class="btn btn-secondary">Agility Check</button> *@
+    
     <div class="form-group">
         <label for="currentHp">Current HP</label>
         <InputNumber id="currentHp" class="form-control" @bind-Value="CurrentCharacter.CurrentHp" @bind-Value:after="SaveChanges"/>
@@ -88,5 +98,15 @@
     private async Task CloseModal()
     {
         await BlazoredModal.CloseAsync(ModalResult.Ok(CurrentCharacter));
+    }
+    
+    private void RollMightCheck()
+    {
+        DiceRollerService.RollDice(20, 1, RollType.Normal, "Might Check", "Roll to determine if you can lift the heavy boulder.");
+    }
+
+    private void RollAgilityCheck()
+    {
+        DiceRollerService.RollDice(20, 1, RollType.Normal, "Agility Check", "Roll to see if you can balance on the narrow beam.");
     }
 }
