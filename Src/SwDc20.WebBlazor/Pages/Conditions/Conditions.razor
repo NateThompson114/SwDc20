@@ -1,0 +1,97 @@
+﻿@page "/conditions"
+@using SwDc20.Core.Domain.Entities.GameInfo.V0._8
+@using SwDc20.Core.Domain.Entities.Variable.V0._8
+@using SwDc20.Infrastructure.Services
+@using Blazored.Modal
+@using Blazored.Modal.Services
+@using SwDc20.WebBlazor.Models
+@using SwDc20.Core.Domain.Enums
+@using SwDc20.WebBlazor.Pages.Conditions.Modals
+@inject ConditionService ConditionService
+@inject VariableService VariableService
+@inject IModalService ModalService
+
+<h3>Conditions Management</h3>
+
+<button class="btn btn-primary mb-3" @onclick="LoadDefaultConditions">Load Default Conditions</button>
+<button class="btn btn-secondary mb-3" @onclick="AddStandardConditionVariables">Add Standard Condition Variables</button>
+
+<div class="row">
+    @foreach (var condition in conditions)
+    {
+        <div class="card-group col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">@condition.Name</h5>
+                    <p class="card-text">@condition.Description</p>
+                    <button class="btn btn-primary" @onclick="() => EditCondition(condition)">Edit</button>
+                    <button class="btn btn-danger" @onclick="() => DeleteCondition(condition.Name)">Delete</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<button class="btn btn-success mt-3" @onclick="AddNewCondition">Add New Condition</button>
+
+@code {
+    private List<CurrentCharacterCondition> conditions = new();
+    private List<DocumentWrapper<Variable>> variableWrappers = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadConditions();
+    }
+
+    private async Task LoadConditions()
+    {
+        conditions = await ConditionService.GetConditionsAsync();
+        variableWrappers = await VariableService.GetVariablesAsync(VariableProperty.Condition);
+    }
+
+    private async Task LoadDefaultConditions()
+    {
+        conditions = await ConditionService.GetDefaultConditionsAsync();
+        foreach (var condition in conditions)
+        {
+            await ConditionService.SaveConditionAsync(condition);
+        }
+        await LoadConditions();
+    }
+
+    private async Task AddStandardConditionVariables()
+    {
+        await ConditionService.AddStandardConditionVariables();
+        await LoadConditions();
+    }
+
+    private async Task EditCondition(CurrentCharacterCondition condition)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(ConditionEditModal.Condition), condition);
+        parameters.Add(nameof(ConditionEditModal.VariableWrappers), variableWrappers);
+        parameters.Add(nameof(ConditionEditModal.AvailableConditions), conditions);
+
+        var modal = ModalService.Show<ConditionEditModal>("Edit Condition", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var updatedCondition = (CurrentCharacterCondition)result.Data;
+            await ConditionService.SaveConditionAsync(updatedCondition);
+            await LoadConditions();
+        }
+    }
+
+    private async Task DeleteCondition(string name)
+    {
+        await ConditionService.DeleteConditionAsync(name);
+        await LoadConditions();
+    }
+
+    private async Task AddNewCondition()
+    {
+        var newCondition = new CurrentCharacterCondition();
+        await EditCondition(newCondition);
+    }
+}

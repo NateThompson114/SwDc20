@@ -1,0 +1,189 @@
+﻿@using SwDc20.Core.Domain.Entities.GameInfo.V0._8
+@using SwDc20.Core.Domain.Entities.Variable.V0._8
+
+<div class="container">
+    <h4>@(string.IsNullOrEmpty(Condition.Name) ? "Add New Condition" : "Edit Condition")</h4>
+
+    <div class="form-group">
+        <label>Name:</label>
+        <input class="form-control" @bind="Condition.Name" />
+    </div>
+
+    <div class="form-group">
+        <label>Description:</label>
+        <textarea class="form-control" @bind="Condition.Description"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Helper Description:</label>
+        <textarea class="form-control" @bind="Condition.HelperDescription"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Duration:</label>
+        <input type="number" class="form-control" @bind="Condition.Duration" />
+    </div>
+
+    <div class="form-group">
+        <label>Stack Max:</label>
+        <input type="number" class="form-control" @bind="Condition.StackMax" />
+    </div>
+
+    <h5>Per Stack Variables</h5>
+    @foreach (var variable in Condition.PerStackVariables)
+    {
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" checked @onchange="@(e => RemoveVariable(variable))" />
+            <label class="form-check-label">@variable.Name</label>
+        </div>
+    }
+
+    <button class="btn btn-secondary mt-3" @onclick="OpenVariableSelectionModal">Add Variable</button>
+
+    <h5>Per Stack Heal Conditions</h5>
+    @foreach (var healCondition in Condition.PerStackHealConditions)
+    {
+        <div class="form-group">
+            <input class="form-control" @bind="healCondition.Name" placeholder="Name" />
+            <textarea class="form-control" @bind="healCondition.Description" placeholder="Description"></textarea>
+            <button class="btn btn-danger" @onclick="() => RemovePerStackHealCondition(healCondition)">Remove</button>
+        </div>
+    }
+
+    <button class="btn btn-secondary mt-3" @onclick="AddPerStackHealCondition">Add Per Stack Heal Condition</button>
+
+    <h5>Max Stack Heal Conditions</h5>
+    @foreach (var healCondition in Condition.MaxStackHealConditions)
+    {
+        <div class="form-group">
+            <input class="form-control" @bind="healCondition.Name" placeholder="Name" />
+            <textarea class="form-control" @bind="healCondition.Description" placeholder="Description"></textarea>
+            <button class="btn btn-danger" @onclick="() => RemoveMaxStackHealCondition(healCondition)">Remove</button>
+        </div>
+    }
+
+    <button class="btn btn-secondary mt-3" @onclick="AddMaxStackHealCondition">Add Max Stack Heal Condition</button>
+
+    <h5>Sub Conditions</h5>
+    @foreach (var subCondition in Condition.SubConditions)
+    {
+        <div class="form-group">
+            <span>@subCondition.Name</span>
+            <button class="btn btn-danger" @onclick="() => RemoveSubCondition(subCondition)">Remove</button>
+        </div>
+    }
+
+    <div class="form-group">
+        <select class="form-control" @bind="selectedSubCondition">
+            <option value="">Select a sub condition</option>
+            @foreach (var availableCondition in AvailableConditions.Where(c => c.Name != Condition.Name && !Condition.SubConditions.Any(sc => sc.Name == c.Name)))
+            {
+                <option value="@availableCondition.Name">@availableCondition.Name</option>
+            }
+        </select>
+        <button class="btn btn-secondary mt-2" @onclick="AddSubCondition">Add Sub Condition</button>
+    </div>
+
+    <h5>Transformation Conditions</h5>
+    @foreach (var transformationCondition in Condition.TransformationConditions)
+    {
+        <div class="form-group">
+            <input class="form-control" @bind="transformationCondition.Name" placeholder="Name" />
+            <button class="btn btn-danger" @onclick="() => RemoveTransformationCondition(transformationCondition)">Remove</button>
+        </div>
+    }
+
+    <button class="btn btn-secondary mt-3" @onclick="AddTransformationCondition">Add Transformation Condition</button>
+
+    <button class="btn btn-primary mt-3" @onclick="SaveChanges">Save Changes</button>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    [CascadingParameter] IModalService ModalService { get; set; } = default!;
+    [Parameter] public CurrentCharacterCondition Condition { get; set; } = new();
+    [Parameter] public List<DocumentWrapper<Variable>> VariableWrappers { get; set; } = new();
+    [Parameter] public List<CurrentCharacterCondition> AvailableConditions { get; set; } = new();
+
+    private string selectedSubCondition = "";
+
+    private async Task OpenVariableSelectionModal()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(VariableSelectionModal.VariableWrappers), VariableWrappers);
+        parameters.Add(nameof(VariableSelectionModal.ExistingVariables), Condition.PerStackVariables);
+
+        var modal = ModalService.Show<VariableSelectionModal>("Select Variable", parameters);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var selectedVariable = (Variable)result.Data;
+            Condition.PerStackVariables.Add(selectedVariable);
+        }
+    }
+
+    private void RemoveVariable(Variable variable)
+    {
+        Condition.PerStackVariables.Remove(variable);
+    }
+
+    private void AddPerStackHealCondition()
+    {
+        Condition.PerStackHealConditions.Add(new HealCondition());
+    }
+
+    private void RemovePerStackHealCondition(HealCondition healCondition)
+    {
+        Condition.PerStackHealConditions.Remove(healCondition);
+    }
+
+    private void AddMaxStackHealCondition()
+    {
+        Condition.MaxStackHealConditions.Add(new HealCondition());
+    }
+
+    private void RemoveMaxStackHealCondition(HealCondition healCondition)
+    {
+        Condition.MaxStackHealConditions.Remove(healCondition);
+    }
+
+    private void AddSubCondition()
+    {
+        if (!string.IsNullOrEmpty(selectedSubCondition))
+        {
+            var subCondition = AvailableConditions.FirstOrDefault(c => c.Name == selectedSubCondition);
+            if (subCondition != null && !Condition.SubConditions.Any(sc => sc.Name == subCondition.Name))
+            {
+                Condition.SubConditions.Add(subCondition);
+                selectedSubCondition = "";
+            }
+        }
+    }
+
+    private void RemoveSubCondition(CurrentCharacterCondition subCondition)
+    {
+        Condition.SubConditions.Remove(subCondition);
+    }
+
+    private void AddTransformationCondition()
+    {
+        Condition.TransformationConditions.Add(new CurrentCharacterCondition());
+    }
+
+    private void RemoveTransformationCondition(CurrentCharacterCondition transformationCondition)
+    {
+        Condition.TransformationConditions.Remove(transformationCondition);
+    }
+
+    private async Task SaveChanges()
+    {
+        if (string.IsNullOrWhiteSpace(Condition.Name))
+        {
+            // Show an error message
+            return;
+        }
+
+        await BlazoredModal.CloseAsync(ModalResult.Ok(Condition));
+    }
+}

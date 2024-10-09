@@ -1,0 +1,44 @@
+﻿@using SwDc20.Core.Domain.Entities.Variable.V0._8
+@using SwDc20.WebBlazor.Models
+@using SwDc20.Core.Application.Constants.Dc20
+
+<div class="container">
+    <h4>Select Variable</h4>
+
+    <div class="row">
+        @foreach (var variable in GetAvailableVariables())
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@variable.Name</h5>
+                        <p class="card-text">@variable.Description</p>
+                        <button class="btn btn-primary" @onclick="() => SelectVariable(variable)">Select</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    [Parameter] public List<DocumentWrapper<Variable>> VariableWrappers { get; set; } = new();
+    [Parameter] public List<Variable> ExistingVariables { get; set; } = new();
+
+    private List<Variable> GetAvailableVariables()
+    {
+        var availableVariables = VariableWrappers.Any()
+            ? VariableWrappers.Select(w => w.Document).ToList()
+            : Dc20StandardConditionVariables.ToList();
+
+        return availableVariables
+            .Where(v => !ExistingVariables.Contains(v))
+            .ToList();
+    }
+
+    private async Task SelectVariable(Variable variable)
+    {
+        await BlazoredModal.CloseAsync(ModalResult.Ok(variable));
+    }
+}

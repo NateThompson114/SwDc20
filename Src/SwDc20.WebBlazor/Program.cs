@@ -20,6 +20,8 @@ builder.Services.AddScoped<GamesService>();
 builder.Services.AddScoped<VariableService>();
 builder.Services.AddScoped<SkillService>();
 builder.Services.AddScoped<WeaponService>();
+builder.Services.AddScoped<ConditionService>();
+builder.Services.AddScoped<DiceRollerService>();
 
 builder.Services.AddBlazoredToast();
 builder.Services.AddBlazoredModal();
