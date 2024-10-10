@@ -1,4 +1,5 @@
-﻿@inject DiceRollerService DiceRollerService
+﻿@using SwDc20.Core.Domain.Enums
+@inject DiceRollerService DiceRollerService
 
 <div class="fdr-floating-dice-roller">
     <div class="fdr-input-group">
@@ -128,7 +129,7 @@
 
     private void RollDice()
     {
-        DiceRollerService.RollDice(DiceSize, Quantity, CurrentRollType);
+        DiceRollerService.RollDice(DiceSize, Quantity, 0, CurrentRollType);
     }
 
 }

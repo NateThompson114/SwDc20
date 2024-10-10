@@ -4,6 +4,7 @@
 @inject IModalService ModalService
 @inject SkillService SkillService
 @inject WeaponService WeaponService
+@using SwDc20.WebBlazor.Pages.Characters.Modals.Contaners
 
 <EditForm Model="@Character" OnValidSubmit="SaveCharacter">
 <DataAnnotationsValidator/>
@@ -226,67 +227,7 @@
 </div>
 
 <hr/>
-
-<div class="card border-info" aria-roledescription="Skills Container" aria-description="Container for your skills, this allows you to handle either your custom skills or default skills, once you do that you can then further customize.">
-    <div class="card-header">
-        <div class="row align-items-center">
-            <div class="col">
-                <h4>Skills</h4>
-            </div>
-            <div class="col-auto">
-                <button type="button" class="btn btn-primary btn-sm" @onclick="AddSkill" title="Add Skill">+ Add New Skill Modal</button>
-            </div>
-        </div>
-    </div>
-    <div class="card-body">
-        <table class="table table-borderless table-striped table-hover">
-            <thead>
-            <tr>
-                <th>Name</th>
-                <th>Attribute</th>
-                <th>Tag</th>
-                <th>Rank</th>
-                <th>Value</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach (var skill in Character.Skills)
-            {
-                <tr>
-                    <td>@skill.Name</td>
-                    <td>@skill.AttributeUsed</td>
-                    <td>@skill.Tag</td>
-                    <td>
-                        <InputNumber class="form-control" @bind-Value="skill.Rank"/>
-                    </td>
-                    <td>@skill.CalculateValue(Character)</td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-secondary" @onclick="() => EditSkill(skill)">Edit</button>
-                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveSkill(skill)">Remove</button>
-                    </td>
-                </tr>
-            }
-            </tbody>
-            <tfoot>
-            <tr>
-                <th colspan="3">Total</th>
-                <th>@Character.Skills.Sum(i => i.Rank)</th>
-                <th colspan="2"></th>
-            </tr>
-            </tfoot>
-        </table>
-    </div>
-    <div class="card-footer">
-        <h6>Add Knowledge Skill</h6>
-        <div class="input-group">
-            <label class="input-group-text" for="newSkillName">Skill Name</label>
-            <InputText id="newSkillName" @bind-Value="newSkillName" class="form-control" />
-            <button type="button" class="btn btn-primary" @onclick="AddNewSkill">Add Skill</button>
-        </div>
-    </div>
-</div>
-
+    <SkillsContainer Character="@Character" CanEdit="true" />
 <hr/>
 
 <div class="card border-secondary" aria-roledescription="Trades Container" aria-description="Container for your trades">
@@ -815,101 +756,6 @@
     {
         await BlazoredModal.CancelAsync();
     }
-
-    #region Skills
-
-    private async Task AddSkill()
-    {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(SkillEditForm.Skill), new Skill
-        {
-            AttributeUsed = SkillService.GetAttributeOptions().First(),
-            Id = Guid.NewGuid(),
-            Version = Skill.CurrentVersion
-        });
-
-        var options = new ModalOptions()
-        {
-            Size = ModalSize.Small,
-            Position = ModalPosition.Middle
-        };
-
-        var modal = ModalService.Show<SkillEditForm>("Add Skill", parameters, options);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            var newSkill = (Skill)result.Data;
-            Character.Skills.Add(newSkill);
-        }
-    }
-    
-    private void AddNewSkill()
-    {
-        if (!string.IsNullOrWhiteSpace(newSkillName) && !Character.Skills.Any(s => s.Name == newSkillName))
-        {
-            var newSkill = new Skill(newSkillName, newSkillAttribute, newTagAttribute)
-            {
-                Id = Guid.NewGuid(),
-                Version = Skill.CurrentVersion
-            };
-            Character.Skills.Add(newSkill);
-            availableSkills.Add(new DocumentWrapper<Skill>
-            {
-                ContentId = newSkill.Id,
-                Document = newSkill,
-                DocumentType = "Skill",
-                ContentVersion = newSkill.Version
-            });
-            SkillService.SaveSkillAsync(newSkill);
-
-            newSkillName = "";
-            newSkillAttribute = "Intelligence";
-            newTagAttribute = "Knowledge";
-            StateHasChanged();
-        }
-    }
-
-    private async Task EditSkill(Skill skill)
-    {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(SkillEditForm.Skill), new Skill
-        {
-            Id = skill.Id,
-            Name = skill.Name,
-            AttributeUsed = skill.AttributeUsed,
-            Rank = skill.Rank,
-            UseForMartialCheck = skill.UseForMartialCheck,
-            Tag = skill.Tag,
-            Version = skill.Version
-        });
-
-        var options = new ModalOptions()
-        {
-            Size = ModalSize.Small,
-            Position = ModalPosition.Middle
-        };
-
-        var modal = ModalService.Show<SkillEditForm>("Edit Skill", parameters, options);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            var editedSkill = (Skill)result.Data;
-            var index = Character.Skills.FindIndex(s => s.Id == editedSkill.Id);
-            if (index != -1)
-            {
-                Character.Skills[index] = editedSkill;
-            }
-        }
-    }
-
-    private void RemoveSkill(Skill skill)
-    {
-        Character.Skills.Remove(skill);
-    }
-
-    #endregion
 
     #region Trades
 

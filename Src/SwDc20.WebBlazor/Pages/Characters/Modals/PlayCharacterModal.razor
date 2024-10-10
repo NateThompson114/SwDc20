@@ -1,4 +1,5 @@
 ﻿@using SwDc20.Core.Domain.Entities.GameInfo.V0._8
+@using SwDc20.WebBlazor.Pages.Characters.Modals.Contaners
 @inject CurrentCharacterService CurrentCharacterService
 @inject DiceRollerService DiceRollerService
 
@@ -69,6 +70,9 @@
             <InputNumber id="@($"resource_{resource.CharacterResource.Name}")" class="form-control" @bind-Value="resource.CurrentResourceAvailable" @bind-Value:after="SaveChanges"/>
         </div>
     }
+    
+    <hr/>
+    <SkillsContainer Character="@CurrentCharacter.Character" CanEdit="false" />
 
     <button class="btn btn-primary" @onclick="CloseModal">Close</button>
 </div>
@@ -102,11 +106,11 @@
     
     private void RollMightCheck()
     {
-        DiceRollerService.RollDice(20, 1, RollType.Normal, "Might Check", "Roll to determine if you can lift the heavy boulder.");
+        // DiceRollerService.RollDice(20, 1, RollType.Normal, "Might Check", "Roll to determine if you can lift the heavy boulder.");
     }
 
     private void RollAgilityCheck()
     {
-        DiceRollerService.RollDice(20, 1, RollType.Normal, "Agility Check", "Roll to see if you can balance on the narrow beam.");
+        // DiceRollerService.RollDice(20, 1, RollType.Normal, "Agility Check", "Roll to see if you can balance on the narrow beam.");
     }
 }

@@ -1,13 +1,6 @@
 ﻿using Blazored.Toast.Services;
 using Microsoft.AspNetCore.Components;
-
-namespace SwDc20.Infrastructure.Services;
-public enum RollType
-{
-    Normal,
-    High,
-    Low
-}
+using SwDc20.Core.Domain.Enums;
 
 public class DiceRollerService
 {
@@ -18,7 +11,17 @@ public class DiceRollerService
         _toastService = toastService;
     }
 
-    public void RollDice(int diceSize, int quantity, RollType rollType = RollType.Normal,  string title = null, string description = null)
+    public (int Result, List<int> Rolls, int FinalResult) RollDice(int diceSize, int quantity, int modifier = 0, RollType rollType = RollType.Normal, string title = null, string description = null)
+    {
+        var (result, rolls) = PerformRoll(diceSize, quantity, rollType);
+        int finalResult = result + modifier;
+
+        ShowRollResult(diceSize, quantity, rollType, result, rolls, finalResult, modifier, title, description);
+
+        return (result, rolls, finalResult);
+    }
+
+    private (int Result, List<int> Rolls) PerformRoll(int diceSize, int quantity, RollType rollType)
     {
         var random = new Random();
         var rolls = new List<int>();
@@ -35,13 +38,21 @@ public class DiceRollerService
             _ => rolls.Sum()
         };
 
-        string rollResult = $"Rolled {quantity}d{diceSize} ({string.Join(", ", rolls)})";
+        return (result, rolls);
+    }
+
+    private void ShowRollResult(int diceSize, int quantity, RollType rollType, int result, List<int> rolls, int finalResult, int modifier, string title, string description)
+    {
+        string rollText = $"Rolled {quantity}d{diceSize} ({string.Join(", ", rolls)})";
         if (rollType == RollType.High)
-            rollResult += $" - Highest: {result}";
+            rollText += $" - Highest: {result}";
         else if (rollType == RollType.Low)
-            rollResult += $" - Lowest: {result}";
+            rollText += $" - Lowest: {result}";
         else
-            rollResult += $" = {result}";
+            rollText += $" = {result}";
+
+        string modifierText = modifier >= 0 ? $"+{modifier}" : modifier.ToString();
+        string resultText = $"{rollText} {modifierText} = {finalResult}";
 
         _toastService.ShowInfo(builder =>
         {
@@ -53,11 +64,8 @@ public class DiceRollerService
             {
                 builder.AddContent(1, new MarkupString($"<p>{description}</p>"));
             }
-            if ((!string.IsNullOrEmpty(title) || !string.IsNullOrEmpty(description)) && !string.IsNullOrEmpty(rollResult))
-            {
-                builder.AddContent(2, new MarkupString("<hr>"));
-            }
-            builder.AddContent(3, rollResult);
+            builder.AddContent(2, new MarkupString("<hr>"));
+            builder.AddContent(3, resultText);
         }, settings => 
         {
             settings.Timeout = 30;
@@ -66,6 +74,5 @@ public class DiceRollerService
             settings.DisableTimeout = false;
             settings.ShowCloseButton = true;
         });
-
     }
 }
