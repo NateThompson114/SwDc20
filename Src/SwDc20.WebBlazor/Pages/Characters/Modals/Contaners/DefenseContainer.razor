@@ -1,0 +1,99 @@
+﻿@using SwDc20.Core.Domain.Entities.Character
+
+<div class="card border-secondary" aria-roledescription="Defenses Container" aria-description="Container for your Physical and Mystical defenses. This also contains your Heavy and Brutal Calculations along with the Physical and Mental Damage Reductions.">
+    <div class="card-header">
+        <h4>Defenses</h4>
+    </div>
+    <div class="card-body">
+        <div class="card-group">
+            <div class="card col-md-6">
+                <div class="card-header">
+                    <h6>Physical Defense</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <div class="form-floating">
+                                @if (CanEdit)
+                                {
+                                    <InputNumber id="physicalDefense" @bind-Value="Character.PhysicalDefense" class="form-control"/>
+                                }
+                                else
+                                {
+                                    <input type="number" id="physicalDefense" class="form-control" value="@Character.PhysicalDefense" disabled />
+                                }
+                                <label for="physicalDefense">Physical Defense</label>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <p>Heavy: @(Character.PhysicalDefense+5)</p>
+                        </li>
+                        <li class="list-group-item">
+                            <p>Brutal: @(Character.PhysicalDefense+10)</p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <div class="form-floating">
+                        @if (CanEdit)
+                        {
+                            <InputNumber id="physicalDefenseReduction" @bind-Value="Character.PhysicalDamageReduction" class="form-control"/>
+                        }
+                        else
+                        {
+                            <input type="number" id="physicalDefenseReduction" class="form-control" value="@Character.PhysicalDamageReduction" disabled />
+                        }
+                        <label for="physicalDefenseReduction">Physical Defense Reduction</label>
+                    </div>
+                </div>
+            </div>
+            <div class="card col-md-6">
+                <div class="card-header">
+                    <h6>Mystical Defense</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <div class="form-floating">
+                                @if (CanEdit)
+                                {
+                                    <InputNumber id="mysticalDefense" @bind-Value="Character.MysticalDefense" class="form-control"/>
+                                }
+                                else
+                                {
+                                    <input type="number" id="mysticalDefense" class="form-control" value="@Character.MysticalDefense" disabled />
+                                }
+                                <label for="mysticalDefense">Mystical Defense</label>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <p>Heavy: @(Character.MysticalDefense+5)</p>
+                        </li>
+                        <li class="list-group-item">
+                            <p>Brutal: @(Character.MysticalDefense+10)</p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <div class="form-floating">
+                        @if (CanEdit)
+                        {
+                            <InputNumber id="mysticalDefenseReduction" @bind-Value="Character.MysticalDamageReduction" class="form-control"/>
+                        }
+                        else
+                        {
+                            <input type="number" id="mysticalDefenseReduction" class="form-control" value="@Character.MysticalDamageReduction" disabled />
+                        }
+                        <label for="mysticalDefenseReduction">Mystical Defense Reduction</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Character Character { get; set; }
+    [Parameter] public bool CanEdit { get; set; } = true;
+    [Parameter] public EventCallback OnDefensesChanged { get; set; }
+}

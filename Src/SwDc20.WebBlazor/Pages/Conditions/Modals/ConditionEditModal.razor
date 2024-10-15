@@ -101,9 +101,9 @@
 @code {
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
     [CascadingParameter] IModalService ModalService { get; set; } = default!;
-    [Parameter] public CurrentCharacterCondition Condition { get; set; } = new();
+    [Parameter] public CharacterCondition Condition { get; set; } = new();
     [Parameter] public List<DocumentWrapper<Variable>> VariableWrappers { get; set; } = new();
-    [Parameter] public List<CurrentCharacterCondition> AvailableConditions { get; set; } = new();
+    [Parameter] public List<CharacterCondition> AvailableConditions { get; set; } = new();
 
     private string selectedSubCondition = "";
 
@@ -161,17 +161,17 @@
         }
     }
 
-    private void RemoveSubCondition(CurrentCharacterCondition subCondition)
+    private void RemoveSubCondition(CharacterCondition subCondition)
     {
         Condition.SubConditions.Remove(subCondition);
     }
 
     private void AddTransformationCondition()
     {
-        Condition.TransformationConditions.Add(new CurrentCharacterCondition());
+        Condition.TransformationConditions.Add(new CharacterCondition());
     }
 
-    private void RemoveTransformationCondition(CurrentCharacterCondition transformationCondition)
+    private void RemoveTransformationCondition(CharacterCondition transformationCondition)
     {
         Condition.TransformationConditions.Remove(transformationCondition);
     }

@@ -1,6 +1,6 @@
 ﻿using Blazored.LocalStorage;
-using SwDc20.Core.Domain.Entities.GameInfo.V0._8;
 using SwDc20.Core.Application.Constants.Dc20;
+using SwDc20.Core.Domain.Entities.Character.V0._8;
 using SwDc20.WebBlazor.Models;
 using SwDc20.Core.Domain.Entities.Variable.V0._8;
 using SwDc20.Core.Domain.Enums;
@@ -19,9 +19,9 @@ public class ConditionService
         _variableService = variableService;
     }
 
-    public async Task<List<CurrentCharacterCondition>> GetConditionsAsync()
+    public async Task<List<CharacterCondition>> GetConditionsAsync()
     {
-        var conditions = await _localStorage.GetItemAsync<List<CurrentCharacterCondition>>(ConditionsKey);
+        var conditions = await _localStorage.GetItemAsync<List<CharacterCondition>>(ConditionsKey);
         if (conditions == null)
         {
             conditions = await GetDefaultConditionsAsync();
@@ -30,7 +30,7 @@ public class ConditionService
         return conditions;
     }
 
-    public async Task SaveConditionAsync(CurrentCharacterCondition condition)
+    public async Task SaveConditionAsync(CharacterCondition condition)
     {
         var conditions = await GetConditionsAsync();
         var existingIndex = conditions.FindIndex(c => c.Name == condition.Name);
@@ -54,7 +54,7 @@ public class ConditionService
         await _localStorage.SetItemAsync(ConditionsKey, conditions);
     }
 
-    public async Task<List<CurrentCharacterCondition>> GetDefaultConditionsAsync()
+    public async Task<List<CharacterCondition>> GetDefaultConditionsAsync()
     {
         var defaultConditions = Dc20StandardConditions.ToList();
         var conditionVariables = await _variableService.GetVariablesAsync(VariableProperty.Condition);

@@ -35,7 +35,7 @@
 <button class="btn btn-success mt-3" @onclick="AddNewCondition">Add New Condition</button>
 
 @code {
-    private List<CurrentCharacterCondition> conditions = new();
+    private List<CharacterCondition> conditions = new();
     private List<DocumentWrapper<Variable>> variableWrappers = new();
 
     protected override async Task OnInitializedAsync()
@@ -65,7 +65,7 @@
         await LoadConditions();
     }
 
-    private async Task EditCondition(CurrentCharacterCondition condition)
+    private async Task EditCondition(CharacterCondition condition)
     {
         var parameters = new ModalParameters();
         parameters.Add(nameof(ConditionEditModal.Condition), condition);
@@ -77,7 +77,7 @@
 
         if (!result.Cancelled)
         {
-            var updatedCondition = (CurrentCharacterCondition)result.Data;
+            var updatedCondition = (CharacterCondition)result.Data;
             await ConditionService.SaveConditionAsync(updatedCondition);
             await LoadConditions();
         }
@@ -91,7 +91,7 @@
 
     private async Task AddNewCondition()
     {
-        var newCondition = new CurrentCharacterCondition();
+        var newCondition = new CharacterCondition();
         await EditCondition(newCondition);
     }
 }

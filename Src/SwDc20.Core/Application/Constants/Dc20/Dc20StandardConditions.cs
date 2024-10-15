@@ -1,13 +1,12 @@
-﻿using SwDc20.Core.Domain.Entities.GameInfo.V0._8;
+﻿using SwDc20.Core.Domain.Entities.Character.V0._8;
 using SwDc20.Core.Domain.Entities.Variable.V0._8;
 using SwDc20.Core.Domain.Enums;
-using SwDc20.WebBlazor.Models;
 
 namespace SwDc20.Core.Application.Constants.Dc20;
 
 public static class Dc20StandardConditions
 {
-	public static CurrentCharacterCondition Bleeding = new()
+	public static CharacterCondition Bleeding = new()
 	{
 		Name = nameof(Bleeding),
 		Description = "You take 1 True damage at the start of each of your turns.",
@@ -17,7 +16,7 @@ public static class Dc20StandardConditions
 		 	 Dc20StandardHealConditions.Healed
 		}
 	};
-	public static CurrentCharacterCondition Blinded = new()
+	public static CharacterCondition Blinded = new()
 	{
 		Name = nameof(Blinded),
 		Description = "You automatically fail Checks that require Sight and all other creatures are considered Unseen. "
@@ -28,7 +27,7 @@ public static class Dc20StandardConditions
 			 Dc20StandardHealConditions.Healed
 		}
 	};
-	public static CurrentCharacterCondition Burning = new()
+	public static CharacterCondition Burning = new()
 	{
 		Name = nameof(Burning),
 		Description = "You take 1 Fire damage at the start of each of your turns.",
@@ -37,7 +36,7 @@ public static class Dc20StandardConditions
 			Dc20StandardHealConditions.SpendAnActionPointFromYouOrAlly
 		}
 	};
-	public static CurrentCharacterCondition Charmed = new()
+	public static CharacterCondition Charmed = new()
 	{
 		Name = nameof(Charmed),
 		Description = "Your Charmer has ADV on Charisma Checks made against you. Additionally, you can’t target your Charmer with harmful Attacks, abilities, or magic effects.",
@@ -46,7 +45,7 @@ public static class Dc20StandardConditions
 			Dc20StandardHealConditions.Healed
 		}
 	};
-	public static CurrentCharacterCondition Dazed = new()
+	public static CharacterCondition Dazed = new()
 	{
 		Name = nameof(Dazed),
 		Description = "You have DisADV on all Checks and Attacks.",
@@ -59,7 +58,7 @@ public static class Dc20StandardConditions
 			Dc20StandardConditionVariables.DisAdvantageOnMentalChecks
 		}
 	};
-	public static CurrentCharacterCondition Deafened = new()
+	public static CharacterCondition Deafened = new()
 	{
 		Name = nameof(Deafened),
 		Description = "You automatically fail Checks that require Hearing, and all creatures are considered Unheard by you. Additionally, you have Resistance (Half) to Sonic damage.",
@@ -68,7 +67,7 @@ public static class Dc20StandardConditions
 			Dc20StandardHealConditions.Healed
 		}
 	};
-	public static CurrentCharacterCondition Doomed = new()
+	public static CharacterCondition Doomed = new()
 	{
 		Name = nameof(Doomed),
 		Description = "The HP threshold of Death’s Door for determining death is decreased by an amount equal to the value of X. "
@@ -78,7 +77,7 @@ public static class Dc20StandardConditions
 		PerStackVariables = new List<Variable>() { Dc20StandardConditionVariables.LowerDeathThreshold },
 		MaxStackHealConditions = new List<HealCondition> { Dc20StandardHealConditions.Dead }
 	};
-	public static CurrentCharacterCondition Exhaustion = new()
+	public static CharacterCondition Exhaustion = new()
 	{
 		Name = nameof(Exhaustion),
 		Description = "You gain a penalty equal to X on all Checks and Saves you make. "
@@ -88,7 +87,7 @@ public static class Dc20StandardConditions
 		PerStackVariables = new List<Variable>() { Dc20StandardConditionVariables.Exhaustion },
 		MaxStackHealConditions = new List<HealCondition> { Dc20StandardHealConditions.Dead }
 	};
-	public static CurrentCharacterCondition Exposed = new()
+	public static CharacterCondition Exposed = new()
 	{
 		Name = nameof(Exposed),
 		Description = "Attacks against you have ADV.",
@@ -97,7 +96,7 @@ public static class Dc20StandardConditions
 			Dc20StandardHealConditions.Healed
 		}
 	};
-	public static CurrentCharacterCondition Frightened = new()
+	public static CharacterCondition Frightened = new()
 	{
 		Name = nameof(Frightened),
 		Description = "You must spend your turns trying to move as far away as you can from the source of your fear as possible. "
@@ -108,7 +107,7 @@ public static class Dc20StandardConditions
 			Dc20StandardHealConditions.Healed
 		}
 	};
-	public static CurrentCharacterCondition Grappled = new()
+	public static CharacterCondition Grappled = new()
 	{
 		Name = nameof(Grappled),
 		Description = "Your Speed is becomes 0 and you have DisADV on Agility Saves.",
@@ -127,7 +126,7 @@ public static class Dc20StandardConditions
 		},
 		PerStackVariables = new List<Variable>{ Dc20StandardConditionVariables.DisadvantageOnAgilitySaves }
 	};
-	public static CurrentCharacterCondition Hindered = new()
+	public static CharacterCondition Hindered = new()
 	{
 		Name = nameof(Hindered),
 		Description = "You have DisADV on Attacks.",
@@ -137,7 +136,7 @@ public static class Dc20StandardConditions
 		},
 		PerStackVariables = new List<Variable> { Dc20StandardConditionVariables.DisAdvantageOnAttacks }
 	};
-	public static CurrentCharacterCondition Impaired = new()
+	public static CharacterCondition Impaired = new()
 	{
 		Name = nameof(Impaired),
 		Description = "You have DisADV on Physical Checks.",
@@ -147,7 +146,7 @@ public static class Dc20StandardConditions
 		},
 		PerStackVariables = new List<Variable> { Dc20StandardConditionVariables.DisAdvantageOnPhysicalChecks }
 	};
-	public static CurrentCharacterCondition Incapacitated = new()
+	public static CharacterCondition Incapacitated = new()
 	{
 		Name = nameof(Incapacitated),
 		Description = "You can not Speak, Concentrate, or spend Action Points.",
@@ -157,7 +156,7 @@ public static class Dc20StandardConditions
 		},
 		PerStackVariables = new List<Variable> { Dc20StandardConditionVariables.CanNotSpendActionPoints }
 	};
-	public static CurrentCharacterCondition Intimidated = new()
+	public static CharacterCondition Intimidated = new()
 	{
 		Name = nameof(Intimidated),
 		Description = "You have DisADV on all Checks while your source of intimidation is within your line of sight.",
@@ -167,7 +166,7 @@ public static class Dc20StandardConditions
 		},
 		PerStackVariables = new List<Variable> { Dc20StandardConditionVariables.SituationalDisAdvantageOnAllChecks }
 	};
-	public static CurrentCharacterCondition Invisible = new()
+	public static CharacterCondition Invisible = new()
 	{
 		Name = nameof(Invisible),
 		Description = "You are Unseen, making creatures that can’t see you Exposed (your Attacks against them have ADV) and Hindered against you (they have DisADV on Attacks against you).",
@@ -176,7 +175,7 @@ public static class Dc20StandardConditions
 			Dc20StandardHealConditions.Healed
 		}
 	};
-	public static CurrentCharacterCondition Paralyzed = new()
+	public static CharacterCondition Paralyzed = new()
 	{
 		Name = nameof(Paralyzed),
 		Description = "Attacks made from within 1 Space that Hit you are considered Critical Hits. "
@@ -186,7 +185,7 @@ public static class Dc20StandardConditions
 			Dc20StandardHealConditions.Healed
 		}
 	};
-	public static CurrentCharacterCondition Petrified = new()
+	public static CharacterCondition Petrified = new()
 	{
 		Name = nameof(Petrified),
 		Description = "You and your mundane belongings are turned into stone and you are no longer aware of your surroundings. "
@@ -199,7 +198,7 @@ public static class Dc20StandardConditions
 			Dc20StandardHealConditions.Healed
 		}
 	};
-	public static CurrentCharacterCondition Poisoned = new()
+	public static CharacterCondition Poisoned = new()
 	{
 		Name = nameof(Poisoned),
 		Description = "You are Impaired (DisADV on Physical Checks) and take 1 Poison damage at the start of each of your turns. "
@@ -210,7 +209,7 @@ public static class Dc20StandardConditions
 			Dc20StandardHealConditions.Healed
 		}
 	};
-	public static CurrentCharacterCondition Prone = new()
+	public static CharacterCondition Prone = new()
 	{
 		Name = nameof(Prone),
 		Description = "You are Hindered (You have DisADV on Attacks). Ranged Attacks are Hindered against you. You are Exposed (Attacks against you have ADV) against Melee Attacks.",
@@ -221,7 +220,7 @@ public static class Dc20StandardConditions
 			Dc20StandardHealConditions.SpendAnActionPointFromYouOrAlly
 		}
 	};
-	public static CurrentCharacterCondition Rattled = new()
+	public static CharacterCondition Rattled = new()
 	{
 		Name = nameof(Rattled),
 		Description = "You can’t willingly move closer to your source of fear, and you are **Intimidated** (DisADV on all Checks while it’s within your line of sight).",
@@ -230,7 +229,7 @@ public static class Dc20StandardConditions
 			Dc20StandardHealConditions.Healed
 		}
 	};
-	public static CurrentCharacterCondition Restrained = new()
+	public static CharacterCondition Restrained = new()
 	{
 		Name = nameof(Restrained),
 		Description = "You are **Hindered** (You have DisADV on Attacks), **Exposed** (Attacks against you have ADV), and **Grappled** (your Speed is reduced to 0 and you have DisADV on Agility Saves).",
@@ -239,7 +238,7 @@ public static class Dc20StandardConditions
 			Dc20StandardHealConditions.Healed
 		}
 	};
-	public static CurrentCharacterCondition Slowed = new()
+	public static CharacterCondition Slowed = new()
 	{
 		Name = nameof(Slowed),
 		Description = "Every 1 Space you move costs an extra 1 Space of movement.",
@@ -252,7 +251,7 @@ public static class Dc20StandardConditions
 			Dc20StandardConditionVariables.MovementHalfed
 		}
 	};
-	public static CurrentCharacterCondition Stunned = new()
+	public static CharacterCondition Stunned = new()
 	{
 		Name = nameof(Stunned),
 		Description = "You automatically fail Agility, Might and Physical Saves. You are also **Exposed** (Attacks against you have ADV), and **Incapacitated** (you can’t Speak, Concentrate, or spend Action Points).",
@@ -265,7 +264,7 @@ public static class Dc20StandardConditions
 			Dc20StandardConditionVariables.AutoFailPhysicalSaves
 		}
 	};
-	public static CurrentCharacterCondition Surprised = new()
+	public static CharacterCondition Surprised = new()
 	{
 		Name = nameof(Surprised),
 		Description = "You can’t spend Action Points and are **Exposed** (Attacks against you have ADV).",
@@ -278,7 +277,7 @@ public static class Dc20StandardConditions
 			Dc20StandardConditionVariables.CanNotSpendActionPoints
 		}
 	};
-	public static CurrentCharacterCondition Taunted = new()
+	public static CharacterCondition Taunted = new()
 	{
 		Name = nameof(Taunted),
 		Description = "You have DisADV on Attacks against creatures other than the one that Taunted you.",
@@ -291,7 +290,7 @@ public static class Dc20StandardConditions
 			Dc20StandardConditionVariables.SituationalDisAdvantageOnAllAttacks
 		}
 	};
-	public static CurrentCharacterCondition Unconscious = new()
+	public static CharacterCondition Unconscious = new()
 	{
 		Name = nameof(Unconscious),
 		Description = "You are no longer aware of your surroundings, you drop whatever you are holding and fall **Prone**. "
@@ -303,7 +302,7 @@ public static class Dc20StandardConditions
 		}
 	};
 	
-	public static List<CurrentCharacterCondition> ToList()
+	public static List<CharacterCondition> ToList()
 	{
 		Bleeding.PerStackHealConditions.Add( Dc20StandardHealConditions.MedicineAction().AppendedDescription(ConditionalExtensions.SuccessRemoveThe(Bleeding.Name).SuccessGainOneTempHpByFives_Append()));
 
@@ -311,24 +310,24 @@ public static class Dc20StandardConditions
 
 		Doomed.PerStackHealConditions.Add(Doomed.StackLongRest());
 		Exhaustion.PerStackHealConditions.Add(Exhaustion.StackOnePerLongRest());
-		Blinded.SubConditions = new List<CurrentCharacterCondition>
+		Blinded.SubConditions = new List<CharacterCondition>
 		{
 			Exposed,
 			Hindered
 		};
-		Frightened.SubConditions = new List<CurrentCharacterCondition>
+		Frightened.SubConditions = new List<CharacterCondition>
 		{
 			Rattled,
 			Intimidated
 		};
 		SetupImpaired();
-		Paralyzed.SubConditions = new List<CurrentCharacterCondition>
+		Paralyzed.SubConditions = new List<CharacterCondition>
 		{
 			Stunned,
 			Exposed,
 			Incapacitated
 		};
-		Petrified.SubConditions = new List<CurrentCharacterCondition>
+		Petrified.SubConditions = new List<CharacterCondition>
 		{
 			Paralyzed,
 			Stunned,
@@ -374,14 +373,14 @@ public static class Dc20StandardConditions
 		
 		return typeof(Dc20StandardConditions)
 			.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
-			.Where(f => f.FieldType == typeof(CurrentCharacterCondition))
-			.Select(f => (CurrentCharacterCondition)f.GetValue(null))
+			.Where(f => f.FieldType == typeof(CharacterCondition))
+			.Select(f => (CharacterCondition)f.GetValue(null))
 			.ToList();
 	}
 	
 	private static void SetupDazed()
 	{
-		var heavilyDazed = new CurrentCharacterCondition
+		var heavilyDazed = new CharacterCondition
 		{
 			Name = $"Heavily {Dazed.Name}",
 			Description = $"{Dazed.Description} You also have DisADV on Mental Saves",
@@ -394,7 +393,7 @@ public static class Dc20StandardConditions
 	}
 	private static void SetupImpaired()
 	{
-		var heavilyImpaired = new CurrentCharacterCondition
+		var heavilyImpaired = new CharacterCondition
 		{
 			Name = $"Heavily {Impaired.Name}",
 			Description = $"{Impaired.Description}  You also have DisADV on Physical Saves.",
@@ -429,12 +428,12 @@ public static class Dc20StandardHealConditions
 		Name = nameof(LongRest),
 		Description = "You can remove this Condition by taking a Long Rest."
 	};
-	public static HealCondition StackLongRest(this CurrentCharacterCondition condition) => new()
+	public static HealCondition StackLongRest(this CharacterCondition condition) => new()
 	{
 		Name = $"{condition.Name} {nameof(LongRest)}",
 		Description = condition.Description.LongRestToRemoveStacks()
 	};
-	public static HealCondition StackOnePerLongRest(this CurrentCharacterCondition condition) => new()
+	public static HealCondition StackOnePerLongRest(this CharacterCondition condition) => new()
 	{
 		Name = $"{condition.Name} {nameof(LongRest)}",
 		Description = condition.Description.LongRestToRemoveOneStack()

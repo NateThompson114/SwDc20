@@ -2,7 +2,7 @@
     <h4 class="card-header">@AttributeName</h4>
     <div class="card-body">
         <div class="form-floating">
-            <InputNumber id="@AttributeName.ToLower()" @bind-Value="AttributeValue" @bind-Value:after="OnAttributeValueChanged" class="form-control" />
+            <InputNumber id="@AttributeName.ToLower()" @bind-Value="AttributeValue" @bind-Value:after="OnAttributeValueChanged" class="form-control"/>
             <label for="@AttributeName.ToLower()">@AttributeName</label>
         </div>
     </div>
@@ -22,40 +22,34 @@
 </div>
 
 @code {
-[Parameter]
-public string AttributeName { get; set; }
+    [Parameter] public string AttributeName { get; set; }
 
-[Parameter]
-public int AttributeValue { get; set; }
+    [Parameter] public int AttributeValue { get; set; }
 
-[Parameter]
-public EventCallback<int> AttributeValueChanged { get; set; }
+    [Parameter] public EventCallback<int> AttributeValueChanged { get; set; }
 
-[Parameter]
-public bool SaveMastery { get; set; }
+    [Parameter] public bool SaveMastery { get; set; }
 
-[Parameter]
-public EventCallback<bool> SaveMasteryChanged { get; set; }
+    [Parameter] public EventCallback<bool> SaveMasteryChanged { get; set; }
 
-[Parameter]
-public EventCallback UpdateSaveMasteries { get; set; }
+    [Parameter] public EventCallback UpdateSaveMasteries { get; set; }
 
-[Parameter]
-public int SelectedMasteriesCount { get; set; }
+    [Parameter] public int SelectedMasteriesCount { get; set; }
 
-[Parameter]
-public int SaveValue { get; set; }
+    [Parameter] public int SaveValue { get; set; }
 
-private string SaveCheckboxId => $"save-{AttributeName.ToLower()}";
+    private string SaveCheckboxId => $"save-{AttributeName.ToLower()}";
 
-private async Task OnAttributeValueChanged()
-{
-await AttributeValueChanged.InvokeAsync(AttributeValue);
-}
+    private async Task OnAttributeValueChanged()
+    {
+        await AttributeValueChanged.InvokeAsync(AttributeValue);
+        await UpdateSaveMasteries.InvokeAsync();
+    }
 
-private async Task OnSaveMasteryChanged()
-{
-await SaveMasteryChanged.InvokeAsync(SaveMastery);
-await UpdateSaveMasteries.InvokeAsync();
-}
+    private async Task OnSaveMasteryChanged()
+    {
+        await SaveMasteryChanged.InvokeAsync(SaveMastery);
+        await UpdateSaveMasteries.InvokeAsync();
+    }
+
 }

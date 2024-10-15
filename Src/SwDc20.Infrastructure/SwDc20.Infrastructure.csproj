@@ -15,4 +15,10 @@
       <ProjectReference Include="..\SwDc20.Core\SwDc20.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="SwDc20.Core">
+        <HintPath>..\SwDc20.WebBlazor\bin\Debug\net8.0\SwDc20.Core.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

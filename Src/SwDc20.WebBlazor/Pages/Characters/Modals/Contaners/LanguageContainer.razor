@@ -1,0 +1,113 @@
+﻿@using SwDc20.Core.Domain.Entities.Character
+@inject IModalService ModalService
+
+<div class="card border-success" aria-roledescription="Language Container" aria-description="Container for your languages and the skill amount.">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h4>Languages</h4>
+            </div>
+            @if (CanEdit)
+            {
+                <div class="col-auto">
+                    <button type="button" class="btn btn-primary btn-sm" @onclick="AddLanguage" title="Add Language">+ Add Language Modal</button>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="card-group">
+            @foreach (var language in Character.Languages)
+            {
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@language.Name</h5>
+                        <div class="form-group">
+                            <label for="@($"languageProficiency_{language.Name}")">Proficiency:</label>
+                            @if (CanEdit)
+                            {
+                                <InputSelect id="@($"languageProficiency_{language.Name}")" class="form-control" @bind-Value="language.Proficiency">
+                                    <option value="Fluent">Fluent</option>
+                                    <option value="Limited">Limited</option>
+                                </InputSelect>
+                            }
+                            else
+                            {
+                                <input type="text" id="@($"languageProficiency_{language.Name}")" class="form-control" value="@language.Proficiency" disabled />
+                            }
+                        </div>
+                    </div>
+                    @if (CanEdit)
+                    {
+                        <div class="card-footer">
+                            <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveLanguage(language)">Remove</button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    @if (CanEdit)
+    {
+        <div class="card-footer">
+            <div class="input-group">
+                <label class="input-group-text" for="newLanguageName">Language Name</label>
+                <InputText id="newLanguageName" @bind-Value="newLanguageName" class="form-control" />
+                <label class="input-group-text" for="newLanguageProficiency">Proficiency</label>
+                <InputSelect id="newLanguageProficiency" class="form-control" @bind-Value="newLanguageProficiency">
+                    <option value="Fluent">Fluent</option>
+                    <option value="Limited">Limited</option>
+                </InputSelect>
+                <button type="button" class="btn btn-primary" @onclick="AddLanguageDirectly">Add Language</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Character Character { get; set; }
+    [Parameter] public bool CanEdit { get; set; } = true;
+    [Parameter] public EventCallback OnLanguagesChanged { get; set; }
+
+    private string newLanguageName = string.Empty;
+    private string newLanguageProficiency = "Limited";
+
+    private async Task AddLanguage()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(LanguageEditForm.Language), new Language { Proficiency = "Limited" });
+
+        var options = new ModalOptions()
+        {
+            Size = ModalSize.Small,
+            Position = ModalPosition.Middle
+        };
+
+        var modal = ModalService.Show<LanguageEditForm>("Add Language", parameters, options);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var newLanguage = (Language)result.Data;
+            Character.Languages.Add(newLanguage);
+            await OnLanguagesChanged.InvokeAsync();
+        }
+    }
+    
+    private async Task AddLanguageDirectly()
+    {
+        if (!string.IsNullOrWhiteSpace(newLanguageName))
+        {
+            Character.Languages.Add(new Language { Name = newLanguageName, Proficiency = newLanguageProficiency });
+            newLanguageName = string.Empty;
+            newLanguageProficiency = "Limited";
+            await OnLanguagesChanged.InvokeAsync();
+        }
+    }
+
+    private async Task RemoveLanguage(Language language)
+    {
+        Character.Languages.Remove(language);
+        await OnLanguagesChanged.InvokeAsync();
+    }
+}

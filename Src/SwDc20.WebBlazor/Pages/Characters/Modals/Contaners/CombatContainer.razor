@@ -1,0 +1,304 @@
+﻿@using SwDc20.Core.Domain.Entities.Character
+@using SwDc20.Core.Domain.Entities.Weapon.V0._8
+@inject WeaponService WeaponService
+@inject IModalService ModalService
+
+<div class="card border-danger" aria-roledescription="Combat Container" aria-description="Container for your weapons and feed into the actions, this handles custom and prebuilt weapons.">
+    <div class="card-header">
+        <h4>Combat</h4>
+    </div>
+    <div class="card-body">
+        <div class="row row-cols-1 row-cols-md-3">
+            <div class="input-group">
+                <label class="input-group-text">
+                    @(Character.AttackSpellCheck > 0 ? Character.AttackSpellCheck : Character.CombatMastery + Character.PrimeModifier)
+                </label>
+                <label class="input-group-text">Attack/Spell Check (CM+Prime)</label>
+                @if (CanEdit)
+                {
+                    <InputNumber id="attackSpellCheck" class="form-control" @bind-Value="Character.AttackSpellCheck" @bind-Value:after="OnChange"/>
+                }
+                else
+                {
+                    <input type="number" id="attackSpellCheck" class="form-control" value="@Character.AttackSpellCheck" disabled/>
+                }
+            </div>
+            <div class="input-group">
+                <label class="input-group-text">
+                    @(Character.SaveDifficultyCheck > 0 ? Character.SaveDifficultyCheck : (Character.CombatMastery + Character.PrimeModifier + 10))
+                </label>
+                <label class="input-group-text">Save DC (CM+Prime+10)</label>
+                @if (CanEdit)
+                {
+                    <InputNumber id="damageBonus" class="form-control" @bind-Value="Character.SaveDifficultyCheck" @bind-Value:after="OnChange"/>
+                }
+                else
+                {
+                    <input type="number" id="damageBonus" class="form-control" value="@Character.SaveDifficultyCheck" disabled/>
+                }
+            </div>
+            <div class="input-group">
+                <label class="input-group-text">
+                    @GetMartialCheckValue()
+                </label>
+                <label class="input-group-text">Martial Check (@MartialSkillsAvailable())</label>
+                @if (CanEdit)
+                {
+                    <select class="form-control" value="@Character.SelectedMartialCheckOption" @onchange="OnMartialCheckOptionChanged">
+                        <option value="">Take Default Maximum</option>
+                        @foreach (var skill in Character.Skills.Where(sk => sk.UseForMartialCheck))
+                        {
+                            <option value="@skill.Id">@skill.Name (@skill.CalculateValue(Character))</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    <select class="form-control" disabled>
+                        <option>@GetMartialCheckSkillsString()</option>
+                    </select>
+                }
+            </div>
+        </div>
+
+        <hr/>
+
+        <div class="row align-items-center">
+            <div class="col">
+                <h4>Weapons</h4>
+            </div>
+            @if (CanEdit)
+            {
+                <div class="col-auto">
+                    <button type="button" class="btn btn-primary btn-sm" @onclick="AddCustomWeapon" title="Add Trade">+ Add Custom Weapon Modal</button>
+                </div>
+            }
+        </div>
+        <div class="row row-cols-1 row-cols-md-2">
+            @foreach (var weapon in Character.Weapons)
+            {
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@weapon.Name</h5>
+                        <p>Damage: @weapon.Damage @weapon.DamageType</p>
+                        <p>Type: @weapon.WeaponType</p>
+                        <div class="form-group">
+                            <label for="@($"weaponQuantity_{weapon.Name}")">Quantity:</label>
+                            @if (CanEdit)
+                            {
+                                <InputNumber id="@($"weaponQuantity_{weapon.Name}")" class="form-control" @bind-Value="weapon.Quantity" @bind-Value:after="OnChange"/>
+                            }
+                            else
+                            {
+                                <input type="number" id="@($"weaponQuantity_{weapon.Name}")" class="form-control" value="@weapon.Quantity" disabled/>
+                            }
+                        </div>
+                        <div class="form-check">
+                            @if (CanEdit)
+                            {
+                                <InputCheckbox id="@($"weaponEquipped_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.Equipped" @bind-Value:after="OnChange"/>
+                            }
+                            else
+                            {
+                                <input type="checkbox" id="@($"weaponEquipped_{weapon.Name}")" class="form-check-input" checked="@weapon.Equipped" disabled/>
+                            }
+                            <label class="form-check-label" for="@($"weaponEquipped_{weapon.Name}")">Equipped</label>
+                        </div>
+                        <div class="form-check">
+                            @if (CanEdit)
+                            {
+                                <InputCheckbox id="@($"weaponPrimary_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.IsPrimary" @bind-Value:after="OnChange"/>
+                            }
+                            else
+                            {
+                                <input type="checkbox" id="@($"weaponPrimary_{weapon.Name}")" class="form-check-input" checked="@weapon.IsPrimary" disabled/>
+                            }
+                            <label class="form-check-label" for="@($"weaponPrimary_{weapon.Name}")">Primary</label>
+                        </div>
+                        <div class="form-check">
+                            @if (CanEdit)
+                            {
+                                <InputCheckbox id="@($"weaponSecondary_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.IsSecondary" @bind-Value:after="OnChange"/>
+                            }
+                            else
+                            {
+                                <input type="checkbox" id="@($"weaponSecondary_{weapon.Name}")" class="form-check-input" checked="@weapon.IsSecondary" disabled/>
+                            }
+                            <label class="form-check-label" for="@($"weaponSecondary_{weapon.Name}")">Secondary</label>
+                        </div>
+
+                        <hr/>
+
+                        <p>@weapon.Description</p>
+                    </div>
+                    @if (CanEdit)
+                    {
+                        <div class="card-footer">
+                            <button type="button" class="btn btn-sm btn-secondary mt-2" @onclick="() => EditWeapon(weapon)">Edit</button>
+                            <button type="button" class="btn btn-sm btn-danger mt-2" @onclick="() => RemoveWeapon(weapon)">Remove</button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    @if (CanEdit)
+    {
+        <div class="card-footer">
+            <div class="input-group">
+                <label class="input-group-text" for="weaponName">Weapon Name</label>
+                <select class="form-control" @bind="selectedWeaponId">
+                    <option selected="selected" value="">
+                        @(availableWeapons.Any() ? "-- Select Weapon --" : "Add Weapons to the Weapon Tab to Select Available")
+                    </option>
+                    @foreach (var weaponWrapper in availableWeapons)
+                    {
+                        <option value="@weaponWrapper.ContentId">@weaponWrapper.Document.Name</option>
+                    }
+                </select>
+                <button type="button" class="btn btn-primary" @onclick="AddWeaponFromAvailable">Add Weapon</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Character Character { get; set; }
+    [Parameter] public EventCallback OnCombatChanged { get; set; }
+    [Parameter] public bool CanEdit { get; set; } = true;
+
+    private string MartialSkillsAvailable() =>
+        string.Join(" or ", Character.Skills
+            .Where(sk => sk.UseForMartialCheck)
+            .Select(sk => sk.Name));
+
+    private List<DocumentWrapper<Weapon>> availableWeapons = new List<DocumentWrapper<Weapon>>();
+    private Guid selectedWeaponId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        availableWeapons = await WeaponService.GetWeaponsAsync();
+    }
+
+    private int GetMartialCheckValue()
+    {
+        if (Character.MartialCheck > 0)
+        {
+            return Character.MartialCheck;
+        }
+
+        if (Guid.TryParse(Character.SelectedMartialCheckOption, out Guid selectedSkillId))
+        {
+            var selectedSkill = Character.Skills.FirstOrDefault(s => s.Id == selectedSkillId);
+            return selectedSkill?.CalculateValue(Character) ?? 0;
+        }
+
+        return Character.Skills
+            .Where(sk => sk.UseForMartialCheck)
+            .Select(sk => sk.CalculateValue(Character))
+            .DefaultIfEmpty(0)
+            .Max();
+    }
+
+    private string GetMartialCheckSkillsString()
+    {
+        if (Guid.TryParse(Character.SelectedMartialCheckOption, out Guid selectedSkillId))
+        {
+            var selectedSkill = Character.Skills.FirstOrDefault(s => s.Id == selectedSkillId);
+            return selectedSkill?.Name ?? "Unknown Skill";
+        }
+
+        var martialCheckSkills = Character.Skills
+            .Where(sk => sk.UseForMartialCheck)
+            .Select(sk => sk.Name);
+
+        return string.Join(" or ", martialCheckSkills);
+    }
+
+    private async Task OnChange()
+    {
+        await OnCombatChanged.InvokeAsync();
+    }
+
+    private async Task OnMartialCheckOptionChanged(ChangeEventArgs e)
+    {
+        Character.SelectedMartialCheckOption = e.Value.ToString();
+        await OnCombatChanged.InvokeAsync();
+    }
+
+    private async Task AddWeaponFromAvailable()
+    {
+        if (selectedWeaponId != Guid.Empty)
+        {
+            var selectedWeaponWrapper = availableWeapons.FirstOrDefault(w => w.ContentId == selectedWeaponId);
+            if (selectedWeaponWrapper != null)
+            {
+                var characterWeapon = new CharacterWeapon(selectedWeaponWrapper.Document);
+                Character.Weapons.Add(characterWeapon);
+                Console.WriteLine($"Added weapon: {characterWeapon.Name}");
+            }
+            else
+            {
+                Console.WriteLine("Selected weapon not found in available weapons");
+            }
+
+            selectedWeaponId = Guid.Empty;
+            await OnCombatChanged.InvokeAsync();
+        }
+    }
+
+    private async Task AddCustomWeapon()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(WeaponEditForm.CharacterWeapon), new CharacterWeapon());
+
+        var options = new ModalOptions()
+        {
+            Size = ModalSize.Large,
+            Position = ModalPosition.Middle
+        };
+
+        var modal = ModalService.Show<WeaponEditForm>("Add Custom Weapon", parameters, options);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var newWeapon = (CharacterWeapon)result.Data;
+            Character.Weapons.Add(newWeapon);
+            await OnCombatChanged.InvokeAsync();
+        }
+    }
+
+    private async Task EditWeapon(CharacterWeapon weapon)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(WeaponEditForm.CharacterWeapon), weapon);
+
+        var options = new ModalOptions()
+        {
+            Size = ModalSize.Large,
+            Position = ModalPosition.Middle
+        };
+
+        var modal = ModalService.Show<WeaponEditForm>("Edit Weapon", parameters, options);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var editedWeapon = (CharacterWeapon)result.Data;
+            var index = Character.Weapons.IndexOf(weapon);
+            if (index != -1)
+            {
+                Character.Weapons[index] = editedWeapon;
+                await OnCombatChanged.InvokeAsync();
+            }
+        }
+    }
+
+    private async Task RemoveWeapon(CharacterWeapon weapon)
+    {
+        Character.Weapons.Remove(weapon);
+        await OnCombatChanged.InvokeAsync();
+    }
+
+}

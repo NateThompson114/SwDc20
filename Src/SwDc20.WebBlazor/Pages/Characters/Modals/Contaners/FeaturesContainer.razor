@@ -1,0 +1,116 @@
+﻿@using SwDc20.Core.Domain.Entities.Character
+@inject IModalService ModalService
+
+<div class="card border-light" aria-roledescription="Features Container" aria-description="Container for Features, this includes ancestry, class and more.">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h4>Features</h4>
+            </div>
+            @if (CanEdit)
+            {
+                <div class="col-auto">
+                    <button type="button" class="btn btn-primary btn-sm" @onclick="AddFeature" title="Add Feature">+ Add Feature Modal</button>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="card-body">
+        @foreach (var featureType in Character.Features.GroupBy(f => f.Tag))
+        {
+            <h5>@featureType.Key</h5>
+            <table class="table table-borderless table-striped">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    @if (CanEdit)
+                    {
+                        <th>Actions</th>
+                    }
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var feature in featureType)
+                {
+                    <tr>
+                        <td>@feature.Name</td>
+                        <td>@feature.Description</td>
+                        @if (CanEdit)
+                        {
+                            <td>
+                                <button type="button" class="btn btn-sm btn-secondary" @onclick="() => EditFeature(feature)">Edit</button>
+                                <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveFeature(feature)">Remove</button>
+                            </td>
+                        }
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Character Character { get; set; }
+    [Parameter] public bool CanEdit { get; set; } = true;
+    [Parameter] public EventCallback OnFeaturesChanged { get; set; }
+
+    private async Task AddFeature()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(FeatureEditForm.Feature), new CharacterFeature
+        {
+            Id = Guid.NewGuid(),
+            Version = CharacterFeature.CurrentVersion
+        });
+
+        var options = new ModalOptions()
+        {
+            Size = ModalSize.Small,
+            Position = ModalPosition.Middle
+        };
+
+        var modal = ModalService.Show<FeatureEditForm>("Add Feature", parameters, options);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var newFeature = (CharacterFeature)result.Data;
+            Character.Features.Add(newFeature);
+            await OnFeaturesChanged.InvokeAsync();
+        }
+    }
+    
+    private async Task EditFeature(CharacterFeature feature)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(FeatureEditForm.Feature), feature);
+
+        var options = new ModalOptions()
+        {
+            Size = ModalSize.Large,
+            Position = ModalPosition.Middle
+        };
+
+        var modal = ModalService.Show<FeatureEditForm>("Edit Feature", parameters, options);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var editedFeature = (CharacterFeature)result.Data;
+            var index = Character.Features.FindIndex(s => s.Id == editedFeature.Id);
+            if (index != -1)
+            {
+                Character.Features[index] = editedFeature;
+                await OnFeaturesChanged.InvokeAsync();
+            }
+        }
+    }
+    
+    private async Task RemoveFeature(CharacterFeature feature)
+    {
+        Character.Features.Remove(feature);
+        await OnFeaturesChanged.InvokeAsync();
+    }
+}

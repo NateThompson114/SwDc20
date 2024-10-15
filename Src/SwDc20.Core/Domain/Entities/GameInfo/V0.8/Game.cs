@@ -8,7 +8,7 @@ public class Game
     public string DungeonMaster { get; set; }
     public string CampaignDescription { get; set; }
     public List<CampaignNote> CampaignNotes { get; set; }
-    public List<CurrentCharacter> Characters { get; set; }
+    public List<Character.V0._8.Character> Characters { get; set; }
 
     public string GameKey { get; init; }
     public List<string> GameJoinKey { get; init; }

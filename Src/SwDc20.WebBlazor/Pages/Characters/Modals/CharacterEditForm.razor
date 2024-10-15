@@ -1,1269 +1,371 @@
-﻿@using SwDc20.Core.Domain.Entities.Character
+﻿@page "/character/{Id:guid}"
+@using SwDc20.Core.Domain.Entities.Character
 @using SwDc20.Core.Domain.Entities.Weapon.V0._8
+@using SwDc20.WebBlazor.Pages.Characters.Modals.Contaners
 @inject CharacterService CharacterService
-@inject IModalService ModalService
 @inject SkillService SkillService
 @inject WeaponService WeaponService
-@using SwDc20.WebBlazor.Pages.Characters.Modals.Contaners
+@inject NavigationManager NavigationManager
 
-<EditForm Model="@Character" OnValidSubmit="SaveCharacter">
-<DataAnnotationsValidator/>
-<ValidationSummary/>
-
-
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-floating">
-            <InputText id="name" @bind-Value="Character.Name" class="form-control"/>
-            <label for="name">Character Name</label>
-        </div>
-    </div>
-
-    <div class="col-md-6">
-        <div class="form-floating">
-            <InputText id="player" @bind-Value="Character.PlayerName" class="form-control"/>
-            <label for="player">Player:</label>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>@(Character.Name ?? "New Character")</h1>
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="editToggle" @bind="CanEdit" @bind:after="UpdateUrl">
+        <label class="form-check-label" for="editToggle">Edit Mode</label>
     </div>
 </div>
 
-<br/>
-
-<div class="row">
-    <div class="form-floating">
-        <div class="input-group">
-            <span class="input-group-text">Level:</span>
-            <InputNumber id="level" @bind-Value="Character.Level" class="form-control" min="0" max="20"/>
-            <span class="input-group-text">Combat Mastery: @Character.CombatMastery</span>
-        </div>
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="imageUrl">Image URL</label>
-    <InputText id="imageUrl" class="form-control" @bind-Value="Character.ImageUrl"/>
-</div>
-@if (!string.IsNullOrEmpty(Character.ImageUrl))
+@if (showSaveIndicator)
 {
-    <img src="@Character.ImageUrl" alt="Character Image" style="max-width: 200px; max-height: 200px;"/>
+    <div class="alert alert-success" role="alert"> ✅ Saved</div>
 }
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-floating">
-            <InputText id="class" @bind-Value="Character.Class" class="form-control"/>
-            <label for="class">Class</label>
-        </div>
-    </div>
 
-    <div class="col-md-6">
-        <div class="form-floating">
-            <InputText id="subclass" @bind-Value="Character.Subclass" class="form-control"/>
-            <label for="subclass">SubClass</label>
-        </div>
-    </div>
-</div>
+<EditForm Model="@Character" OnValidSubmit="SaveCharacter">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <FloatingDiceRoller />
 
-<div class="form-group">
-    <label for="ancestry">Ancestry</label>
-    <InputText id="ancestry" class="form-control" @bind-Value="Character.Ancestry"/>
-</div>
-
-<hr/>
-
-<div class="card border-danger" aria-roledescription="Attribute and Prime Container" aria-description="Container card for attribute cards and prime modifier, these are the key values for your characters, and contain Might, Agility, Charisma, and Intelligence.">
-    <div class="card-header">
-        <h4>Attributes</h4>
-    </div>
-    <div class="card-body">
-        <div class="row" >
-
-            <div class="col-lg-3 col-md-6">
-                <SwDc20.WebBlazor.Components.AttributeCardWithSave
-                    AttributeName="@nameof(Character.Might)"
-                    @bind-AttributeValue="Character.Might"
-                    @bind-SaveMastery="Character.MightSaveMastery"
-                    UpdateSaveMasteries="@UpdateSaveMasteries"
-                    SelectedMasteriesCount="@SelectedMasteriesCount"
-                    SaveValue="@Character.CalculateSaves.CalculateMightSave(Character)"/>
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-                <SwDc20.WebBlazor.Components.AttributeCardWithSave
-                    AttributeName="@nameof(Character.Agility)"
-                    @bind-AttributeValue="Character.Agility"
-                    @bind-SaveMastery="Character.AgilitySaveMastery"
-                    UpdateSaveMasteries="@UpdateSaveMasteries"
-                    SelectedMasteriesCount="@SelectedMasteriesCount"
-                    SaveValue="@Character.CalculateSaves.CalculateAgilitySave(Character)"/>
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-                <SwDc20.WebBlazor.Components.AttributeCardWithSave
-                    AttributeName="@nameof(Character.Charisma)"
-                    @bind-AttributeValue="Character.Charisma"
-                    @bind-SaveMastery="Character.CharismaSaveMastery"
-                    UpdateSaveMasteries="@UpdateSaveMasteries"
-                    SelectedMasteriesCount="@SelectedMasteriesCount"
-                    SaveValue="@Character.CalculateSaves.CalculateCharismaSave(Character)"/>
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-                <SwDc20.WebBlazor.Components.AttributeCardWithSave
-                    AttributeName="@nameof(Character.Intelligence)"
-                    @bind-AttributeValue="Character.Intelligence"
-                    @bind-SaveMastery="Character.IntelligenceSaveMastery"
-                    UpdateSaveMasteries="@UpdateSaveMasteries"
-                    SelectedMasteriesCount="@SelectedMasteriesCount"
-                    SaveValue="@Character.CalculateSaves.CalculateIntelligenceSave(Character)"/>
-
-            </div>
-
-        </div>
-    </div>
-    <div class="card-footer">
-        <figure class="text-center border-info">
-            <blockquote class="blockquote">
-                <p>Prime Modifier: @Character.PrimeModifier</p>
-            </blockquote>
-        </figure>
-    </div>
-</div>
-
-<hr/>
-
-<div class="card border-success" aria-roledescription="Health, Stamina, and Mana Container" aria-description="Container for your Max Hit Points, Stamina Point, and Mana Points.">
-    <div class="card-header">
-        <h4>Health, Stamina, and Mana</h4>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="maxHitPoints">Max Hit Points</label>
-                    <InputNumber id="maxHitPoints" class="form-control" @bind-Value="Character.MaxHitPoints"/>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="maxStaminaPoints">Max Stamina Points</label>
-                    <InputNumber id="maxStaminaPoints" class="form-control" @bind-Value="Character.MaxStaminaPoints"/>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="maxManaPoints">Max Mana Points</label>
-                    <InputNumber id="maxManaPoints" class="form-control" @bind-Value="Character.MaxManaPoints"/>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<hr/>
-
-<div class="card border-secondary" aria-roledescription="Defenses Container" aria-description="Container for your Physical and Mystical defenses. This also contains your Heavy and Brutal Calculations along with the Physical and Mental Damage Reductions.">
-    <div class="card-header">
-        <h4>Defenses</h4>
-    </div>
-    <div class="card-body">
-        <div class="card-group">
-            <div class="card col-md-6">
-                <div class="card-header">
-                    <h6>Physical Defense</h6>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">
-                            <div class="form-floating">
-                                <InputNumber id="physicalDefense" @bind-Value="Character.PhysicalDefense" class="form-control"/>
-                                <label for="physicalDefense">Physical Defense</label>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            <p>Heavy: @(Character.PhysicalDefense+5)</p>
-                        </li>
-                        <li class="list-group-item">
-                            <p>Brutal: @(Character.PhysicalDefense+10)</p>
-                        </li>
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <div class="form-floating">
-                        <InputNumber id="physicalDefenseReduction" @bind-Value="Character.PhysicalDamageReduction" class="form-control"/>
-                        <label for="physicalDefenseReduction">Physical Defense Reduction</label>
-                    </div>
-                </div>
-            </div>
-            <div class="card col-md-6">
-                <div class="card-header">
-                    <h6>Mystical Defense</h6>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">
-                            <div class="form-floating">
-                                <InputNumber id="mysticalDefense" @bind-Value="Character.MysticalDefense" class="form-control"/>
-                                <label for="mysticalDefense">Mystical Defense</label>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            <p>Heavy: @(Character.MysticalDefense+5)</p>
-                        </li>
-                        <li class="list-group-item">
-                            <p>Brutal: @(Character.MysticalDefense+10)</p>
-                        </li>
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <div class="form-floating">
-                        <InputNumber id="mysticalDefenseReduction" @bind-Value="Character.MysticalDamageReduction" class="form-control"/>
-                        <label for="mysticalDefenseReduction">Mystical Defense Reduction</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<hr/>
-    <SkillsContainer Character="@Character" CanEdit="true" />
-<hr/>
-
-<div class="card border-secondary" aria-roledescription="Trades Container" aria-description="Container for your trades">
-    <div class="card-header">
-        <div class="row align-items-center">
-            <div class="col">
-                <h4>Trades</h4>
-            </div>
-            <div class="col-auto">
-                <button type="button" class="btn btn-primary btn-sm" @onclick="AddTrade" title="Add Trade">+ Add Trade Modal</button>
-            </div>
-            @* <button type="button" class="btn btn-primary mt-2" @onclick="AddTrade">Add Trade (Modal)</button> *@
-        </div>
-    </div>
-    <div class="card-body">
-        <div class="card-group">
-            @foreach (var trade in Character.Trades)
-            {
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">@trade.Name</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label for="@($"tradeBonus_{trade.Name}")">Bonus:</label>
-                            <InputNumber id="@($"tradeBonus_{trade.Name}")" class="form-control" @bind-Value="trade.Bonus"/>
-                        </div>
-
-                        <hr/>
-
-                        <p>@trade.Description</p>
-                    </div>
-                    <div class="card-footer">
-                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveTrade(trade)">Remove</button>
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
-    @* <div class="card-footer"></div> *@
-</div>
-
-<hr/>
-
-<div class="card border-success" aria-roledescription="Language Container" aria-description="Container for your languages and the skill amount.">
-    <div class="card-header">
-        <div class="row align-items-center">
-            <div class="col">
-                <h4>Languages</h4>
-            </div>
-            <div class="col-auto">
-                <button type="button" class="btn btn-primary btn-sm" @onclick="AddLanguage" title="Add Trade">+ Add Language Modal</button>
-            </div>
-        </div>
-    </div>
-    <div class="card-body">
-        <div class="card-group">
-            @foreach (var language in Character.Languages)
-            {
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">@language.Name</h5>
-                        <div class="form-group">
-                            <label for="@($"languageProficiency_{language.Name}")">Proficiency:</label>
-                            <InputSelect id="@($"languageProficiency_{language.Name}")" class="form-control" @bind-Value="language.Proficiency">
-                                <option value="Fluent">Fluent</option>
-                                <option value="Limited">Limited</option>
-                            </InputSelect>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveLanguage(language)">Remove</button>
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
-    <div class="card-footer">
-        <div class="input-group">
-            <label class="input-group-text" for="newLanguageName">Language Name</label>
-            <InputText id="newLanguageName" @bind-Value="newLanguageName" class="form-control" />
-            <label class="input-group-text" for="newLanguageProficiency">Proficiency</label>
-            <InputSelect id="newLanguageProficiency" class="form-control" @bind-Value="newLanguageProficiency">
-                <option value="Fluent">Fluent</option>
-                <option value="Limited">Limited</option>
-            </InputSelect>
-            <button type="button" class="btn btn-primary" @onclick="AddLanguageDirectly">Add Language</button>
-        </div>
-    </div>
-</div>
-
-<hr/>
-
-<div class="card border-danger" aria-roledescription="Combat Container" aria-description="Container for your weapons and feed into the actions, this handles custom and prebuilt weapons.">
-    <div class="card-header">
-        <h4>Combat</h4>
-    </div>
-    <div class="card-body">
-        <div class="row row-cols-1 row-cols-md-3">
-            <div class="input-group">
-                <label class="input-group-text">
-                    @(Character.AttackSpellCheck > 0 ? Character.AttackSpellCheck : Character.CombatMastery + Character.PrimeModifier)
-                </label>
-                <label class="input-group-text">Attack/Spell Check (CM+Prime)</label>
-                <InputNumber id="attackSpellCheck" class="form-control" @bind-Value="Character.AttackSpellCheck"/>
-            </div>
-            <div class="input-group">
-                <label class="input-group-text">
-                    @(Character.SaveDifficultyCheck > 0 ? Character.SaveDifficultyCheck : (Character.CombatMastery + Character.PrimeModifier + 10))
-                </label>
-                <label class="input-group-text">Save DC (CM+Prime+10)</label>
-                <InputNumber id="damageBonus" class="form-control" @bind-Value="Character.SaveDifficultyCheck"/>
-            </div>
-            <div class="input-group">
-                <label class="input-group-text">
-                    @GetMartialCheckValue()
-                </label>
-                <label class="input-group-text">Martial Check (@GetMartialCheckSkillsString())</label>
-                <select class="form-control" @bind="SelectedMartialCheckOption">
-                    <option value="">Take Default Maximum</option>
-                    @foreach (var skill in Character.Skills.Where(sk => sk.UseForMartialCheck))
-                    {
-                        <option value="@skill.Id">@skill.Name (@skill.CalculateValue(Character))</option>
-                    }
-                </select>
-            </div>
-        </div>
-        
-        <hr/>
-
-        <div class="row align-items-center">
-            <div class="col">
-                <h4>Weapons</h4>
-            </div>
-            <div class="col-auto">
-                <button type="button" class="btn btn-primary btn-sm" @onclick="AddCustomWeapon" title="Add Trade">+ Add Custom Weapon Modal</button>
-            </div>
-        </div>
-        <div class="row row-cols-1 row-cols-md-2">
-            @foreach (var weapon in Character.Weapons)
-            {
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">@weapon.Name</h5>
-                        <p>Damage: @weapon.Damage @weapon.DamageType</p>
-                        <p>Type: @weapon.WeaponType</p>
-                        <div class="form-group">
-                            <label for="@($"weaponQuantity_{weapon.Name}")">Quantity:</label>
-                            <InputNumber id="@($"weaponQuantity_{weapon.Name}")" class="form-control" @bind-Value="weapon.Quantity"/>
-                        </div>
-                        <div class="form-check">
-                            <InputCheckbox id="@($"weaponEquipped_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.Equipped"/>
-                            <label class="form-check-label" for="@($"weaponEquipped_{weapon.Name}")">Equipped</label>
-                        </div>
-                        <div class="form-check">
-                            <InputCheckbox id="@($"weaponPrimary_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.IsPrimary"/>
-                            <label class="form-check-label" for="@($"weaponPrimary_{weapon.Name}")">Primary</label>
-                        </div>
-                        <div class="form-check">
-                            <InputCheckbox id="@($"weaponSecondary_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.IsSecondary"/>
-                            <label class="form-check-label" for="@($"weaponSecondary_{weapon.Name}")">Secondary</label>
-                        </div>
-
-                        <hr/>
-
-                        <p>@weapon.Description</p>
-                    </div>
-                    <div class="card-footer">
-                        <button type="button" class="btn btn-sm btn-secondary mt-2" @onclick="() => EditWeapon(weapon)">Edit</button>
-                        <button type="button" class="btn btn-sm btn-danger mt-2" @onclick="() => RemoveWeapon(weapon)">Remove</button>
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
-    <div class="card-footer">
-        <div class="input-group">
-            <label class="input-group-text" for="weaponName">Weapon Name</label>
-            <select class="form-control" @bind="selectedWeaponId">
-                <option selected="selected" value="">
-                    @(availableWeapons.Any() ? "-- Select Weapon --" : "Add Weapons to the Weapon Tab to Select Available")
-                </option>
-                @foreach (var weaponWrapper in availableWeapons)
-                {
-                    <option value="@weaponWrapper.ContentId">@weaponWrapper.Document.Name</option>
-                }
-            </select>
-            <button type="button" class="btn btn-primary" @onclick="AddWeaponFromAvailable">Add Weapon</button>
-        </div>
-    </div>
-</div>
-
-<hr/>
-
-<div class="card border-info" aria-roledescription="Inventory Container" aria-description="Container for your inventory and backpack inventory.">
-    <div class="card-header">
-        <div class="row align-items-center">
-            <div class="col">
-                <h4>Inventory</h4>
-            </div>
-            <div class="col-auto">
-                <button type="button" class="btn btn-primary btn-sm" @onclick="() => AddInventoryItem()" title="Add Inventory">+ Add Inventory Modal</button>
-            </div>
-        </div>
-    </div>
-    <div class="card-body">
-        <ul class="nav nav-tabs" id="inventoryTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link @(activeTab == "main" ? "active" : "")"
-                        id="main-tab"
-                        @onclick="@(() => SetActiveTab("main"))"
-                        type="button"
-                        role="tab">
-                    Main Inventory
-                </button>
-            </li>
-            @foreach (var container in Character.Inventory.Where(i => i.IsContainer))
-            {
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link @(activeTab == container.Id.ToString() ? "active" : "")"
-                            id="@container.Id-tab"
-                            @onclick="() => SetActiveTab(container.Id.ToString())"
-                            type="button"
-                            role="tab">
-                        @container.Name
-                    </button>
-                </li>
-            }
-        </ul>
-
-        <div class="tab-content mt-3" id="inventoryTabContent">
-            <div class="tab-pane fade @(activeTab == "main" ? "show active" : "")" id="main" role="tabpanel">
-                @RenderInventoryTable(Character.Inventory.ToList())
-            </div>
-            @foreach (var container in Character.Inventory.Where(i => i.IsContainer))
-            {
-            <div class="tab-pane fade @(activeTab == container.Id.ToString() ? "show active" : "")" id="@container.Id" role="tabpanel">
-                <h5>@container.Name (Capacity: @container.Inventory.Sum(i => i.StackWeight)/@container.WeightCapacity)</h5>
-                <button type="button" class="btn btn-primary btn-sm mb-2" @onclick="() => AddInventoryItem(container)" title="Add Item to Container">+ Add Item</button>
-                @RenderInventoryTable(container.Inventory, container)
-            </div>
-            }
-        </div>
-    </div>
-</div>
-
-<hr/>
-
-<div class="card border-light" aria-roledescription="Features Container" aria-description="Container for Features, this includes ancestry, class and more.">
-    <div class="card-header">
-        <div class="row align-items-center">
-            <div class="col">
-                <h4>Features</h4>
-            </div>
-            <div class="col-auto">
-                <button type="button" class="btn btn-primary btn-sm" @onclick="AddFeature" title="Add Inventory">+ Add Feature Modal</button>
-            </div>
-        </div>
-    </div>
-    <div class="card-body">
-        @foreach (var featureType in Character.Features.GroupBy(f => f.Tag))
+    <h1>
+        @Character.Id
+        @if (showSaveIndicator)
         {
-            <h5>@featureType.Key</h5>
-            <table class="table table-borderless table-striped">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach (var feature in featureType)
-                {
-                    <tr>
-                        <td>@feature.Name</td>
-                        <td>@feature.Description</td>
-                        <td>
-                            <button type="button" class="btn btn-sm btn-secondary" @onclick="() => EditFeature(feature)">Edit</button>
-                            <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveFeature(feature)">Remove</button>
-                        </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
+            <span class="save-indicator text-sm-center"> ✅Saved</span>
         }
-    </div>
-    <div class="card-footer"></div>
-</div>
+    </h1>
 
-<hr/>
 
-<div class="card border-success" aria-roledescription="" aria-description="">
-    <div class="card-header">
-        Resources
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="input-group">
-                    <label class="input-group-text">Death Threshold:</label>
-                    <select class="form-control" @bind="SelectedDeathThresholdAttribute">
-                        @foreach (var attr in AttributeList)
-                        {
-                            <option value="@attr">@attr @(attr == "Prime" ? "(Default)" : "")</option>
-                        }
-                    </select>
-                    <label class="input-group-text">@CalculateDeathThreshold()</label>
-                </div>
-            </div>
-            <div class="col-md-8"></div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="input-group">
-                    <label class="input-group-text">Available Action Points:</label>
-                    <InputNumber class="form-control" @bind-Value="Character.ActionPoints" min="0" max="5"/>
-                    <label class="input-group-text">/ 5</label>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="input-group">
-                    <label class="input-group-text">Rest Points:</label>
-                    <select class="form-control" @bind="SelectedRestPointsAttribute">
-                        @foreach (var attr in AttributeList)
-                        {
-                            <option value="@attr">@attr @(attr == nameof(Character.Might) ? "(Default)" : "")</option>
-                        }
-                    </select>
-                    <label class="input-group-text">@CalculateRestPoints()</label>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="input-group">
-                    <label class="input-group-text">Grit Points:</label>
-                    <select class="form-control" @bind="SelectedGritPointsAttribute">
-                        @foreach (var attr in AttributeList)
-                        {
-                            <option value="@attr">@attr @(attr == nameof(Character.Charisma) ? "(Default)" : "")</option>
-                        }
-                    </select>
-                    <label class="input-group-text">@CalculateGritPoints()</label>
-                </div>
-            </div>
-        </div>
-        <div class="row mb-3">
-            
-            <div class="col-md-4">
-                <div class="input-group">
-                    <label class="input-group-text">Jump Distance:</label>
-                    <InputNumber class="form-control" @bind-Value="Character.JumpDistance"/>
-                </div>
-                
-            </div>
-            <div class="col-md-4">
-                <div class="input-group">
-                    <label class="input-group-text">Move Speed:</label>
-                    <InputNumber class="form-control" @bind-Value="Character.MoveSpeed"/>
-                </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-floating">
+                <InputText id="name" @bind-Value="Character.Name" class="form-control" @bind-Value:after="AutoSaveCharacter"/>
+                <label for="name">Character Name</label>
             </div>
         </div>
 
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <div class="input-group">
-                    <label class="input-group-text">Currency:</label>
-                    <InputNumber class="form-control" @bind-Value="Character.Currency"/>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="col-12">
-                <h5>Additional Resources</h5>
-                <table class="table table-sm">
-                    <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Max Value</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var resource in Character.Resources)
-                    {
-                        <tr>
-                            <td><input class="form-control" @bind="resource.Name"/></td>
-                            <td><InputNumber class="form-control" @bind-Value="resource.MaxValue"/></td>
-                            <td>
-                                <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveResource(resource)">Remove</button>
-                            </td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
-                <button type="button" class="btn btn-primary btn-sm" @onclick="AddResource">Add Resource</button>
+        <div class="col-md-6">
+            <div class="form-floating">
+                <InputText id="player" @bind-Value="Character.PlayerName" class="form-control" @bind-Value:after="AutoSaveCharacter"/>
+                <label for="player">Player:</label>
             </div>
         </div>
     </div>
-    <div class="card-footer"></div>
-</div>
 
-<hr/>
+    <br/>
 
-@* <div class="card" aria-roledescription="" aria-description=""> *@
-@*     <div class="card-header"></div> *@
-@*     <div class="card-body"></div> *@
-@*     <div class="card-footer"></div> *@
-@* </div> *@
+    <div class="row">
+        <div class="form-floating">
+            <div class="input-group">
+                <span class="input-group-text">Level:</span>
+                <InputNumber id="level" @bind-Value="Character.Level" class="form-control" min="0" max="20" @bind-Value:after="AutoSaveCharacter"/>
+                <span class="input-group-text">Combat Mastery: @Character.CombatMastery</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="imageUrl">Image URL</label>
+        <InputText id="imageUrl" class="form-control" @bind-Value="Character.ImageUrl" @bind-Value:after="AutoSaveCharacter"/>
+    </div>
+    @if (!string.IsNullOrEmpty(Character.ImageUrl))
+    {
+        <img src="@Character.ImageUrl" alt="Character Image" style="max-width: 200px; max-height: 200px;"/>
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-floating">
+                <InputText id="class" @bind-Value="Character.Class" class="form-control" @bind-Value:after="AutoSaveCharacter"/>
+                <label for="class">Class</label>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-floating">
+                <InputText id="subclass" @bind-Value="Character.Subclass" class="form-control" @bind-Value:after="AutoSaveCharacter"/>
+                <label for="subclass">SubClass</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="ancestry">Ancestry</label>
+        <InputText id="ancestry" class="form-control" @bind-Value="Character.Ancestry" @bind-Value:after="AutoSaveCharacter"/>
+    </div>
+
+    <hr/>
+
+    <div class="card border-danger" aria-roledescription="Attribute and Prime Container" aria-description="Container card for attribute cards and prime modifier, these are the key values for your characters, and contain Might, Agility, Charisma, and Intelligence.">
+        <div class="card-header">
+            <h4>Attributes</h4>
+        </div>
+        <div class="card-body">
+            <div class="row" >
+
+                <div class="col-lg-3 col-md-6">
+                    <SwDc20.WebBlazor.Components.AttributeCardWithSave
+                        AttributeName="@nameof(Character.Might)"
+                        @bind-AttributeValue="Character.Might"
+                        @bind-SaveMastery="Character.MightSaveMastery"
+                        UpdateSaveMasteries="@UpdateSaveMasteries"
+                        SelectedMasteriesCount="@SelectedMasteriesCount"
+                        SaveValue="@Character.CalculateSaves.CalculateMightSave(Character)"/>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <SwDc20.WebBlazor.Components.AttributeCardWithSave
+                        AttributeName="@nameof(Character.Agility)"
+                        @bind-AttributeValue="Character.Agility"
+                        @bind-SaveMastery="Character.AgilitySaveMastery"
+                        UpdateSaveMasteries="@UpdateSaveMasteries"
+                        SelectedMasteriesCount="@SelectedMasteriesCount"
+                        SaveValue="@Character.CalculateSaves.CalculateAgilitySave(Character)"/>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <SwDc20.WebBlazor.Components.AttributeCardWithSave
+                        AttributeName="@nameof(Character.Charisma)"
+                        @bind-AttributeValue="Character.Charisma"
+                        @bind-SaveMastery="Character.CharismaSaveMastery"
+                        UpdateSaveMasteries="@UpdateSaveMasteries"
+                        SelectedMasteriesCount="@SelectedMasteriesCount"
+                        SaveValue="@Character.CalculateSaves.CalculateCharismaSave(Character)"/>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <SwDc20.WebBlazor.Components.AttributeCardWithSave
+                        AttributeName="@nameof(Character.Intelligence)"
+                        @bind-AttributeValue="Character.Intelligence"
+                        @bind-SaveMastery="Character.IntelligenceSaveMastery"
+                        UpdateSaveMasteries="@UpdateSaveMasteries"
+                        SelectedMasteriesCount="@SelectedMasteriesCount"
+                        SaveValue="@Character.CalculateSaves.CalculateIntelligenceSave(Character)"/>
+
+                </div>
+
+            </div>
+        </div>
+        <div class="card-footer">
+            <figure class="text-center border-info">
+                <blockquote class="blockquote">
+                    <p>Prime Modifier: @Character.PrimeModifier</p>
+                </blockquote>
+            </figure>
+        </div>
+    </div>
+
+    <hr/>
+
+    <HealthStaminaManaContainer Character="@Character" CanEdit="@CanEdit" OnChanged="@AutoSaveCharacter" />
+
+    <hr/>
+
+    <DefenseContainer Character="@Character" CanEdit="@CanEdit" OnDefensesChanged="@AutoSaveCharacter" />
+
+    <hr/>
+
+    <SkillsContainer Character="@Character" CanEdit="@CanEdit" OnChanged="@AutoSaveCharacter" />
+
+    <hr/>
+
+    <TradesContainer Character="@Character" OnTradesChanged="@AutoSaveCharacter" CanEdit="@CanEdit" />
+
+    <hr/>
+
+    <LanguageContainer Character="@Character" CanEdit="@CanEdit" OnLanguagesChanged="@AutoSaveCharacter" />
+
+
+    <hr/>
+
+    <CombatContainer Character="@Character" CanEdit="@CanEdit" OnCombatChanged="AutoSaveCharacter" />
+
+    <hr/>
+
+    <InventoryContainer Character="@Character" OnInventoryChanged="@AutoSaveCharacter" CanEdit="@CanEdit" />
+
+    <hr/>
+
+    <FeaturesContainer Character="@Character" CanEdit="@CanEdit" OnFeaturesChanged="@AutoSaveCharacter" />
+
+    <hr/>
+
+    <ResourceContainer Character="@Character" CanEdit="@CanEdit" OnResourcesChanged="@AutoSaveCharacter" />
+
+    <hr/>
+
+    @* <div class="card" aria-roledescription="" aria-description=""> *@
+    @*     <div class="card-header"></div> *@
+    @*     <div class="card-body"></div> *@
+    @*     <div class="card-footer"></div> *@
+    @* </div> *@
 
 
 
-<button type="submit" class="btn btn-primary">Save Character</button>
-<button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    @if (CanEdit)
+    {
+        <button type="submit" class="btn btn-primary">Save Character</button>        
+    }
+    
+    @* <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button> *@
+    
+
 </EditForm>
 
 @code {
-    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    [Parameter] public Guid Id { get; set; }
+    [Parameter] public bool CanEdit { get; set; } = true;
     [Parameter] public Character Character { get; set; }
     private List<DocumentWrapper<Skill>> availableSkills;
-    private string newTradeName;
-    private int newTradeBonus;
-    private string newTradeDescription;
-    private string newLanguageName;
-    private string newLanguageProficiency = "Limited";
     private List<DocumentWrapper<Weapon>> availableWeapons = new List<DocumentWrapper<Weapon>>();
+    
+    
+    // [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    
+    
+    
     private Guid selectedWeaponId;
     private string newSkillName = "";
     private string newSkillAttribute = "Intelligence";
     private string newTagAttribute = "Knowledge";
     private string activeTab = "main";
-    private Guid? SelectedMartialCheckOption { get; set; }
-    private List<string> AttributeList = new List<string> { "Prime", nameof(Character.Might), nameof(Character.Agility), nameof(Character.Charisma), nameof(Character.Intelligence) };
-    private string SelectedDeathThresholdAttribute { get; set; } = "Prime";
-    private string SelectedRestPointsAttribute { get; set; } = nameof(Character.Might);
-    private string SelectedGritPointsAttribute { get; set; } = nameof(Character.Charisma);
-    
-    private int GetMartialCheckValue()
-    {
-        if (Character.MartialCheck > 0)
-        {
-            return Character.MartialCheck;
-        }
-    
-        if (SelectedMartialCheckOption.HasValue)
-        {
-            var selectedSkill = Character.Skills.FirstOrDefault(s => s.Id == SelectedMartialCheckOption.Value);
-            return selectedSkill?.CalculateValue(Character) ?? 0;
-        }
-    
-        return Character.Skills
-            .Where(sk => sk.UseForMartialCheck)
-            .Select(sk => sk.CalculateValue(Character))
-            .DefaultIfEmpty(0)
-            .Max();
-    }
-
-    private string GetMartialCheckSkillsString()
-    {
-        var martialCheckSkills = Character.Skills
-            .Where(sk => sk.UseForMartialCheck)
-            .Select(sk => sk.Name);
-    
-        return string.Join(" or ", martialCheckSkills);
-    }
-    
-    private void SetActiveTab(string tabId)
-    {
-        activeTab = tabId;
-    }
+    private List<string> AttributeList = new List<string> { "Prime", nameof(Character.Might), nameof(Character.Agility), nameof(Character.Charisma), nameof(Character.Intelligence) };    
+    private bool showSaveIndicator = false;
     
     protected override async Task OnInitializedAsync()
     {
-        availableSkills = await SkillService.GetSkillsAsync();
+        var characterWrapper = await CharacterService.GetCharacterAsync(Id);
 
+        Character = characterWrapper?.Document ?? new Character
+                        {
+                            Id = Id,
+                            Version = Character.CurrentVersion,
+                            Resources = new List<CharacterResource>()
+                        };
+
+
+        availableSkills = await SkillService.GetSkillsAsync();
         if (availableSkills.Count() == 0)
         {
             availableSkills = SkillService.GetDefaultSkills().Select(s => new DocumentWrapper<Skill>
-            {
-                ContentId = s.Id,
-                Document = s,
-                DocumentType = "Skill",
-                ContentVersion = s.Version
-            }).ToList();
+                                {
+                                    ContentId = s.Id,
+                                    Document = s,
+                                    DocumentType = "Skill",
+                                    ContentVersion = s.Version
+                                }
+                    ).ToList();
         }
         
         if (Character.Skills.Count == 0)
         {
-            Character.Skills = availableSkills.Select(s => s.Document).Select(s => new Skill()
-            {
-                Id = s.Id,
-                Name = s.Name,
-                AttributeUsed = s.AttributeUsed, 
-                Tag = s.Tag,
-                UseForMartialCheck = s.UseForMartialCheck,
-                Version = Skill.CurrentVersion
-            }).ToList();
+            Character.Skills = availableSkills.Select(s => s.Document)
+                    .Select(s => new Skill()
+                        {
+                            Id = s.Id,
+                            Name = s.Name,
+                            AttributeUsed = s.AttributeUsed,
+                            Tag = s.Tag,
+                            UseForMartialCheck = s.UseForMartialCheck,
+                            Version = Skill.CurrentVersion
+                        }
+                    )
+                    .ToList();
         }
         
-        if (Character.ActionPoints == 0)
+        if(Character.ActionPoints == 0)
         {
             Character.ActionPoints = 4;
         }
-
+        
         availableWeapons = await WeaponService.GetWeaponsAsync();
     }
-
-    private async Task SaveCharacter()
-    {
-        Character.DeathThreshold = CalculateDeathThreshold();
-        Character.RestPoints = CalculateRestPoints();
-        Character.GritPoints = CalculateGritPoints();
-        
-        var characterWrapper = new DocumentWrapper<Character>
-        {
-            Document = Character,
-            ContentId = Character.Id,
-            ContentVersion = Character.Version
-        };
-
-        await CharacterService.SaveCharacterAsync(characterWrapper);
-        await BlazoredModal.CloseAsync(ModalResult.Ok(true));
-    }
-
-    private async Task Cancel()
-    {
-        await BlazoredModal.CancelAsync();
-    }
-
-    #region Trades
-
-    private async Task AddTrade()
-    {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(TradeEditForm.Trade), new Trade());
-
-        var options = new ModalOptions()
-        {
-            Size = ModalSize.Small,
-            Position = ModalPosition.Middle
-        };
-
-        var modal = ModalService.Show<TradeEditForm>("Add Trade", parameters, options);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            var newTrade = (Trade)result.Data;
-            Character.Trades.Add(newTrade);
-        }
-    }
-
-    private void AddTradeDirectly()
-    {
-        if (!string.IsNullOrWhiteSpace(newTradeName))
-        {
-            Character.Trades.Add(new Trade { Name = newTradeName, Bonus = newTradeBonus, Description = newTradeDescription});
-            newTradeName = string.Empty;
-            newTradeBonus = 0;
-            newTradeDescription = string.Empty;
-        }
-    }
     
-    private void RemoveTrade(Trade trade)
-    {
-        Character.Trades.Remove(trade);
-    }
-    #endregion
-
-    #region Languages
-
-    private async Task AddLanguage()
-    {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(LanguageEditForm.Language), new Language { Proficiency = "Limited" });
-
-        var options = new ModalOptions()
-        {
-            Size = ModalSize.Small,
-            Position = ModalPosition.Middle
-        };
-
-        var modal = ModalService.Show<LanguageEditForm>("Add Language", parameters, options);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            var newLanguage = (Language)result.Data;
-            Character.Languages.Add(newLanguage);
-        }
-    }
-    
-    private void AddLanguageDirectly()
-    {
-        if (!string.IsNullOrWhiteSpace(newLanguageName))
-        {
-            Character.Languages.Add(new Language { Name = newLanguageName, Proficiency = newLanguageProficiency });
-            newLanguageName = string.Empty;
-            newLanguageProficiency = "Limited";
-        }
-    }
-
-    private void RemoveLanguage(Language language)
-    {
-        Character.Languages.Remove(language);
-    }
-
-    #endregion
-
-    #region Weapons
-
-    private void OnWeaponSelected(ChangeEventArgs e)
-    {
-        if (Guid.TryParse(e.Value.ToString(), out Guid weaponId))
-        {
-            selectedWeaponId = weaponId;
-            Console.WriteLine($"Selected weapon ID: {selectedWeaponId}");
-        }
-        else
-        {
-            selectedWeaponId = Guid.Empty;
-            Console.WriteLine("No weapon selected");
-        }
-    }
-
-    private async Task AddWeaponFromAvailable()
-    {
-        if (selectedWeaponId != Guid.Empty)
-        {
-            var selectedWeaponWrapper = availableWeapons.FirstOrDefault(w => w.ContentId == selectedWeaponId);
-            if (selectedWeaponWrapper != null)
-            {
-                var characterWeapon = new CharacterWeapon(selectedWeaponWrapper.Document);
-                Character.Weapons.Add(characterWeapon);
-                Console.WriteLine($"Added weapon: {characterWeapon.Name}");
-            }
-            else
-            {
-                Console.WriteLine("Selected weapon not found in available weapons");
-            }
-
-            // Reset the selection
-            selectedWeaponId = Guid.Empty;
-        }
-        else
-        {
-            Console.WriteLine("No weapon selected");
-        }
-
-        StateHasChanged();
-    }
-
-    private async Task AddCustomWeapon()
-    {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(WeaponEditForm.CharacterWeapon), new CharacterWeapon());
-
-        var options = new ModalOptions()
-        {
-            Size = ModalSize.Large,
-            Position = ModalPosition.Middle
-        };
-
-        var modal = ModalService.Show<WeaponEditForm>("Add Custom Weapon", parameters, options);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            var newWeapon = (CharacterWeapon)result.Data;
-            Character.Weapons.Add(newWeapon);
-        }
-    }
-
-    private async Task EditWeapon(CharacterWeapon weapon)
-    {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(WeaponEditForm.CharacterWeapon), weapon);
-
-        var options = new ModalOptions()
-        {
-            Size = ModalSize.Large,
-            Position = ModalPosition.Middle
-        };
-
-        var modal = ModalService.Show<WeaponEditForm>("Edit Weapon", parameters, options);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            var editedWeapon = (CharacterWeapon)result.Data;
-            var index = Character.Weapons.IndexOf(weapon);
-            if (index != -1)
-            {
-                Character.Weapons[index] = editedWeapon;
-            }
-        }
-    }
-
-    private void RemoveWeapon(CharacterWeapon weapon)
-    {
-        Character.Weapons.Remove(weapon);
-    }
-
-    #endregion
-
-    #region Inventory
-
-    private async Task AddInventoryItem(CharacterInventory container = null)
-    {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(InventoryEditForm.InventoryItem), new CharacterInventory
-        {
-            Id = Guid.NewGuid(),
-            Version = CharacterInventory.CurrentVersion
-        });
-    
-        if (container != null)
-        {
-            parameters.Add(nameof(InventoryEditForm.RemainingCapacity), container.RemainingCapacity);
-        }
-
-        var modalOptions = new ModalOptions()
-        {
-            Size = ModalSize.Large,
-            Position = ModalPosition.Middle
-        };
-    
-        var modal = ModalService.Show<InventoryEditForm>("Add Inventory Item", parameters, modalOptions);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            var newItem = (CharacterInventory)result.Data;
-            if (container != null)
-            {
-                var addResult = await container.AddInventory(newItem);
-                if (!addResult.StartsWith("Added"))
-                {
-                    ModalService.Show<ConfirmDialog>("Error", 
-                        new ModalParameters().Add(nameof(ConfirmDialog.Message), addResult));
-                    return;
-                }
-            }
-            else
-            {
-                Character.Inventory.Add(newItem);
-            }
-            StateHasChanged();
-        }
-    }
-
-    private async Task EditInventoryItem(CharacterInventory item, CharacterInventory container = null)
-    {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(InventoryEditForm.InventoryItem), new CharacterInventory
-        {
-            Id = item.Id,
-            Version = item.Version,
-            Name = item.Name,
-            Quantity = item.Quantity,
-            Weight = item.Weight,
-            Value = item.Value,
-            Description = item.Description,
-            Type = item.Type,
-            IsContainer = item.IsContainer,
-            WeightCapacity = item.WeightCapacity
-        });
-    
-        if (container != null)
-        {
-            parameters.Add(nameof(InventoryEditForm.RemainingCapacity), container.RemainingCapacity + item.StackWeight);
-        }
-    
-        var modalOptions = new ModalOptions()
-        {
-            Size = ModalSize.Large,
-            Position = ModalPosition.Middle
-        };
-
-        var modal = ModalService.Show<InventoryEditForm>("Edit Inventory Item", parameters, modalOptions);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            var editedItem = (CharacterInventory)result.Data;
-            if (container != null)
-            {
-                var index = container.Inventory.IndexOf(item);
-                if (index != -1)
-                {
-                    container.Inventory[index] = editedItem;
-                }
-            }
-            else
-            {
-                var index = Character.Inventory.IndexOf(item);
-                if (index != -1)
-                {
-                    Character.Inventory[index] = editedItem;
-                }
-            }
-            StateHasChanged();
-        }
-    }
-    
-    private async Task TransferItem(CharacterInventory item, CharacterInventory sourceContainer = null)
-    {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(TransferItemModal.Item), item);
-        parameters.Add(nameof(TransferItemModal.SourceContainer), sourceContainer);
-        parameters.Add(nameof(TransferItemModal.Containers), Character.Inventory.Where(i => i.IsContainer && i != item).ToList());
-
-        var modalOptions = new ModalOptions()
-        {
-            Size = ModalSize.Large,
-            Position = ModalPosition.Middle
-        };
-
-        var modal = ModalService.Show<TransferItemModal>("Transfer Item", parameters, modalOptions);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            var transferData = (TransferData)result.Data;
-        
-            if (item.Quantity >= transferData.Quantity)
-            {
-                var newItem = new CharacterInventory
-                {
-                    Id = Guid.NewGuid(),
-                    Version = CharacterInventory.CurrentVersion,
-                    Name = item.Name,
-                    Quantity = transferData.Quantity,
-                    Weight = item.Weight,
-                    Value = item.Value,
-                    Description = item.Description,
-                    Type = item.Type,
-                    IsContainer = item.IsContainer,
-                    WeightCapacity = item.WeightCapacity
-                };
-
-                if (transferData.DestinationId.HasValue)
-                {
-                    var destinationContainer = Character.Inventory.FirstOrDefault(i => i.Id == transferData.DestinationId.Value);
-                    if (destinationContainer != null)
-                    {
-                        var addResult = await destinationContainer.AddInventory(newItem);
-                        if (!addResult.StartsWith("Added"))
-                        {
-                            ModalService.Show<ConfirmDialog>("Error", 
-                                new ModalParameters().Add(nameof(ConfirmDialog.Message), addResult));
-                            return;
-                        }
-                    }
-                }
-                else
-                {
-                    Character.Inventory.Add(newItem);
-                }
-
-                item.Quantity -= transferData.Quantity;
-                if (item.Quantity == 0)
-                {
-                    if (sourceContainer != null)
-                    {
-                        sourceContainer.Inventory.Remove(item);
-                    }
-                    else
-                    {
-                        Character.Inventory.Remove(item);
-                    }
-                }
-
-                StateHasChanged();
-            }
-            else
-            {
-                ModalService.Show<ConfirmDialog>("Error", 
-                    new ModalParameters().Add(nameof(ConfirmDialog.Message), "Invalid transfer: Not enough items."));
-            }
-        }
-    }
-
-    private void RemoveInventoryItem(CharacterInventory item, CharacterInventory container = null)
-    {
-        if (item.IsContainer && item.Inventory.Any())
-        {
-            ModalService.Show<ConfirmDialog>("Cannot Remove", 
-                new ModalParameters().Add(nameof(ConfirmDialog.Message), "Cannot remove a container that contains items."));
-            return;
-        }
-
-        if (container != null)
-        {
-            container.Inventory.Remove(item);
-        }
-        else
-        {
-            Character.Inventory.Remove(item);
-        }
-        StateHasChanged();
-    }
-    
-    private async Task AddItemToContainer(CharacterInventory container)
-    {
-        await AddInventoryItem(container);
-    }
-
-    #region Render Fragments
-
-    private RenderFragment RenderInventoryTable(List<CharacterInventory> items, CharacterInventory container = null) => __builder =>
-    {
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>Name</th>
-                <th>Quantity</th>
-                <th>Weight</th>
-                <th>Value</th>
-                <th>Description</th>
-                <th>Type</th>
-                <th>Capacity</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach (var item in items)
-            {
-                <tr>
-                    <td>@item.Name</td>
-                    <td>@item.Quantity</td>
-                    <td>@item.Weight</td>
-                    <td>@item.Value</td>
-                    <td>@item.Description</td>
-                    <td>@item.Type</td>
-                    <td>@(item.IsContainer ? $"{item.Inventory.Sum(i => i.StackWeight)}/{item.WeightCapacity}" : "-")</td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-secondary" @onclick="() => EditInventoryItem(item, container)">Edit</button>
-                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveInventoryItem(item, container)">Remove</button>
-                        <button type="button" class="btn btn-sm btn-info" @onclick="() => TransferItem(item, container)">Transfer</button>
-                        @if (item.IsContainer)
-                        {
-                            <button type="button" class="btn btn-sm btn-primary" @onclick="() => AddItemToContainer(item)">Add Item</button>
-                        }
-                    </td>
-                </tr>
-            }
-            </tbody>
-            <tfoot>
-            <tr>
-                <th colspan="2">Total</th>
-                <th>@items.Sum(i => i.Weight * i.Quantity)</th>
-                <th>@items.Sum(i => i.Value * i.Quantity)</th>
-                <th colspan="3"></th>
-                @* <th>@(container == null ? null : container.Inventory.Sum(i => i.StackWeight)/container.WeightCapacity)</th> *@
-                <th></th>
-            </tr>
-            </tfoot>
-        </table>
-    };
-
-    #endregion
-
-    #endregion
-    
-    #region Features
-
-    private async Task AddFeature()
-    {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(FeatureEditForm.Feature), new CharacterFeature
-        {
-            Id = Guid.NewGuid(),
-            Version = CharacterFeature.CurrentVersion
-        });
-
-        var options = new ModalOptions()
-        {
-            Size = ModalSize.Small,
-            Position = ModalPosition.Middle
-        };
-
-        var modal = ModalService.Show<FeatureEditForm>("Add Trade", parameters, options);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            var newFeature = (CharacterFeature)result.Data;
-            Character.Features.Add(newFeature);
-        }
-    }
-    
-    private async Task EditFeature(CharacterFeature feature)
-    {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(FeatureEditForm.Feature), feature);
-
-        var options = new ModalOptions()
-        {
-            Size = ModalSize.Large,
-            Position = ModalPosition.Middle
-        };
-
-        var modal = ModalService.Show<FeatureEditForm>("Edit Feature", parameters, options);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            var editedFeatures = (CharacterFeature)result.Data;
-            var index = Character.Features.FindIndex(s => s.Id == editedFeatures.Id);
-            if (index != -1)
-            {
-                Character.Features[index] = editedFeatures;
-            }
-        }
-    }
-    
-    // private void AddFeatureDirectly()
+    // protected override async Task OnInitializedAsync()
     // {
-    //     if (!string.IsNullOrWhiteSpace(newTradeName))
+    //     availableSkills = await SkillService.GetSkillsAsync();
+    //
+    //     if (availableSkills.Count() == 0)
     //     {
-    //         Character.Features.Add(new CharacterFeature { Name = newTradeName, Bonus = newTradeBonus, Description = newTradeDescription});
-    //         newCharacterFeature = null;
-    //         newTradeBonus = 0;
-    //         newTradeDescription = string.Empty;
+    //         availableSkills = SkillService.GetDefaultSkills().Select(s => new DocumentWrapper<Skill>
+    //         {
+    //             ContentId = s.Id,
+    //             Document = s,
+    //             DocumentType = "Skill",
+    //             ContentVersion = s.Version
+    //         }).ToList();
     //     }
+    //     
+    //     if (Character.Skills.Count == 0)
+    //     {
+    //         Character.Skills = availableSkills.Select(s => s.Document).Select(s => new Skill()
+    //         {
+    //             Id = s.Id,
+    //             Name = s.Name,
+    //             AttributeUsed = s.AttributeUsed, 
+    //             Tag = s.Tag,
+    //             UseForMartialCheck = s.UseForMartialCheck,
+    //             Version = Skill.CurrentVersion
+    //         }).ToList();
+    //     }
+    //     
+    //     if (Character.ActionPoints == 0)
+    //     {
+    //         Character.ActionPoints = 4;
+    //     }
+    //
+    //     availableWeapons = await WeaponService.GetWeaponsAsync();
     // }
     
-    private void RemoveFeature(CharacterFeature trade)
+    private void UpdateUrl()
     {
-        Character.Features.Remove(trade);
+        var uri = NavigationManager.GetUriWithQueryParameter("canEdit", CanEdit);
+
+        NavigationManager.NavigateTo(uri, false);
     }
     
-    #endregion
+    private async Task SaveCharacter()
+    {
+        var characterWrapper = new DocumentWrapper<Character>
+                    {
+                        Document = Character,
+                        ContentId = Character.Id,
+                        ContentVersion = Character.Version
+                    };
+        
+        await CharacterService.SaveCharacterAsync(characterWrapper);
+        
+        showSaveIndicator = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        showSaveIndicator = false;
+        
+        StateHasChanged();
+    }
+
+
+    // private async Task SaveCharacter()
+    // {
+    //     var characterWrapper = new DocumentWrapper<Character>
+    //     {
+    //         Document = Character,
+    //         ContentId = Character.Id,
+    //         ContentVersion = Character.Version
+    //     };
+    //
+    //     await CharacterService.SaveCharacterAsync(characterWrapper);
+    // }
     
-    
+    private async Task SaveCharacterAndClose()
+    {
+        await SaveCharacter();
+        
+        // await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+    }
+
+    // private async Task Cancel()
+    // {
+    //     await BlazoredModal.CancelAsync();
+    // }
     
     private int SelectedMasteriesCount =>
         (Character.MightSaveMastery ? 1 : 0) +
@@ -1273,60 +375,17 @@
 
     private async Task UpdateSaveMasteries()
     {
-        await InvokeAsync(StateHasChanged);
-        // This method is called whenever a checkbox is changed
-        // We don't need to do anything here, as the Character properties are directly bound
-        // But you can add any additional logic if needed
+        await AutoSaveCharacter();
     }
-
-    private Task ShowInventory()
+    
+    private async Task AutoSaveCharacter()
     {
-        return Task.CompletedTask;
-
-    }
-
-    private Task ShowContainer(CharacterInventory container)
-    {
-        return Task.CompletedTask;
-    }
-
-    private int CalculateDeathThreshold()
-    {
-        int attributeValue = GetAttributeValue(SelectedDeathThresholdAttribute);
-        return 0 - attributeValue;
-    }
-
-    private int CalculateRestPoints()
-    {
-        int attributeValue = GetAttributeValue(SelectedRestPointsAttribute);
-        return Character.Level + attributeValue;
-    }
-
-    private int CalculateGritPoints()
-    {
-        int attributeValue = GetAttributeValue(SelectedGritPointsAttribute);
-        return attributeValue + 2;
-    }
-
-    private int GetAttributeValue(string attributeName)
-    {
-        return attributeName switch
-        {
-            "Prime" => Character.PrimeModifier,
-            nameof(Character.Might) => Character.Might,
-            nameof(Character.Agility) => Character.Agility,
-            nameof(Character.Charisma) => Character.Charisma,
-            nameof(Character.Intelligence) => Character.Intelligence,
-            _ => 0
-        };
-    }
-    private void AddResource()
-    {
-        Character.Resources.Add(new CharacterResource { Name = "New Resource", MaxValue = 0 });
-    }
-
-    private void RemoveResource(CharacterResource resource)
-    {
-        Character.Resources.Remove(resource);
+        await SaveCharacter();
+        
+        showSaveIndicator = true;
+        StateHasChanged();
+        await Task.Delay(2000); // Show the save indicator for 2 seconds
+        showSaveIndicator = false;
+        StateHasChanged();
     }
 }

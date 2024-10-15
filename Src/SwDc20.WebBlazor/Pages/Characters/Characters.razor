@@ -5,7 +5,6 @@
 @inject WeaponService WeaponService
 @inject IModalService ModalService
 @inject NavigationManager NavigationManager
-@inject CurrentCharacterService CurrentCharacterService
 @inject GamesService GamesService
 
 <h3>Characters</h3>
@@ -75,7 +74,7 @@ else
 
 @code {
     private List<DocumentWrapper<Character>> characters;
-    private CurrentCharacter? currentCharacter;
+    // private CurrentCharacter? currentCharacter;
     // private List<Game> currentGamesWithCharacters;
     private ModalOptions modalOptions = new ModalOptions()
     {
@@ -86,7 +85,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         characters = await CharacterService.GetCharactersAsync();
-        currentCharacter = await CurrentCharacterService.GetCurrentCharacterAsync();
+        // currentCharacter = await CurrentCharacterService.GetCurrentCharacterAsync();
         // currentGamesWithCharacters = await GamesService.GetGamesWithCharactersAsync(currentCharacter.Character.Id);
     }
 
@@ -142,7 +141,7 @@ else
     private async Task RefreshCharacters()
     {
         characters = await CharacterService.GetCharactersAsync();
-        currentCharacter = await CurrentCharacterService.GetCurrentCharacterAsync();
+        // currentCharacter = await CurrentCharacterService.GetCurrentCharacterAsync();
         StateHasChanged();
     }
 
@@ -150,41 +149,41 @@ else
     {
         if (character != null)
         {
-            var isCharacterSetup = await CurrentCharacterService.IsCharacterSetupAsync();
-            CurrentCharacter playingCharacter;
+            // var isCharacterSetup = await CurrentCharacterService.IsCharacterSetupAsync();
+            // CurrentCharacter playingCharacter;
 
-            if (!isCharacterSetup)
-            {
-                // First time setup
-                playingCharacter = new CurrentCharacter(character);
-            }
-            else
-            {
-                // Use existing values
-                playingCharacter = await CurrentCharacterService.GetCurrentCharacterAsync();
-                if (playingCharacter == null || playingCharacter.Character.Id != character.Id)
-                {
-                    // If the character has changed, create a new CurrentCharacter
-                    playingCharacter = new CurrentCharacter(character);
-                }
-                else
-                {
-                    // Update the base character data while keeping current values
-                    playingCharacter.Character = character;
-                }
-            }
+            // if (!isCharacterSetup)
+            // {
+            //     // First time setup
+            //     playingCharacter = new CurrentCharacter(character);
+            // }
+            // else
+            // {
+            //     // Use existing values
+            //     playingCharacter = await CurrentCharacterService.GetCurrentCharacterAsync();
+            //     if (playingCharacter == null || playingCharacter.Character.Id != character.Id)
+            //     {
+            //         // If the character has changed, create a new CurrentCharacter
+            //         playingCharacter = new CurrentCharacter(character);
+            //     }
+            //     else
+            //     {
+            //         // Update the base character data while keeping current values
+            //         playingCharacter.Character = character;
+            //     }
+            // }
 
-            var parameters = new ModalParameters();
-            parameters.Add(nameof(PlayCharacterModal.CurrentCharacter), playingCharacter);
-        
-            var modal = ModalService.Show<PlayCharacterModal>("Play Character", parameters, modalOptions);
-            var result = await modal.Result;
-
-            if (!result.Cancelled)
-            {
-                currentCharacter = (CurrentCharacter)result.Data;
-                StateHasChanged();
-            }
+            // var parameters = new ModalParameters();
+            // parameters.Add(nameof(PlayCharacterModal.CurrentCharacter), playingCharacter);
+            //
+            // var modal = ModalService.Show<PlayCharacterModal>("Play Character", parameters, modalOptions);
+            // var result = await modal.Result;
+            //
+            // if (!result.Cancelled)
+            // {
+            //     currentCharacter = (CurrentCharacter)result.Data;
+            //     StateHasChanged();
+            // }
         }
         else
         {
@@ -194,19 +193,19 @@ else
 
     private async Task EditCurrentCharacter()
     {
-        if (currentCharacter != null)
-        {
-            var parameters = new ModalParameters();
-            parameters.Add(nameof(PlayCharacterModal.CurrentCharacter), currentCharacter);
-        
-            var modal = ModalService.Show<PlayCharacterModal>("Edit Current Character", parameters, modalOptions);
-            var result = await modal.Result;
-
-            if (!result.Cancelled)
-            {
-                currentCharacter = (CurrentCharacter)result.Data;
-                StateHasChanged();
-            }
-        }
+        // if (currentCharacter != null)
+        // {
+        //     var parameters = new ModalParameters();
+        //     parameters.Add(nameof(PlayCharacterModal.CurrentCharacter), currentCharacter);
+        //
+        //     var modal = ModalService.Show<PlayCharacterModal>("Edit Current Character", parameters, modalOptions);
+        //     var result = await modal.Result;
+        //
+        //     if (!result.Cancelled)
+        //     {
+        //         currentCharacter = (CurrentCharacter)result.Data;
+        //         StateHasChanged();
+        //     }
+        // }
     }
 }
