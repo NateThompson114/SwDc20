@@ -9,10 +9,14 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>@(Character.Name ?? "New Character")</h1>
-    <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="editToggle" @bind="CanEdit" @bind:after="UpdateUrl">
-        <label class="form-check-label" for="editToggle">Edit Mode</label>
-    </div>
+    @* <div class="form-check form-switch"> *@
+    @*     <input class="form-check-input" type="checkbox" id="editToggle" @bind="CanEdit" @bind:after="UpdateUrl"> *@
+    @*     <label class="form-check-label" for="editToggle">Edit Mode</label> *@
+    @* </div> *@
+    @if (showSaveIndicator)
+    {
+        <span class="save-indicator text-sm-center"> ✅Saved</span>
+    }
 </div>
 
 @if (showSaveIndicator)
@@ -26,13 +30,13 @@
     <ValidationSummary/>
     <FloatingDiceRoller />
 
-    <h1>
-        @Character.Id
-        @if (showSaveIndicator)
-        {
-            <span class="save-indicator text-sm-center"> ✅Saved</span>
-        }
-    </h1>
+    @* <h1> *@
+    @*     @Character.Id *@
+    @*     @if (showSaveIndicator) *@
+    @*     { *@
+    @*         <span class="save-indicator text-sm-center"> ✅Saved</span> *@
+    @*     } *@
+    @* </h1> *@
 
 
     <div class="row">
@@ -203,7 +207,7 @@
 
     @if (CanEdit)
     {
-        <button type="submit" class="btn btn-primary">Save Character</button>        
+        <button type="submit" class="btn btn-primary" @onclick="SaveCharacterAndClose">Save Character</button>        
     }
     
     @* <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button> *@
@@ -212,7 +216,7 @@
 </EditForm>
 
 @code {
-    [Parameter] public Guid Id { get; set; }
+    [Parameter] public Guid Id { get; set; } = Guid.NewGuid();
     [Parameter] public bool CanEdit { get; set; } = true;
     [Parameter] public Character Character { get; set; }
     private List<DocumentWrapper<Skill>> availableSkills;
