@@ -3,9 +3,9 @@
 @using SwDc20.Core.Domain.Entities.GameInfo.V0._8
 @inject CharacterService CharacterService
 @inject WeaponService WeaponService
-@inject IModalService ModalService
 @inject NavigationManager NavigationManager
 @inject GamesService GamesService
+@inject IModalService ModalService
 
 <h3>Characters</h3>
 
@@ -44,29 +44,8 @@ else
                         <button class="btn btn-success mr-2" @onclick="() => PlayCharacter(characterWrapper.Document)">Play</button>
                         <button class="btn btn-primary mr-2" @onclick="() => EditCharacter(characterWrapper.Document.Id)">Edit</button>
                         <button class="btn btn-danger" @onclick="() => DeleteCharacter(characterWrapper.Document.Id)">Delete</button>
-                        
                     </div>
                 </div>
-                @* This might be something to handle to allow players to directly play
-                    but I need to leverage signal to allow for eventing between players *@
-                @* <div class="card-footer"> *@
-                @*     <table class="table table-sm "> *@
-                @*         <thead> *@
-                @*             <tr> *@
-                @*                 <th>Game Name</th> *@
-                @*                 <th>Level</th> *@
-                @*             </tr> *@
-                @*         </thead> *@
-                @*         @foreach (var game in currentCharacters) *@
-                @*         { *@
-                @* *@
-                @*             <tr> *@
-                @*                 <td>@game.</td> *@
-                @*                 <td>@game.Level</td> *@
-                @*             </tr> *@
-                @*         } *@
-                @*     </table> *@
-                @* </div> *@
             </div>
         }
     </div>
@@ -74,64 +53,30 @@ else
 
 @code {
     private List<DocumentWrapper<Character>> characters;
-    // private CurrentCharacter? currentCharacter;
-    // private List<Game> currentGamesWithCharacters;
-    private ModalOptions modalOptions = new ModalOptions()
-    {
-        Size = ModalSize.ExtraLarge,
-        Position = ModalPosition.TopCenter
-    };
 
     protected override async Task OnInitializedAsync()
     {
         characters = await CharacterService.GetCharactersAsync();
-        // currentCharacter = await CurrentCharacterService.GetCurrentCharacterAsync();
-        // currentGamesWithCharacters = await GamesService.GetGamesWithCharactersAsync(currentCharacter.Character.Id);
     }
 
-    private async Task CreateNewCharacter()
+    private void CreateNewCharacter()
     {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(CharacterEditForm.Character), new Character
-        {
-            Id = Guid.NewGuid(),
-            Version = Character.CurrentVersion,
-            Resources = new List<CharacterResource>()
-        });
-        
-
-        var modal = ModalService.Show<CharacterEditForm>("Create New Character", parameters, modalOptions);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            await RefreshCharacters();
-        }
+        var newCharacterId = Guid.NewGuid();
+        NavigationManager.NavigateTo($"/character/{newCharacterId}");
     }
 
-    private async Task EditCharacter(Guid id)
+    private void EditCharacter(Guid id)
     {
-        var characterWrapper = await CharacterService.GetCharacterAsync(id);
-        if (characterWrapper != null)
-        {
-            var parameters = new ModalParameters();
-            parameters.Add(nameof(CharacterEditForm.Character), characterWrapper.Document);
-            
-
-            var modal = ModalService.Show<CharacterEditForm>("Edit Character", parameters, modalOptions);
-            var result = await modal.Result;
-
-            if (!result.Cancelled)
-            {
-                await RefreshCharacters();
-            }
-        }
+        NavigationManager.NavigateTo($"/character/{id}");
     }
 
     private async Task DeleteCharacter(Guid id)
     {
-        var confirmResult = await ModalService.Show<DeleteConfirmation>("Confirm Delete").Result;
-        if (!confirmResult.Cancelled)
+        var parameters = new ModalParameters();
+        var modal = ModalService.Show<DeleteConfirmation>("Confirm Delete");
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
         {
             await CharacterService.DeleteCharacterAsync(id);
             await RefreshCharacters();
@@ -141,71 +86,19 @@ else
     private async Task RefreshCharacters()
     {
         characters = await CharacterService.GetCharactersAsync();
-        // currentCharacter = await CurrentCharacterService.GetCurrentCharacterAsync();
         StateHasChanged();
     }
 
-    private async Task PlayCharacter(Character character)
+    private void PlayCharacter(Character character)
     {
         if (character != null)
         {
-            // var isCharacterSetup = await CurrentCharacterService.IsCharacterSetupAsync();
-            // CurrentCharacter playingCharacter;
-
-            // if (!isCharacterSetup)
-            // {
-            //     // First time setup
-            //     playingCharacter = new CurrentCharacter(character);
-            // }
-            // else
-            // {
-            //     // Use existing values
-            //     playingCharacter = await CurrentCharacterService.GetCurrentCharacterAsync();
-            //     if (playingCharacter == null || playingCharacter.Character.Id != character.Id)
-            //     {
-            //         // If the character has changed, create a new CurrentCharacter
-            //         playingCharacter = new CurrentCharacter(character);
-            //     }
-            //     else
-            //     {
-            //         // Update the base character data while keeping current values
-            //         playingCharacter.Character = character;
-            //     }
-            // }
-
-            // var parameters = new ModalParameters();
-            // parameters.Add(nameof(PlayCharacterModal.CurrentCharacter), playingCharacter);
-            //
-            // var modal = ModalService.Show<PlayCharacterModal>("Play Character", parameters, modalOptions);
-            // var result = await modal.Result;
-            //
-            // if (!result.Cancelled)
-            // {
-            //     currentCharacter = (CurrentCharacter)result.Data;
-            //     StateHasChanged();
-            // }
+            // Implement play character logic here
+            Console.WriteLine($"Playing character: {character.Name}");
         }
         else
         {
             Console.Error.WriteLine("Attempted to play a null character");
         }
-    }
-
-    private async Task EditCurrentCharacter()
-    {
-        // if (currentCharacter != null)
-        // {
-        //     var parameters = new ModalParameters();
-        //     parameters.Add(nameof(PlayCharacterModal.CurrentCharacter), currentCharacter);
-        //
-        //     var modal = ModalService.Show<PlayCharacterModal>("Edit Current Character", parameters, modalOptions);
-        //     var result = await modal.Result;
-        //
-        //     if (!result.Cancelled)
-        //     {
-        //         currentCharacter = (CurrentCharacter)result.Data;
-        //         StateHasChanged();
-        //     }
-        // }
     }
 }
