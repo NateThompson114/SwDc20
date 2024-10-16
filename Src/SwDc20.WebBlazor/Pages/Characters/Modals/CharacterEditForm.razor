@@ -8,7 +8,7 @@
 @inject NavigationManager NavigationManager
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>@(Character.Name ?? "New Character")</h1>
+    <h1>@(Character?.Name ?? "New Character")</h1>
     @* <div class="form-check form-switch"> *@
     @*     <input class="form-check-input" type="checkbox" id="editToggle" @bind="CanEdit" @bind:after="UpdateUrl"> *@
     @*     <label class="form-check-label" for="editToggle">Edit Mode</label> *@
@@ -19,25 +19,11 @@
     }
 </div>
 
-@if (showSaveIndicator)
-{
-    <div class="alert alert-success" role="alert"> ✅ Saved</div>
-}
-
 
 <EditForm Model="@Character" OnValidSubmit="SaveCharacter">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
-    <FloatingDiceRoller />
-
-    @* <h1> *@
-    @*     @Character.Id *@
-    @*     @if (showSaveIndicator) *@
-    @*     { *@
-    @*         <span class="save-indicator text-sm-center"> ✅Saved</span> *@
-    @*     } *@
-    @* </h1> *@
-
+    <FloatingDiceRoller/>
 
     <div class="row">
         <div class="col-md-6">
@@ -104,7 +90,7 @@
             <h4>Attributes</h4>
         </div>
         <div class="card-body">
-            <div class="row" >
+            <div class="row">
 
                 <div class="col-lg-3 col-md-6">
                     <SwDc20.WebBlazor.Components.AttributeCardWithSave
@@ -160,40 +146,40 @@
 
     <hr/>
 
-    <HealthStaminaManaContainer Character="@Character" CanEdit="@CanEdit" OnChanged="@AutoSaveCharacter" />
+    <HealthStaminaManaContainer Character="@Character" CanEdit="@CanEdit" OnChanged="@AutoSaveCharacter"/>
 
     <hr/>
 
-    <DefenseContainer Character="@Character" CanEdit="@CanEdit" OnDefensesChanged="@AutoSaveCharacter" />
+    <DefenseContainer Character="@Character" CanEdit="@CanEdit" OnDefensesChanged="@AutoSaveCharacter"/>
 
     <hr/>
 
-    <SkillsContainer Character="@Character" CanEdit="@CanEdit" OnChanged="@AutoSaveCharacter" />
+    <SkillsContainer Character="@Character" CanEdit="@CanEdit" OnChanged="@AutoSaveCharacter"/>
 
     <hr/>
 
-    <TradesContainer Character="@Character" OnTradesChanged="@AutoSaveCharacter" CanEdit="@CanEdit" />
+    <TradesContainer Character="@Character" OnTradesChanged="@AutoSaveCharacter" CanEdit="@CanEdit"/>
 
     <hr/>
 
-    <LanguageContainer Character="@Character" CanEdit="@CanEdit" OnLanguagesChanged="@AutoSaveCharacter" />
+    <LanguageContainer Character="@Character" CanEdit="@CanEdit" OnLanguagesChanged="@AutoSaveCharacter"/>
 
 
     <hr/>
 
-    <CombatContainer Character="@Character" CanEdit="@CanEdit" OnCombatChanged="AutoSaveCharacter" />
+    <CombatContainer Character="@Character" CanEdit="@CanEdit" OnCombatChanged="AutoSaveCharacter"/>
 
     <hr/>
 
-    <InventoryContainer Character="@Character" OnInventoryChanged="@AutoSaveCharacter" CanEdit="@CanEdit" />
+    <InventoryContainer Character="@Character" OnInventoryChanged="@AutoSaveCharacter" CanEdit="@CanEdit"/>
 
     <hr/>
 
-    <FeaturesContainer Character="@Character" CanEdit="@CanEdit" OnFeaturesChanged="@AutoSaveCharacter" />
+    <FeaturesContainer Character="@Character" CanEdit="@CanEdit" OnFeaturesChanged="@AutoSaveCharacter"/>
 
     <hr/>
 
-    <ResourceContainer Character="@Character" CanEdit="@CanEdit" OnResourcesChanged="@AutoSaveCharacter" />
+    <ResourceContainer Character="@Character" CanEdit="@CanEdit" OnResourcesChanged="@AutoSaveCharacter"/>
 
     <hr/>
 
@@ -204,41 +190,33 @@
     @* </div> *@
 
 
-
     @if (CanEdit)
     {
-        <button type="submit" class="btn btn-primary" @onclick="SaveCharacterAndClose">Save Character</button>        
+        <button type="submit" class="btn btn-primary" @onclick="SaveCharacterAndClose">Save Character</button>
     }
-    
+
     @* <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button> *@
-    
+
 
 </EditForm>
 
-@code {
+@code
+{
     [Parameter] public Guid Id { get; set; } = Guid.NewGuid();
     [Parameter] public bool CanEdit { get; set; } = true;
-    [Parameter] public Character Character { get; set; }
+    public Character Character { get; set; } = new()
+    {
+        Id = Guid.NewGuid(), 
+        Version = Character.CurrentVersion
+    };
     private List<DocumentWrapper<Skill>> availableSkills;
-    private List<DocumentWrapper<Weapon>> availableWeapons = new List<DocumentWrapper<Weapon>>();
-    
-    
-    // [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
-    
-    
-    
-    private Guid selectedWeaponId;
-    private string newSkillName = "";
-    private string newSkillAttribute = "Intelligence";
-    private string newTagAttribute = "Knowledge";
-    private string activeTab = "main";
-    private List<string> AttributeList = new List<string> { "Prime", nameof(Character.Might), nameof(Character.Agility), nameof(Character.Charisma), nameof(Character.Intelligence) };    
+    private List<DocumentWrapper<Weapon>> availableWeapons = [];
     private bool showSaveIndicator = false;
     
     protected override async Task OnInitializedAsync()
     {
         var characterWrapper = await CharacterService.GetCharacterAsync(Id);
-
+        
         Character = characterWrapper?.Document ?? new Character
                         {
                             Id = Id,
@@ -246,11 +224,12 @@
                             Resources = new List<CharacterResource>()
                         };
 
-
         availableSkills = await SkillService.GetSkillsAsync();
-        if (availableSkills.Count() == 0)
+
+        if (!availableSkills.Any())
         {
-            availableSkills = SkillService.GetDefaultSkills().Select(s => new DocumentWrapper<Skill>
+            availableSkills = SkillService.GetDefaultSkills()
+                    .Select(s => new DocumentWrapper<Skill>
                                 {
                                     ContentId = s.Id,
                                     Document = s,
@@ -260,136 +239,68 @@
                     ).ToList();
         }
         
-        if (Character.Skills.Count == 0)
+        if (!Character.Skills.Any())
         {
             Character.Skills = availableSkills.Select(s => s.Document)
                     .Select(s => new Skill()
-                        {
-                            Id = s.Id,
-                            Name = s.Name,
-                            AttributeUsed = s.AttributeUsed,
-                            Tag = s.Tag,
-                            UseForMartialCheck = s.UseForMartialCheck,
-                            Version = Skill.CurrentVersion
-                        }
-                    )
-                    .ToList();
+                                {
+                                    Id = s.Id,
+                                    Name = s.Name,
+                                    AttributeUsed = s.AttributeUsed,
+                                    Tag = s.Tag,
+                                    UseForMartialCheck = s.UseForMartialCheck,
+                                    Version = Skill.CurrentVersion
+                                }
+                    ).ToList();
         }
-        
-        if(Character.ActionPoints == 0)
+
+
+        if (Character.ActionPoints == 0)
         {
             Character.ActionPoints = 4;
         }
-        
+
+
         availableWeapons = await WeaponService.GetWeaponsAsync();
     }
-    
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     availableSkills = await SkillService.GetSkillsAsync();
-    //
-    //     if (availableSkills.Count() == 0)
-    //     {
-    //         availableSkills = SkillService.GetDefaultSkills().Select(s => new DocumentWrapper<Skill>
-    //         {
-    //             ContentId = s.Id,
-    //             Document = s,
-    //             DocumentType = "Skill",
-    //             ContentVersion = s.Version
-    //         }).ToList();
-    //     }
-    //     
-    //     if (Character.Skills.Count == 0)
-    //     {
-    //         Character.Skills = availableSkills.Select(s => s.Document).Select(s => new Skill()
-    //         {
-    //             Id = s.Id,
-    //             Name = s.Name,
-    //             AttributeUsed = s.AttributeUsed, 
-    //             Tag = s.Tag,
-    //             UseForMartialCheck = s.UseForMartialCheck,
-    //             Version = Skill.CurrentVersion
-    //         }).ToList();
-    //     }
-    //     
-    //     if (Character.ActionPoints == 0)
-    //     {
-    //         Character.ActionPoints = 4;
-    //     }
-    //
-    //     availableWeapons = await WeaponService.GetWeaponsAsync();
-    // }
-    
-    private void UpdateUrl()
-    {
-        var uri = NavigationManager.GetUriWithQueryParameter("canEdit", CanEdit);
 
-        NavigationManager.NavigateTo(uri, false);
-    }
-    
+
     private async Task SaveCharacter()
     {
-        var characterWrapper = new DocumentWrapper<Character>
-                    {
-                        Document = Character,
-                        ContentId = Character.Id,
-                        ContentVersion = Character.Version
-                    };
-        
-        await CharacterService.SaveCharacterAsync(characterWrapper);
-        
-        showSaveIndicator = true;
-        StateHasChanged();
-        await Task.Delay(2000);
-        showSaveIndicator = false;
-        
-        StateHasChanged();
+        if (Character != null)
+        {
+            var characterWrapper = new DocumentWrapper<Character>
+                        {
+                            Document = Character,
+                            ContentId = Character.Id,
+                            ContentVersion = Character.Version
+                        };
+            
+            await CharacterService.SaveCharacterAsync(characterWrapper);
+
+            showSaveIndicator = true;
+            StateHasChanged();
+            await Task.Delay(2000);
+            showSaveIndicator = false;
+            StateHasChanged();
+        }
     }
 
-
-    // private async Task SaveCharacter()
-    // {
-    //     var characterWrapper = new DocumentWrapper<Character>
-    //     {
-    //         Document = Character,
-    //         ContentId = Character.Id,
-    //         ContentVersion = Character.Version
-    //     };
-    //
-    //     await CharacterService.SaveCharacterAsync(characterWrapper);
-    // }
-    
     private async Task SaveCharacterAndClose()
     {
         await SaveCharacter();
-        
-        // await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+        NavigationManager.NavigateTo("/characters");
     }
 
-    // private async Task Cancel()
-    // {
-    //     await BlazoredModal.CancelAsync();
-    // }
-    
-    private int SelectedMasteriesCount =>
-        (Character.MightSaveMastery ? 1 : 0) +
-        (Character.AgilitySaveMastery ? 1 : 0) +
-        (Character.CharismaSaveMastery ? 1 : 0) +
-        (Character.IntelligenceSaveMastery ? 1 : 0);
+    private int SelectedMasteriesCount => (Character?.MightSaveMastery == true ? 1 : 0) + (Character?.AgilitySaveMastery == true ? 1 : 0) + (Character?.CharismaSaveMastery == true ? 1 : 0) + (Character?.IntelligenceSaveMastery == true ? 1 : 0);
 
     private async Task UpdateSaveMasteries()
     {
         await AutoSaveCharacter();
     }
-    
+
     private async Task AutoSaveCharacter()
     {
         await SaveCharacter();
-        
-        showSaveIndicator = true;
-        StateHasChanged();
-        await Task.Delay(2000); // Show the save indicator for 2 seconds
-        showSaveIndicator = false;
-        StateHasChanged();
     }
 }
