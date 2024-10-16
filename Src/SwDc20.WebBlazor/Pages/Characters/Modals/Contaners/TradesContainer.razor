@@ -1,0 +1,91 @@
+﻿@using SwDc20.Core.Domain.Entities.Character
+@inject IModalService ModalService
+
+<div class="card border-secondary" aria-roledescription="Trades Container" aria-description="Container for your trades">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h4>Trades</h4>
+            </div>
+            @if (CanEdit)
+            {
+                <div class="col-auto">
+                    <button type="button" class="btn btn-primary btn-sm" @onclick="AddTrade" title="Add Trade">+ Add Trade Modal</button>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="card-group">
+            @foreach (var trade in Character.Trades)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">@trade.Name</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="@($"tradeBonus_{trade.Name}")">Bonus:</label>
+                            @if (CanEdit)
+                            {
+                                <InputNumber id="@($"tradeBonus_{trade.Name}")" class="form-control" @bind-Value="trade.Bonus"/>
+                            }
+                            else
+                            {
+                                <input type="number" id="@($"tradeBonus_{trade.Name}")" class="form-control" value="@trade.Bonus" disabled />
+                            }
+                        </div>
+
+                        <hr/>
+
+                        <p>@trade.Description</p>
+                    </div>
+                    @if (CanEdit)
+                    {
+                        <div class="card-footer">
+                            <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveTrade(trade)">Remove</button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Character Character { get; set; }
+    [Parameter] public EventCallback OnTradesChanged { get; set; }
+    [Parameter] public bool CanEdit { get; set; } = true;
+
+    private async Task AddTrade()
+    {
+        if (!CanEdit) return;
+
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(TradeEditForm.Trade), new Trade());
+
+        var options = new ModalOptions()
+        {
+            Size = ModalSize.Small,
+            Position = ModalPosition.Middle
+        };
+
+        var modal = ModalService.Show<TradeEditForm>("Add Trade", parameters, options);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var newTrade = (Trade)result.Data;
+            Character.Trades.Add(newTrade);
+            await OnTradesChanged.InvokeAsync();
+        }
+    }
+
+    private async Task RemoveTrade(Trade trade)
+    {
+        if (!CanEdit) return;
+
+        Character.Trades.Remove(trade);
+        await OnTradesChanged.InvokeAsync();
+    }
+}

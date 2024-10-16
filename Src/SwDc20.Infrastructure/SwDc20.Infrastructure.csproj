@@ -8,10 +8,17 @@
 
     <ItemGroup>
       <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+      <PackageReference Include="Blazored.Toast" Version="4.2.1" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\SwDc20.Core\SwDc20.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="SwDc20.Core">
+        <HintPath>..\SwDc20.WebBlazor\bin\Debug\net8.0\SwDc20.Core.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

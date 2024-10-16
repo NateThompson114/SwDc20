@@ -16,12 +16,11 @@ public class GamesService(ILocalStorageService localStorage)
     {
         var games = await localStorage.GetItemAsync<List<Game>>(GameKey);
 
-        return games.Where(g => g.Characters.Any(c => c.Character.Id == characterId)).ToList();
+        return games.Where(g => g.Characters.Any(c => c.Id == characterId)).ToList();
     }
     
     public async Task SetGameAsync(Game game)
     {
         await localStorage.SetItemAsync(GameKey, game);
     }
-    
 }

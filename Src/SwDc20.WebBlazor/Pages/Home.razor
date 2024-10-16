@@ -6,18 +6,121 @@
 
 <h1>Welcome to SwDc20</h1>
 
-<h2 class="alert alert-info">THIS IS PRE ALPHA</h2>
 
-<h3><a href="https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/668fe23ff9326eeb8c5cd7a3" target="_blank" rel="noreferrer noopener">Star Wars DC20 Alchemy Page</a></h3>
+<div class="row align-items-center alert alert-info overflow-hidden">
+    <div class="col">
+        <h2 class="">THIS IS ALPHA</h2>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-danger" @onclick="PurgeLocalStorage">Purge Local Storage</button>
+    </div>
+</div>
 
-<p>Please do not use this yet as your online storage, once 0.8 character sheet is ready I will remove the alpha banner and let everyone know. I have included a Purge Local Storage option if you find yourself unable to open your characters.</p>
-<button class="btn btn-danger" @onclick="PurgeLocalStorage">Purge Local Storage</button>
+<p>Use this at your own risk as your online storage, the character sheet is 80% done, and the data is structure is 99% done, once 0.8 character sheet is ready I will remove the alpha banner and let everyone know. I have included a Purge Local Storage option if you find yourself unable to open your characters.</p>
+
 
 @if (!string.IsNullOrEmpty(message))
 {
     <div class="alert alert-info mt-3">
         @message
     </div>
+}
+
+<hr/>
+@foreach (var link in links.Where(l => l.Type == "External"))
+{
+<h3>
+    <a href="@link.Url" target="_blank" rel="noreferrer noopener">@link.Name</a>
+</h3>
+@* <div class="col"> *@
+@*     <div class="card h-100"> *@
+@*         <div class="card-body"> *@
+@*             <h5 class="card-title">@link.Name</h5> *@
+@*             $1$ <p class="card-text">Type: @link.Type</p> #1# *@
+@*             <a href="@link.Url" target="_blank" rel="noreferrer noopener" class="btn btn-primary">Link</a> *@
+@*             @if (!string.IsNullOrEmpty(link.Description)) *@
+@*             { *@
+@*             <p class="card-text mt-2">@link.Description</p> *@
+@*             } *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+}
+@* <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-4"> *@
+@*     @foreach (var link in links.Where(l => l.Type == "External")) *@
+@*     { *@
+@*         <h3> *@
+@*             <a href="@link.Url" target="_blank" rel="noreferrer noopener">@link.Name</a> *@
+@*         </h3> *@
+@*     $1$ <div class="col"> #1# *@
+@*     $1$     <div class="card h-100"> #1# *@
+@*     $1$         <div class="card-body"> #1# *@
+@*     $1$             <h5 class="card-title">@link.Name</h5> #1# *@
+@*     $1$             $2$ <p class="card-text">Type: @link.Type</p> #2# #1# *@
+@*     $1$             <a href="@link.Url" target="_blank" rel="noreferrer noopener" class="btn btn-primary">Link</a> #1# *@
+@*     $1$             @if (!string.IsNullOrEmpty(link.Description)) #1# *@
+@*     $1$             { #1# *@
+@*     $1$             <p class="card-text mt-2">@link.Description</p> #1# *@
+@*     $1$             } #1# *@
+@*     $1$         </div> #1# *@
+@*     $1$     </div> #1# *@
+@*     $1$ </div> #1# *@
+@*     } *@
+@* </div> *@
+<hr/>
+
+<table class="table table-sm table-borderless table-striped">
+    <thead>
+    <tr>
+        <th>Status Indicator</th>
+        <th>Status Text</th>
+        <th>Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>🔴</td>
+        <td>Alpha</td>
+        <td> This is being spitballed, but there is no checking of numbers done</td>
+    </tr>
+
+    <tr>
+        <td>🟡</td><td>Beta</td><td> Contains items that have been confirmed</td>
+    </tr>
+    <tr>
+        <td>🟢</td><td>Release</td><td> These have been play tested and so far feel good for both a DC20 game and Star Wars</td>
+    </tr>
+    <tr>
+        <td>🔃</td><td>Change Incoming</td><td>I am currently working in this area and will be adding new items within that day (EST timezone)</td>
+    </tr>
+    <tr>
+        <td>❌</td><td>Rework needed</td><td>This is about to get a full rework, and many if not all values may change</td>
+    </tr>
+    </tbody>
+</table>
+
+@foreach (var linkGroup in links.Where(l => l.Type != "External").GroupBy(l => l.Type))
+{
+    <h3>@linkGroup.Key</h3>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-4">
+        @foreach (var link in linkGroup)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@link.Name</h5>
+                        @* <p class="card-text">Type: @link.Type</p> *@
+                        <a href="@link.Url" target="_blank" rel="noreferrer noopener" class="btn btn-primary">Link</a>
+                        @if (!string.IsNullOrEmpty(link.Description))
+                        {
+                            <p class="card-text mt-2">@link.Description</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <hr/>
 }
 
 @code {
@@ -42,4 +145,54 @@
             message = $"An error occurred while purging local storage: {ex.Message}";
         }
     }
+
+    public class Link
+    {
+        public string Name { get; set; }
+        public string Url { get; set; }
+        public string Type { get; set; }
+        public string? Description { get; set; }
+
+        public Link(string name, string url, string type, string description = null)
+        {
+            Name = name;
+            Url = url;
+            Type = type;
+            Description = description;
+        }
+
+        public Link()
+        {
+        }
+    }
+
+    private List<Link> links = new List<Link>
+    {
+        new Link { Name = "Star Wars DC20 Alchemy Page", Url = "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/668fe23ff9326eeb8c5cd7a3", Type = "External" },
+        new Link { Name = "Star Wars DC20 Discord", Url = "https://discord.gg/a9wXw9tYg7", Type = "External" },
+        new Link { Name = "Star Wars DC20 Github", Url = "https://github.com/NateThompson114/SwDc20", Type = "External" },
+        new Link("🟡Consular (Wizard)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66970ebd37d8bb0c0042a1ff", "Class"),
+        new Link("🟡Bounty Hunter (Sorcerer)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66970f02c40aef5934bc23d8", "Class"),
+        new Link("🔴Medic (Cleric)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66970fad73fe3fc25d037e92", "Class"),
+        new Link("🟡Guardaian (Spellblade)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66970f7237d8bb0c00435751", "Class"),
+        new Link("🟡Nightsister (Warlock)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/6697104e73fe3fc25d04830d", "Class", "In testing"),
+        new Link("🟡Trooper (Fighter)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/669710a337d8bb0c00457526", "Class"),
+        new Link("🟡Scrapper (Barbarian)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/669710da73fe3fc25d05ac68", "Class"),
+        new Link("🟡Officer (Commander)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/6697119873fe3fc25d06c10e", "Class"),
+        new Link("🟡Smuggler (Bard)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/669711ec37d8bb0c0048a309", "Class"),
+        new Link("🟡SpecOps (Rogue)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66971210ea94a942643a072e", "Class"),
+        new Link("🟡Gunslinger (Ranger)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/6697134773fe3fc25d091012", "Class"),
+        new Link("🟡Teräs Käsis (Monk)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/669713e1ea94a942643ce2d6", "Class", "In testing"),
+        new Link("🔴Jedi Snetinel (Psion'ish)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/6697144eccc96ac6d54ee468", "Class"),
+        new Link("🔴Engineer (Artificer/Custom Class)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66e4b6a350f796d3e835af15", "Class", "In testing"),
+        new Link("🟡🔴Ancestry Options", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66e4514a196b0c026aaa9eff", "Ancestry", "In testing"),
+        new Link("🔴NPCs", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66e45d9211316e55e4e08f94", "NPC", "In testing"),
+        new Link("🟡Underworld NPCs", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66e45dfe5d63bad1c0fe3117", "NPC", "In testing"),
+        new Link("🔴Miscellaneous NPCs", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66e45e43f9d10ae7f4cd21e1", "NPC", "In testing"),
+        new Link("🔴Force and Tech Abilities (Spells)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66e3a8e4afbc49a080b0721e", "Spell", "In testing"),
+        new Link("🔴Equipment", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66e3aaf1afbc49a080b1bd35", "Equipment", "In testing"),
+        new Link("🔴Skills, Trades & Languages", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66e4c27ab8252c5261a28247", "Skill", "In testing"),
+        new Link("🔴Galactic Tech System (Magic Item)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66e4ce93b8252c5261ad83ab", "Tech", "In testing"),
+    };
+
 }

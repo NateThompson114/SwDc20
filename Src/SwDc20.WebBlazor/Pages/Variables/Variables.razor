@@ -1,19 +1,25 @@
 ﻿@page "/variables"
+@using System.Web
 @using SwDc20.Core.Domain.Entities.Variable.V0._8
-@using SwDc20.WebBlazor.Models
-@using SwDc20.Core.Application.Constants
+@using SwDc20.Core.Application.Constants.Dc20
 @using SwDc20.Core.Domain.Enums
-@using SwDc20.Core.Domain.Entities.Character.V0._8
+@using SwDc20.WebBlazor.Pages.Variables.Modals
 @inject VariableService VariableService
 @inject SkillService SkillService
+@inject IModalService ModalService
+@inject NavigationManager NavigationManager
 
 <h1>Variables</h1>
+
+<button class="btn btn-secondary mb-3" @onclick="OpenFilterModal">
+    Filter by Properties
+</button>
 
 @if (!AreAllStandardVariablesLoaded())
 {
     <button class="btn btn-primary mb-3 me-2" @onclick="LoadStandardVariables">Load Standard Variables</button>
 }
-<button class="btn btn-success mb-3" @onclick="() => OpenModal(new Variable { Id = Guid.NewGuid(), Version = Variable.CurrentVersion, Properties = new List<Property>(), Deletable = true })">Add New Variable</button>
+<button class="btn btn-success mb-3" @onclick="() => OpenModal(new Variable { Id = Guid.NewGuid(), Version = Variable.CurrentVersion, Properties = new List<VariableProperty>(), Deletable = true })">Add New Variable</button>
 
 @if (variables == null)
 {
@@ -32,7 +38,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var variableWrapper in variables)
+            @foreach (var variableWrapper in FilteredVariables())
             {
                 var variable = variableWrapper.Document;
                 <tr>
@@ -69,10 +75,28 @@ else
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
-                        <div class="form-group">
-                            <label for="name">Name</label>
+                        <div class="form-floating">
                             <InputText id="name" class="form-control" @bind-Value="editingVariable.Name" />
+                            <label for="name">Name</label>
                         </div>
+                        
+                        <br/>
+                        
+                        <div class="input-group">
+                            <label class="input-group-text" for="coreVariable">Core Variable</label>
+                            <InputSelect id="coreVariable" class="form-control" @bind-Value="editingVariable.CoreVariable">
+                                <option value="true">True</option>
+                                <option value="false">False</option>
+                            </InputSelect>
+                            <label class="input-group-text" for="deletable">Deletable</label>
+                            <InputSelect id="deletable" class="form-control" @bind-Value="editingVariable.Deletable">
+                                <option value="true">True</option>
+                                <option value="false">False</option>
+                            </InputSelect>
+                        </div>
+                       
+
+                        
 
                         <div class="form-group">
                             <label for="cost">Cost</label>
@@ -80,7 +104,7 @@ else
                         </div>
 
                         <div class="form-group">
-                            <label for="damageIncrease">Damage Increase</label>
+                            <label for="damageIncrease">One handed Damage Increase</label>
                             <InputNumber id="damageIncrease" class="form-control" @bind-Value="editingVariable.DamageIncrease" />
                         </div>
 
@@ -90,7 +114,7 @@ else
                         </div>
 
                         <div class="form-group">
-                            <label for="bonusToHit">Bonus To Hit</label>
+                            <label for="bonusToHit">One handed Bonus To Hit</label>
                             <InputNumber id="bonusToHit" class="form-control" @bind-Value="editingVariable.BonusToHit" />
                         </div>
 
@@ -108,10 +132,13 @@ else
                             <label for="calculation">Calculation</label>
                             <InputText id="calculation" class="form-control" @bind-Value="editingVariable.Calculation" />
                         </div>
+                        
+                        <hr/>
 
                         <div class="form-group">
-                            <label>Properties</label>
-                            @foreach (var property in Property.List)
+                            <h4>Variable belongs to</h4>
+                            <p>When selecting things like Magic, Melee, or Ranged, these variables will show up in the weapon creator </p>
+                            @foreach (var property in VariableProperty.List)
                             {
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="@property.Name" 
@@ -121,12 +148,31 @@ else
                                 </div>
                             }
                         </div>
+                        
+                        <hr/>
 
                         <div class="form-group">
-                            <label>Required Variables</label>
-                            @if (variables != null)
+                            <h4>Default Variable</h4>
+                            <p>These variables will not show in normal drop downs but instead appear as check boxes for the items, like in the weapon creator</p>
+                            @foreach (var property in VariableProperty.List)
                             {
-                                foreach (var variableWrapper in variables)
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="@($"default-{property.Name}")"
+                                           checked="@(editingVariable.DefaultVariableForProperties?.Contains(property) ?? false)"
+                                           @onchange="@(e => ToggleDefaultProperty(property))" />
+                                    <label class="form-check-label" for="@($"default-{property.Name}")">@property.Name</label>
+                                </div>
+                            }
+                        </div>
+                        
+                        <hr/>
+
+                        <div class="form-group">
+                            <h4>Required Variables to Select This Variable</h4>
+                            <p>This selection will make picking this variable require whichever variable below you select, this can be chained</p>
+                            @if (FilteredVariables() != null)
+                            {
+                                foreach (var variableWrapper in FilteredVariables().Where(v => v.Document.Id != editingVariable.Id))
                                 {
                                     var variable = variableWrapper.Document;
                                     <div class="form-check">
@@ -138,27 +184,8 @@ else
                                 }
                             }
                         </div>
-
-                        <div class="form-group">
-                            <label>Default Variable For Properties</label>
-                            @foreach (var property in Property.List)
-                            {
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="@($"default-{property.Name}")"
-                                       checked="@(editingVariable.DefaultVariableForProperties?.Contains(property) ?? false)"
-                                       @onchange="@(e => ToggleDefaultProperty(property))" />
-                                <label class="form-check-label" for="@($"default-{property.Name}")">@property.Name</label>
-                            </div>
-                            }
-                        </div>
-
-                        <div class="form-group">
-                            <label for="deletable">Deletable</label>
-                            <InputSelect id="deletable" class="form-control" @bind-Value="editingVariable.Deletable">
-                                <option value="true">True</option>
-                                <option value="false">False</option>
-                            </InputSelect>
-                        </div>
+                        
+                        
 
                         <div class="form-group">
                             <label for="isStackable">IsStackable</label>
@@ -240,6 +267,7 @@ else
 }
 
 @code {
+    [Parameter] public string PropertyFilter { get; set; }
     private List<DocumentWrapper<Variable>> variables;
     private bool showModal = false;
     private Variable editingVariable = new Variable
@@ -248,11 +276,32 @@ else
         Version = Variable.CurrentVersion
     };
     private List<Skill> availableSkills = new List<Skill>();
-
+    private HashSet<VariableProperty> selectedProperties = new HashSet<VariableProperty>(VariableProperty.ToList());
+    private bool selectAll = true;
+    
     protected override async Task OnInitializedAsync()
     {
         await LoadVariables();
         await LoadAvailableSkills();
+
+        var uri = new Uri(NavigationManager.Uri);
+        var query = HttpUtility.ParseQueryString(uri.Query);
+        var propertyParam = query.Get("property");
+
+        if (string.IsNullOrEmpty(propertyParam))
+        {
+            // If there's no property parameter, select all properties
+            selectedProperties = new HashSet<VariableProperty>(VariableProperty.ToList());
+            selectAll = true;
+        }
+        else
+        {
+            var propertyNames = propertyParam.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            selectedProperties = new HashSet<VariableProperty>(
+                VariableProperty.ToList().Where(p => propertyNames.Contains(p.Name, StringComparer.OrdinalIgnoreCase))
+            );
+            selectAll = selectedProperties.Count == VariableProperty.ToList().Count;
+        }
     }
 
     private async Task LoadAvailableSkills()
@@ -275,7 +324,7 @@ else
             return false;
         }
 
-        var standardVariableIds = StandardVariables.ToList().Select(v => v.Id).ToHashSet();
+        var standardVariableIds = Dc20StandardVariables.ToList().Select(v => v.Id).ToHashSet();
         var loadedVariableIds = variables
             .Select(v => v.Document?.Id)
             .Where(id => id.HasValue)
@@ -286,7 +335,7 @@ else
 
     private async Task LoadStandardVariables()
     {
-        var standardVariables = StandardVariables.ToList();
+        var standardVariables = Dc20StandardVariables.ToList();
         foreach (var variable in standardVariables)
         {
             await VariableService.SaveVariableAsync(variable);
@@ -312,8 +361,9 @@ else
             BonusToHit = variable.BonusToHit,
             TwoHandedBonusToHit = variable.TwoHandedBonusToHit,
             Description = variable.Description,
-            Properties = new List<Property>(variable.Properties ?? Enumerable.Empty<Property>()),
+            Properties = new List<VariableProperty>(variable.Properties ?? Enumerable.Empty<VariableProperty>()),
             Calculation = variable.Calculation,
+            CoreVariable = variable.CoreVariable,
             Deletable = variable.Deletable,
             IsStackable = variable.IsStackable,
             CountsTowardsMaximumProperties = variable.CountsTowardsMaximumProperties,
@@ -360,23 +410,67 @@ else
         await LoadVariables();
         CloseModal();
     }
-
-    private void ToggleProperty(Property property)
+    
+    private async Task OpenFilterModal()
     {
-        if (editingVariable.Properties == null)
-        {
-            editingVariable.Properties = new List<Property>();
-        }
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(FilterModal.SelectedProperties), selectedProperties);
+        parameters.Add(nameof(FilterModal.SelectAll), selectAll);
 
-        if (editingVariable.Properties.Contains(property))
+        var modal = ModalService.Show<FilterModal>("Filter by Properties", parameters);
+        var result = await modal.Result;
+
+        if (result.Cancelled)
+            return;
+
+        var data = (dynamic)result.Data;
+        selectedProperties = new HashSet<VariableProperty>(data.SelectedProperties);
+        selectAll = data.SelectAll;
+
+        UpdateUrl();
+        
+        StateHasChanged();
+    }
+    
+    private void UpdateUrl()
+    {
+        if (selectAll)
         {
-            editingVariable.Properties.Remove(property);
+            // If all properties are selected, navigate to the base URL without query parameters
+            NavigationManager.NavigateTo("variables", false);
         }
         else
         {
-            editingVariable.Properties.Add(property);
+            // If only some properties are selected, update the URL with the selected properties
+            var propertyFilter = string.Join(",", selectedProperties.Select(p => p.Name.ToLowerInvariant()));
+            var uri = NavigationManager.GetUriWithQueryParameter("property", propertyFilter.Length > 0 ? propertyFilter : (string?)null);
+            NavigationManager.NavigateTo(uri, false);
         }
     }
+    
+    private void ToggleProperty(VariableProperty property)
+    {
+        if (selectedProperties.Contains(property))
+        {
+            selectedProperties.Remove(property);
+        }
+        else
+        {
+            selectedProperties.Add(property);
+        }
+        selectAll = selectedProperties.Count == VariableProperty.List.Count;
+        StateHasChanged();
+    }
+    
+    private IEnumerable<DocumentWrapper<Variable>> FilteredVariables()
+    {
+        if (selectAll)
+            return variables ?? Enumerable.Empty<DocumentWrapper<Variable>>();
+    
+        return variables?.Where(v => v.Document.Properties.Any(p => selectedProperties.Contains(p))) 
+               ?? Enumerable.Empty<DocumentWrapper<Variable>>();
+    }
+
     
     private void ToggleRequiredVariable(Variable variable)
     {
@@ -392,15 +486,15 @@ else
         }
     }
 
-    private void ToggleDefaultProperty(Property property)
+    private void ToggleDefaultProperty(VariableProperty variableProperty)
     {
-        if (editingVariable.DefaultVariableForProperties.Contains(property))
+        if (editingVariable.DefaultVariableForProperties.Contains(variableProperty))
         {
-            editingVariable.DefaultVariableForProperties.Remove(property);
+            editingVariable.DefaultVariableForProperties.Remove(variableProperty);
         }
         else
         {
-            editingVariable.DefaultVariableForProperties.Add(property);
+            editingVariable.DefaultVariableForProperties.Add(variableProperty);
         }
     }
 }

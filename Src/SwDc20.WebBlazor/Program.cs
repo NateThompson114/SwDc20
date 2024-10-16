@@ -15,11 +15,13 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<DataSyncService>();
 builder.Services.AddScoped<CharacterService>();
-builder.Services.AddScoped<CurrentCharacterService>();
+// builder.Services.AddScoped<CurrentCharacterService>();
 builder.Services.AddScoped<GamesService>();
 builder.Services.AddScoped<VariableService>();
 builder.Services.AddScoped<SkillService>();
 builder.Services.AddScoped<WeaponService>();
+builder.Services.AddScoped<ConditionService>();
+builder.Services.AddScoped<DiceRollerService>();
 
 builder.Services.AddBlazoredToast();
 builder.Services.AddBlazoredModal();

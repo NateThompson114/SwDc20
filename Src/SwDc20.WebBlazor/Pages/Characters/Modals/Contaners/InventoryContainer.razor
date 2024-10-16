@@ -1,0 +1,341 @@
+﻿@using SwDc20.Core.Domain.Entities.Character
+@inject IModalService ModalService
+
+<div class="card border-info" aria-roledescription="Inventory Container" aria-description="Container for your inventory and backpack inventory.">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h4>Inventory</h4>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary btn-sm" @onclick="() => AddInventoryItem()" title="Add Inventory">+ Add Inventory Modal</button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <ul class="nav nav-tabs" id="inventoryTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link @(activeTab == "main" ? "active" : "")"
+                        id="main-tab"
+                        @onclick="@(() => SetActiveTab("main"))"
+                        type="button"
+                        role="tab">
+                    Main Inventory
+                </button>
+            </li>
+            @foreach (var container in Character.Inventory.Where(i => i.IsContainer))
+            {
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link @(activeTab == container.Id.ToString() ? "active" : "")"
+                            id="@container.Id-tab"
+                            @onclick="() => SetActiveTab(container.Id.ToString())"
+                            type="button"
+                            role="tab">
+                        @container.Name
+                    </button>
+                </li>
+            }
+        </ul>
+
+        <div class="tab-content mt-3" id="inventoryTabContent">
+            <div class="tab-pane fade @(activeTab == "main" ? "show active" : "")" id="main" role="tabpanel">
+                @RenderInventoryTable(Character.Inventory.ToList())
+            </div>
+            @foreach (var container in Character.Inventory.Where(i => i.IsContainer))
+            {
+                <div class="tab-pane fade @(activeTab == container.Id.ToString() ? "show active" : "")" id="@container.Id" role="tabpanel">
+                    <h5>@container.Name (Capacity: @container.Inventory.Sum(i => i.StackWeight)/@container.WeightCapacity)</h5>
+                    <button type="button" class="btn btn-primary btn-sm mb-2" @onclick="() => AddInventoryItem(container)" title="Add Item to Container">+ Add Item</button>
+                    @RenderInventoryTable(container.Inventory, container)
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Character Character { get; set; }
+    [Parameter] public EventCallback OnInventoryChanged { get; set; }
+    [Parameter] public EventCallback OnSaveChanges { get; set; }
+    [Parameter] public bool CanEdit { get; set; } = true;
+
+    private string activeTab = "main";
+
+    private void SetActiveTab(string tabId)
+    {
+        activeTab = tabId;
+    }
+
+    private async Task AddInventoryItem(CharacterInventory container = null)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(InventoryEditForm.InventoryItem), new CharacterInventory
+        {
+            Id = Guid.NewGuid(),
+            Version = CharacterInventory.CurrentVersion
+        });
+    
+        if (container != null)
+        {
+            parameters.Add(nameof(InventoryEditForm.RemainingCapacity), container.RemainingCapacity);
+        }
+
+        var modalOptions = new ModalOptions()
+        {
+            Size = ModalSize.Large,
+            Position = ModalPosition.Middle
+        };
+    
+        var modal = ModalService.Show<InventoryEditForm>("Add Inventory Item", parameters, modalOptions);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var newItem = (CharacterInventory)result.Data;
+            if (container != null)
+            {
+                var addResult = await container.AddInventory(newItem);
+                if (!addResult.StartsWith("Added"))
+                {
+                    ModalService.Show<ConfirmDialog>("Error", 
+                        new ModalParameters().Add(nameof(ConfirmDialog.Message), addResult));
+                    return;
+                }
+            }
+            else
+            {
+                Character.Inventory.Add(newItem);
+            }
+            await OnInventoryChanged.InvokeAsync();
+            await OnSaveChanges.InvokeAsync();
+        }
+    }
+
+    private async Task EditInventoryItem(CharacterInventory item, CharacterInventory container = null)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(InventoryEditForm.InventoryItem), new CharacterInventory
+        {
+            Id = item.Id,
+            Version = item.Version,
+            Name = item.Name,
+            Quantity = item.Quantity,
+            Weight = item.Weight,
+            Value = item.Value,
+            Description = item.Description,
+            Type = item.Type,
+            IsContainer = item.IsContainer,
+            WeightCapacity = item.WeightCapacity
+        });
+    
+        if (container != null)
+        {
+            parameters.Add(nameof(InventoryEditForm.RemainingCapacity), container.RemainingCapacity + item.StackWeight);
+        }
+    
+        var modalOptions = new ModalOptions()
+        {
+            Size = ModalSize.Large,
+            Position = ModalPosition.Middle
+        };
+
+        var modal = ModalService.Show<InventoryEditForm>("Edit Inventory Item", parameters, modalOptions);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var editedItem = (CharacterInventory)result.Data;
+            if (container != null)
+            {
+                var index = container.Inventory.IndexOf(item);
+                if (index != -1)
+                {
+                    container.Inventory[index] = editedItem;
+                }
+            }
+            else
+            {
+                var index = Character.Inventory.IndexOf(item);
+                if (index != -1)
+                {
+                    Character.Inventory[index] = editedItem;
+                }
+            }
+            await OnInventoryChanged.InvokeAsync();
+            await OnSaveChanges.InvokeAsync();
+        }
+    }
+    
+    private async Task TransferItem(CharacterInventory item, CharacterInventory sourceContainer = null)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(TransferItemModal.Item), item);
+        parameters.Add(nameof(TransferItemModal.SourceContainer), sourceContainer);
+        parameters.Add(nameof(TransferItemModal.Containers), Character.Inventory.Where(i => i.IsContainer && i != item).ToList());
+
+        var modalOptions = new ModalOptions()
+        {
+            Size = ModalSize.Large,
+            Position = ModalPosition.Middle
+        };
+
+        var modal = ModalService.Show<TransferItemModal>("Transfer Item", parameters, modalOptions);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var transferData = (TransferData)result.Data;
+        
+            if (item.Quantity >= transferData.Quantity)
+            {
+                var newItem = new CharacterInventory
+                {
+                    Id = Guid.NewGuid(),
+                    Version = CharacterInventory.CurrentVersion,
+                    Name = item.Name,
+                    Quantity = transferData.Quantity,
+                    Weight = item.Weight,
+                    Value = item.Value,
+                    Description = item.Description,
+                    Type = item.Type,
+                    IsContainer = item.IsContainer,
+                    WeightCapacity = item.WeightCapacity
+                };
+
+                if (transferData.DestinationId.HasValue)
+                {
+                    var destinationContainer = Character.Inventory.FirstOrDefault(i => i.Id == transferData.DestinationId.Value);
+                    if (destinationContainer != null)
+                    {
+                        var addResult = await destinationContainer.AddInventory(newItem);
+                        if (!addResult.StartsWith("Added"))
+                        {
+                            ModalService.Show<ConfirmDialog>("Error", 
+                                new ModalParameters().Add(nameof(ConfirmDialog.Message), addResult));
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    Character.Inventory.Add(newItem);
+                }
+
+                item.Quantity -= transferData.Quantity;
+                if (item.Quantity == 0)
+                {
+                    if (sourceContainer != null)
+                    {
+                        sourceContainer.Inventory.Remove(item);
+                    }
+                    else
+                    {
+                        Character.Inventory.Remove(item);
+                    }
+                }
+
+                await OnInventoryChanged.InvokeAsync();
+                await OnSaveChanges.InvokeAsync();
+            }
+            else
+            {
+                ModalService.Show<ConfirmDialog>("Error", 
+                    new ModalParameters().Add(nameof(ConfirmDialog.Message), "Invalid transfer: Not enough items."));
+            }
+        }
+    }
+
+    private async Task RemoveInventoryItem(CharacterInventory item, CharacterInventory container = null)
+    {
+        if (item.IsContainer && item.Inventory.Any())
+        {
+            ModalService.Show<ConfirmDialog>("Cannot Remove", 
+                new ModalParameters().Add(nameof(ConfirmDialog.Message), "Cannot remove a container that contains items."));
+            return;
+        }
+
+        if (container != null)
+        {
+            container.Inventory.Remove(item);
+        }
+        else
+        {
+            Character.Inventory.Remove(item);
+        }
+        await OnInventoryChanged.InvokeAsync();
+        await OnSaveChanges.InvokeAsync();
+    }
+    
+    private async Task AddItemToContainer(CharacterInventory container)
+    {
+        await AddInventoryItem(container);
+    }
+
+    private async Task UpdateQuantity(CharacterInventory item, int newQuantity)
+    {
+        if (newQuantity >= 0)
+        {
+            item.Quantity = newQuantity;
+            await OnInventoryChanged.InvokeAsync();
+            await OnSaveChanges.InvokeAsync();
+        }
+    }
+
+    private RenderFragment RenderInventoryTable(List<CharacterInventory> items, CharacterInventory container = null) => __builder =>
+    {
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Weight</th>
+                <th>Total Weight</th>
+                <th>Value</th>
+                <th>Total Value</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Capacity</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in items)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>
+                        <input type="number" class="form-control form-control-sm" value="@item.Quantity" 
+                               @onchange="async (e) => await UpdateQuantity(item, int.Parse(e.Value.ToString()))" />
+                    </td>
+                    <td>@item.Weight</td>
+                    <td>@(item.Weight * item.Quantity)</td>
+                    <td>@item.Value</td>
+                    <td>@(item.Value * item.Quantity)</td>
+                    <td>@item.Description</td>
+                    <td>@item.Type</td>
+                    <td>@(item.IsContainer ? $"{item.Inventory.Sum(i => i.StackWeight)}/{item.WeightCapacity}" : "-")</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-secondary" @onclick="() => EditInventoryItem(item, container)">Edit</button>
+                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveInventoryItem(item, container)">Remove</button>
+                        <button type="button" class="btn btn-sm btn-info" @onclick="() => TransferItem(item, container)">Transfer</button>
+                        @if (item.IsContainer)
+                        {
+                            <button type="button" class="btn btn-sm btn-primary" @onclick="() => AddItemToContainer(item)">Add Item</button>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+            <tfoot>
+            <tr>
+                <th colspan="2">Total</th>
+                <th></th>
+                <th>@items.Sum(i => i.Weight * i.Quantity)</th>
+                <th></th>
+                <th>@items.Sum(i => i.Value * i.Quantity)</th>
+                <th colspan="4"></th>
+            </tr>
+            </tfoot>
+        </table>
+    };
+}

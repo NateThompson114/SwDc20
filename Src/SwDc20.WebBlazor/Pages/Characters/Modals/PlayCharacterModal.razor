@@ -1,92 +1,199 @@
-﻿@using SwDc20.Core.Domain.Entities.GameInfo.V0._8
-@inject CurrentCharacterService CurrentCharacterService
-
-<div class="container">
-    <h3>
-        @CurrentCharacter.Character.Name
-        @if (showSaveIndicator)
-        {
-            <span class="save-indicator text-sm-center"> ✅saved</span>
-        }
-    </h3>
-
-    <div class="form-group">
-        <label for="currentHp">Current HP</label>
-        <InputNumber id="currentHp" class="form-control" @bind-Value="CurrentCharacter.CurrentHp" @bind-Value:after="SaveChanges"/>
-        <p>Max: @CurrentCharacter.Character.MaxHitPoints</p>
-    </div>
-
-    <div class="form-group">
-        <label for="currentStamina">Current Stamina</label>
-        <InputNumber id="currentStamina" class="form-control" @bind-Value="CurrentCharacter.CurrentStamina" @bind-Value:after="SaveChanges"/>
-    </div>
-
-    <div class="form-group">
-        <label for="currentManaPoints">Current Mana Points</label>
-        <InputNumber id="currentManaPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentManaPoints" @bind-Value:after="SaveChanges"/>
-    </div>
-
-    <div class="form-group">
-        <label for="temporaryHp">Temporary HP</label>
-        <InputNumber id="temporaryHp" class="form-control" @bind-Value="CurrentCharacter.TemporaryHp" @bind-Value:after="SaveChanges"/>
-    </div>
-
-    <div class="form-group">
-        <label for="currentActionPoints">Current Action Points</label>
-        <InputNumber id="currentActionPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentActionPoints" @bind-Value:after="SaveChanges"/>
-    </div>
-
-    <div class="form-group">
-        <label for="currentExhaustion">Current Exhaustion</label>
-        <InputNumber id="currentExhaustion" class="form-control" @bind-Value="CurrentCharacter.CurrentExhaustion" @bind-Value:after="SaveChanges"/>
-    </div>
-
-    <div class="form-group">
-        <label for="currentRestPoints">Current Rest Points</label>
-        <InputNumber id="currentRestPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentRestPoints" @bind-Value:after="SaveChanges"/>
-    </div>
-
-    <div class="form-group">
-        <label for="currentGritPoints">Current Grit Points</label>
-        <InputNumber id="currentGritPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentGritPoints" @bind-Value:after="SaveChanges"/>
-    </div>
-
-    <h4>Current Resources</h4>
-    @foreach (var resource in CurrentCharacter.CurrentResources)
-    {
-        <div class="form-group">
-            <label for="@($"resource_{resource.CharacterResource.Name}")">@resource.CharacterResource.Name</label>
-            <InputNumber id="@($"resource_{resource.CharacterResource.Name}")" class="form-control" @bind-Value="resource.CurrentResourceAvailable" @bind-Value:after="SaveChanges"/>
-        </div>
-    }
-
-    <button class="btn btn-primary" @onclick="CloseModal">Close</button>
-</div>
-
-@code {
-    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
-    [Parameter] public CurrentCharacter CurrentCharacter { get; set; }
-
-    private bool showSaveIndicator = false;
-
-    private async Task SaveChanges()
-    {
-        await CurrentCharacterService.SetCurrentCharacterAsync(CurrentCharacter);
-        await CurrentCharacterService.SetCharacterSetupAsync(true);
-        await ShowSaveIndicator();
-    }
-
-    private async Task ShowSaveIndicator()
-    {
-        showSaveIndicator = true;
-        StateHasChanged();
-        await Task.Delay(2000);  // Wait for 2 seconds
-        showSaveIndicator = false;
-        StateHasChanged();
-    }
-
-    private async Task CloseModal()
-    {
-        await BlazoredModal.CloseAsync(ModalResult.Ok(CurrentCharacter));
-    }
-}
+﻿@* @using SwDc20.Core.Domain.Entities.GameInfo.V0._8 *@
+@* @using SwDc20.WebBlazor.Pages.Characters.Modals.Contaners *@
+@* $1$ @inject CurrentCharacterService CurrentCharacterService #1# *@
+@* @inject DiceRollerService DiceRollerService *@
+@* *@
+@* <div class="container"> *@
+@*     <h3> *@
+@*         @CurrentCharacter.Character.Name *@
+@*         @if (showSaveIndicator) *@
+@*         { *@
+@*             <span class="save-indicator text-sm-center"> ✅saved</span> *@
+@*         } *@
+@*     </h3> *@
+@* *@
+@*     <FloatingDiceRoller /> *@
+@* *@
+@*     $1$ <DiceRoller/> #1# *@
+@*     $1$ #1# *@
+@*     $1$ <button @onclick="() => DiceRollerService.RollDice(20, 2, RollType.High)" class="btn btn-primary">Roll 2d20 (Highest)</button> #1# *@
+@*     $1$ <button @onclick="() => DiceRollerService.RollDice(20, 2, RollType.Low)" class="btn btn-primary">Roll 2d20 (Lowest)</button> #1# *@
+@*     $1$ <button @onclick="() => DiceRollerService.RollDice(6, 6)" class="btn btn-primary">Roll 6d6</button> #1# *@
+@*     $1$ <button @onclick="RollMightCheck" class="btn btn-primary">Might Check</button> #1# *@
+@*     $1$ <button @onclick="RollAgilityCheck" class="btn btn-secondary">Agility Check</button> #1# *@
+@* *@
+@*     <div class="form-group"> *@
+@*         <label for="currentHp">Current HP</label> *@
+@*         <InputNumber id="currentHp" class="form-control" @bind-Value="CurrentCharacter.CurrentHp" @bind-Value:after="SaveChanges"/> *@
+@*         <p>Max: @CurrentCharacter.Character.MaxHitPoints</p> *@
+@*     </div> *@
+@* *@
+@*     <div class="form-group"> *@
+@*         <label for="currentStamina">Current Stamina</label> *@
+@*         <InputNumber id="currentStamina" class="form-control" @bind-Value="CurrentCharacter.CurrentStamina" @bind-Value:after="SaveChanges"/> *@
+@*     </div> *@
+@* *@
+@*     <div class="form-group"> *@
+@*         <label for="currentManaPoints">Current Mana Points</label> *@
+@*         <InputNumber id="currentManaPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentManaPoints" @bind-Value:after="SaveChanges"/> *@
+@*     </div> *@
+@* *@
+@*     <div class="form-group"> *@
+@*         <label for="temporaryHp">Temporary HP</label> *@
+@*         <InputNumber id="temporaryHp" class="form-control" @bind-Value="CurrentCharacter.TemporaryHp" @bind-Value:after="SaveChanges"/> *@
+@*     </div> *@
+@* *@
+@*     <div class="form-group"> *@
+@*         <label for="currentActionPoints">Current Action Points</label> *@
+@*         <InputNumber id="currentActionPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentActionPoints" @bind-Value:after="SaveChanges"/> *@
+@*     </div> *@
+@* *@
+@*     <div class="form-group"> *@
+@*         <label for="currentExhaustion">Current Exhaustion</label> *@
+@*         <InputNumber id="currentExhaustion" class="form-control" @bind-Value="CurrentCharacter.CurrentExhaustion" @bind-Value:after="SaveChanges"/> *@
+@*     </div> *@
+@* *@
+@*     <div class="form-group"> *@
+@*         <label for="currentRestPoints">Current Rest Points</label> *@
+@*         <InputNumber id="currentRestPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentRestPoints" @bind-Value:after="SaveChanges"/> *@
+@*     </div> *@
+@* *@
+@*     <div class="form-group"> *@
+@*         <label for="currentGritPoints">Current Grit Points</label> *@
+@*         <InputNumber id="currentGritPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentGritPoints" @bind-Value:after="SaveChanges"/> *@
+@*     </div> *@
+@* *@
+@*     <h4>Current Resources</h4> *@
+@*     $1$ @foreach (var resource in CurrentCharacter.CurrentResources) #1# *@
+@*     $1$ { #1# *@
+@*     $1$     <div class="form-group"> #1# *@
+@*     $1$         <label for="@($"resource_{resource.CharacterResource.Name}")">@resource.CharacterResource.Name</label> #1# *@
+@*     $1$         <InputNumber id="@($"resource_{resource.CharacterResource.Name}")" class="form-control" @bind-Value="resource.CurrentResourceAvailable" @bind-Value:after="SaveChanges"/> #1# *@
+@*     $1$     </div> #1# *@
+@*     $1$ } #1# *@
+@* *@
+@*     <hr/> *@
+@* *@
+@*     <div class="card border-danger" aria-roledescription="Attribute and Prime Container" aria-description="Container card for attribute cards and prime modifier, these are the key values for your characters, and contain Might, Agility, Charisma, and Intelligence."> *@
+@*         <div class="card-header"> *@
+@*             <h4>Attributes</h4> *@
+@*         </div> *@
+@*         <div class="card-body"> *@
+@*             <div class="row" > *@
+@* *@
+@*                 <div class="col-lg-3 col-md-6"> *@
+@*                     <SwDc20.WebBlazor.Components.AttributeCardWithSave *@
+@*                         AttributeName="@nameof(CurrentCharacter.Character.Might)" *@
+@*                         @bind-AttributeValue="CurrentCharacter.Character.Might" *@
+@*                         @bind-SaveMastery="CurrentCharacter.Character.MightSaveMastery" *@
+@*                         UpdateSaveMasteries="@UpdateSaveMasteries" *@
+@*                         SelectedMasteriesCount="@SelectedMasteriesCount" *@
+@*                         SaveValue="@Character.CalculateSaves.CalculateMightSave(CurrentCharacter.Character)"/> *@
+@*                 </div> *@
+@* *@
+@*                 <div class="col-lg-3 col-md-6"> *@
+@*                     <SwDc20.WebBlazor.Components.AttributeCardWithSave *@
+@*                         AttributeName="@nameof(CurrentCharacter.Character.Agility)" *@
+@*                         @bind-AttributeValue="CurrentCharacter.Character.Agility" *@
+@*                         @bind-SaveMastery="CurrentCharacter.Character.AgilitySaveMastery" *@
+@*                         UpdateSaveMasteries="@UpdateSaveMasteries" *@
+@*                         SelectedMasteriesCount="@SelectedMasteriesCount" *@
+@*                         SaveValue="@Character.CalculateSaves.CalculateAgilitySave(CurrentCharacter.Character)"/> *@
+@*                 </div> *@
+@* *@
+@*                 <div class="col-lg-3 col-md-6"> *@
+@*                     <SwDc20.WebBlazor.Components.AttributeCardWithSave *@
+@*                         AttributeName="@nameof(CurrentCharacter.Character.Charisma)" *@
+@*                         @bind-AttributeValue="CurrentCharacter.Character.Charisma" *@
+@*                         @bind-SaveMastery="CurrentCharacter.Character.CharismaSaveMastery" *@
+@*                         UpdateSaveMasteries="@UpdateSaveMasteries" *@
+@*                         SelectedMasteriesCount="@SelectedMasteriesCount" *@
+@*                         SaveValue="@Character.CalculateSaves.CalculateCharismaSave(CurrentCharacter.Character)"/> *@
+@*                 </div> *@
+@* *@
+@*                 <div class="col-lg-3 col-md-6"> *@
+@*                     <SwDc20.WebBlazor.Components.AttributeCardWithSave *@
+@*                         AttributeName="@nameof(CurrentCharacter.Character.Intelligence)" *@
+@*                         @bind-AttributeValue="CurrentCharacter.Character.Intelligence" *@
+@*                         @bind-SaveMastery="CurrentCharacter.Character.IntelligenceSaveMastery" *@
+@*                         UpdateSaveMasteries="@UpdateSaveMasteries" *@
+@*                         SelectedMasteriesCount="@SelectedMasteriesCount" *@
+@*                         SaveValue="@Character.CalculateSaves.CalculateIntelligenceSave(CurrentCharacter.Character)"/> *@
+@* *@
+@*                 </div> *@
+@* *@
+@*             </div> *@
+@*         </div> *@
+@*         <div class="card-footer"> *@
+@*             <figure class="text-center border-info"> *@
+@*                 <blockquote class="blockquote"> *@
+@*                     <p>Prime Modifier: @CurrentCharacter.Character.PrimeModifier</p> *@
+@*                 </blockquote> *@
+@*             </figure> *@
+@*         </div> *@
+@*     </div> *@
+@* *@
+@*     <hr/> *@
+@* *@
+@*     $1$ <SkillsContainer Character="@CurrentCharacter.Character" CanEdit="false" /> #1# *@
+@* *@
+@*     <hr/> *@
+@* *@
+@*     <InventoryContainer Character="@CurrentCharacter.Character" OnInventoryChanged="@StateHasChanged" OnSaveChanges="@SaveChanges" /> *@
+@* *@
+@*     <hr/> *@
+@* *@
+@*     <button class="btn btn-primary" @onclick="CloseModal">Close</button> *@
+@* </div> *@
+@* *@
+@* @code { *@
+@*     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } *@
+@*     // [Parameter] public CurrentCharacter CurrentCharacter { get; set; } *@
+@* *@
+@*     private bool showSaveIndicator = false; *@
+@* *@
+@*     private async Task SaveChanges() *@
+@*     { *@
+@*         // await CurrentCharacterService.SetCurrentCharacterAsync(CurrentCharacter); *@
+@*         // await CurrentCharacterService.SetCharacterSetupAsync(true); *@
+@*         await ShowSaveIndicator(); *@
+@*     } *@
+@* *@
+@*     private async Task ShowSaveIndicator() *@
+@*     { *@
+@*         showSaveIndicator = true; *@
+@*         StateHasChanged(); *@
+@*         await Task.Delay(2000);  // Wait for 2 seconds *@
+@*         showSaveIndicator = false; *@
+@*         StateHasChanged(); *@
+@*     } *@
+@* *@
+@*     private async Task CloseModal() *@
+@*     { *@
+@*         await BlazoredModal.CloseAsync(ModalResult.Ok(CurrentCharacter)); *@
+@*     } *@
+@* *@
+@*     private async Task UpdateSaveMasteries() *@
+@*     { *@
+@*         await InvokeAsync(StateHasChanged); *@
+@*         // This method is called whenever a checkbox is changed *@
+@*         // We don't need to do anything here, as the Character properties are directly bound *@
+@*         // But you can add any additional logic if needed *@
+@*     } *@
+@* *@
+@*     private int SelectedMasteriesCount => *@
+@*         (CurrentCharacter.Character.MightSaveMastery ? 1 : 0) + *@
+@*         (CurrentCharacter.Character.AgilitySaveMastery ? 1 : 0) + *@
+@*         (CurrentCharacter.Character.CharismaSaveMastery ? 1 : 0) + *@
+@*         (CurrentCharacter.Character.IntelligenceSaveMastery ? 1 : 0); *@
+@* *@
+@*     private void RollMightCheck() *@
+@*     { *@
+@*         // DiceRollerService.RollDice(20, 1, RollType.Normal, "Might Check", "Roll to determine if you can lift the heavy boulder."); *@
+@*     } *@
+@* *@
+@*     private void RollAgilityCheck() *@
+@*     { *@
+@*         // DiceRollerService.RollDice(20, 1, RollType.Normal, "Agility Check", "Roll to see if you can balance on the narrow beam."); *@
+@*     } *@
+@* } *@

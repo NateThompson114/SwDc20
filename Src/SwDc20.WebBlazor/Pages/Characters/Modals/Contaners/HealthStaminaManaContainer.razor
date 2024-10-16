@@ -1,0 +1,61 @@
+﻿@using SwDc20.Core.Domain.Entities.Character
+
+<div class="card border-success" aria-roledescription="Health, Stamina, and Mana Container" aria-description="Container for your Max Hit Points, Stamina Point, and Mana Points.">
+    <div class="card-header">
+        <h4>Health, Stamina, and Mana</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="maxHitPoints">Max Hit Points</label>
+                    @if (CanEdit)
+                    {
+                        <InputNumber id="maxHitPoints" class="form-control" @bind-Value="Character.MaxHitPoints" />
+                    }
+                    else
+                    {
+                        <input type="number" id="maxHitPoints" class="form-control" value="@Character.MaxHitPoints" readonly />
+                    }
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="maxStaminaPoints">Max Stamina Points</label>
+                    @if (CanEdit)
+                    {
+                        <InputNumber id="maxStaminaPoints" class="form-control" @bind-Value="Character.MaxStaminaPoints" />
+                    }
+                    else
+                    {
+                        <input type="number" id="maxStaminaPoints" class="form-control" value="@Character.MaxStaminaPoints" readonly />
+                    }
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="maxManaPoints">Max Mana Points</label>
+                    @if (CanEdit)
+                    {
+                        <InputNumber id="maxManaPoints" class="form-control" @bind-Value="Character.MaxManaPoints" />
+                    }
+                    else
+                    {
+                        <input type="number" id="maxManaPoints" class="form-control" value="@Character.MaxManaPoints" readonly />
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Character Character { get; set; }    
+    [Parameter] public bool CanEdit { get; set; } = true;
+    [Parameter] public EventCallback<Character> OnChanged  { get; set; }
+
+    private async Task OnResourceChanged()
+    {
+        await OnChanged.InvokeAsync(Character);
+    }
+}

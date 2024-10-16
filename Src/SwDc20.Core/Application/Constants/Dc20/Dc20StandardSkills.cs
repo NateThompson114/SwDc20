@@ -1,9 +1,9 @@
 ﻿using SwDc20.Core.Domain.Entities.Character.V0._8;
 using Attribute = SwDc20.Core.Domain.Enums.Attribute;
 
-namespace SwDc20.Core.Application.Constants;
+namespace SwDc20.Core.Application.Constants.Dc20;
 
-public static class SkillConstants
+public static class Dc20StandardSkills
 {
     public static readonly Skill Awareness = new()
     {

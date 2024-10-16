@@ -1,5 +1,5 @@
 ﻿using System.Text.RegularExpressions;
-using SwDc20.Core.Application.Constants;
+using SwDc20.Core.Application.Constants.Dc20;
 using SwDc20.Core.Domain.Entities.Character.V0._8;
 using SwDc20.Core.Domain.Enums;
 using SwDc20.WebBlazor.Models;
@@ -10,6 +10,7 @@ public class Variable: BaseEntity
 {
     public const string CurrentVersion = "0.8";
     public string Name { get; set; }
+    public bool CoreVariable { get; set; }
     public int Cost { get; set; }
     public bool CountsTowardsMaximumProperties { get; set; } = true;
     public bool IsStackable { get; set; } = false;
@@ -18,31 +19,41 @@ public class Variable: BaseEntity
     public int BonusToHit { get; set; }
     public int TwoHandedBonusToHit { get; set; }
     public string Description { get; set; }
-    public List<Property>? Properties { get; set; }
+    public List<VariableProperty>? Properties { get; set; }
     public string? Calculation { get; set; }
     public int NestedCount { get; set; } = 0;
     public bool Deletable { get; set; } = true;
-    
     public List<VariableModification<Skill>> SkillsModified { get; set; }
     public int MightModification { get; set; }
     public int AgilityModification { get; set; }
     public int CharismaModification { get; set; }
     public int IntelligenceModification { get; set; }
     public int PhysicalDefenseModification { get; set; }
+    public int AllChecksModification { get; set; }
+    public int AllSavesModification { get; set; }
+    public int SpeedModification { get; set; }
+    public bool SpeedHalfed { get; set; }
+    public int SaveDifficultyCheckModification { get; set; }
     public int RangeModification { get; set; }
     public int ReachModification { get; set; }
     public int WeaponStyleCountModification { get; set; }
     public int HeavyHitDamageIncrease { get; set; }
     public int BrutalHitDamageIncrease { get; set; }
-
+    public bool CanNotSpendActionPoints { get; set; }
+    public AttributeToModify? ChooseAttributeToModify { get; set; }
     public List<Variable> Requires { get; set; }
-    public List<Property> DefaultVariableForProperties { get; set; }
+    public List<VariableProperty> DefaultVariableForProperties { get; set; }
+    public Death? DeathModification { get; set; }
+    public Advantages? Advantages { get; set; }
+    public Disadvantages? Disadvantages { get; set; }
+    public AutoSuccess? AutoSuccess { get; set; }
+    public AutoFailure? AutoFailure { get; set; }
 
     public Variable()
     {
         SkillsModified = new List<VariableModification<Skill>>();
         Requires = new List<Variable>();
-        DefaultVariableForProperties = new List<Property>();
+        DefaultVariableForProperties = new List<VariableProperty>();
         UpdateNestedCount();
     }
 
@@ -55,7 +66,7 @@ public class Variable: BaseEntity
 
         if (matches.Count == 0) return;
 
-        var variables = StandardVariables.ToList();
+        var variables = Dc20StandardVariables.ToList();
         int maxNestedCount = 0;
 
         foreach (Match match in matches)
@@ -80,6 +91,41 @@ public class Variable: BaseEntity
             ContentVersion = Version
         };
     }
+}
+public class Advantages
+{
+    public bool Situational { get; set; }
+    public Skill? Skill { get; set; }
+    public int Attack { get; set; }
+
+    public int AllChecks { get; set; }
+    public int MentalChecks { get; set; }
+    public int MentalSaves { get; set; }
+    
+    public int PhysicalChecks { get; set; }
+    public int PhysicalSaves { get; set; }
+	
+    public int Might { get; set; }
+    public int Agility { get; set; }
+    public int Charisma { get; set; }
+    public int Intelligence { get; set; }
+    public int Prime { get; set; }
+}
+public class AutoFailure: Advantages { }
+public class AutoSuccess: Advantages { }
+public class Disadvantages:Advantages { }
+
+public class Death
+{
+    public int DeathDoorThresholdChange { get; set; }
+}
+
+public class AttributeToModify
+{
+    public int Amount { get; set; }
+    public int Max { get; set; }
+    public int Min { get; set; }
+    public bool GainSaveMastery { get; set; }
 }
 
 public class VariableModification<TMod>

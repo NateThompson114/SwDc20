@@ -1,0 +1,255 @@
+﻿@using SwDc20.Core.Domain.Entities.Character
+
+<div class="card border-success" aria-roledescription="Resource Container" aria-description="">
+    <div class="card-header">
+        Resources
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <label class="input-group-text">Death Threshold:</label>
+                    @if (CanEdit)
+                    {
+                    <select class="form-control" @bind="Character.SelectedDeathThresholdAttribute">
+                        @foreach (var attr in AttributeList)
+                        {
+                        <option value="@attr">@attr @(attr == "Prime" ? "(Default)" : "")</option>
+                        }
+                    </select>
+                    }
+                    else
+                    {
+                    <input type="text" class="form-control" value="@Character.SelectedDeathThresholdAttribute" disabled />
+                    }
+                    <label class="input-group-text">@CalculateDeathThreshold()</label>
+                </div>
+            </div>
+            <div class="col-md-8"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <label class="input-group-text">Available Action Points:</label>
+                    @if (CanEdit)
+                    {
+                    <InputNumber class="form-control" @bind-Value="Character.ActionPoints" min="0" max="5"/>
+                    }
+                    else
+                    {
+                    <input type="number" class="form-control" value="@Character.ActionPoints" disabled />
+                    }
+                    <label class="input-group-text">/ 5</label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group">
+                    <label class="input-group-text">Rest Points:</label>
+                    @if (CanEdit)
+                    {
+                    <select class="form-control" @bind="Character.SelectedRestPointsAttribute">
+                        @foreach (var attr in AttributeList)
+                        {
+                        <option value="@attr">@attr @(attr == nameof(Character.Might) ? "(Default)" : "")</option>
+                        }
+                    </select>
+                    }
+                    else
+                    {
+                    <input type="text" class="form-control" value="@Character.SelectedRestPointsAttribute" disabled />
+                    }
+                    <label class="input-group-text">@CalculateRestPoints()</label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group">
+                    <label class="input-group-text">Grit Points:</label>
+                    @if (CanEdit)
+                    {
+                    <select class="form-control" @bind="Character.SelectedGritPointsAttribute">
+                        @foreach (var attr in AttributeList)
+                        {
+                        <option value="@attr">@attr @(attr == nameof(Character.Charisma) ? "(Default)" : "")</option>
+                        }
+                    </select>
+                    }
+                    else
+                    {
+                    <input type="text" class="form-control" value="@Character.SelectedGritPointsAttribute" disabled />
+                    }
+                    <label class="input-group-text">@CalculateGritPoints()</label>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <label class="input-group-text">Jump Distance:</label>
+                    @if (CanEdit)
+                    {
+                        <InputNumber class="form-control" @bind-Value="Character.JumpDistance"/>
+                    }
+                    else
+                    {
+                        <input type="number" class="form-control" value="@Character.JumpDistance" disabled />
+                    }
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group">
+                    <label class="input-group-text">Move Speed:</label>
+                    @if (CanEdit)
+                    {
+                        <InputNumber class="form-control" @bind-Value="Character.MoveSpeed"/>
+                    }
+                    else
+                    {
+                        <input type="number" class="form-control" value="@Character.MoveSpeed" disabled />
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <label class="input-group-text">Currency:</label>
+                    @if (CanEdit)
+                    {
+                        <InputNumber class="form-control" @bind-Value="Character.Currency"/>
+                    }
+                    else
+                    {
+                        <input type="number" class="form-control" value="@Character.Currency" disabled />
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <h5>Additional Resources</h5>
+                <table class="table table-sm">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Max Value</th>
+                        @if (CanEdit)
+                        {
+                            <th>Actions</th>
+                        }
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var resource in Character.Resources)
+                    {
+                        <tr>
+                            <td>
+                                @if (CanEdit)
+                                {
+                                    <input class="form-control" @bind="resource.Name"/>
+                                }
+                                else
+                                {
+                                    <input class="form-control" value="@resource.Name" disabled />
+                                }
+                            </td>
+                            <td>
+                                @if (CanEdit)
+                                {
+                                    <InputNumber class="form-control" @bind-Value="resource.MaxValue"/>
+                                }
+                                else
+                                {
+                                    <input type="number" class="form-control" value="@resource.MaxValue" disabled />
+                                }
+                            </td>
+                            @if (CanEdit)
+                            {
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveResource(resource)">Remove</button>
+                                </td>
+                            }
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+                @if (CanEdit)
+                {
+                    <button type="button" class="btn btn-primary btn-sm" @onclick="AddResource">Add Resource</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Character Character { get; set; }
+    [Parameter] public bool CanEdit { get; set; } = true;
+    [Parameter] public EventCallback OnResourcesChanged { get; set; }
+
+    private List<string> AttributeList = new List<string> { "Prime", nameof(Character.Might), nameof(Character.Agility), nameof(Character.Charisma), nameof(Character.Intelligence) };
+    
+    private string SelectedDeathThresholdAttribute { get; set; } = "Prime";
+    private string SelectedRestPointsAttribute { get; set; } = nameof(Character.Might);
+    private string SelectedGritPointsAttribute { get; set; } = nameof(Character.Charisma);
+    
+    protected override void OnInitialized()
+    {
+        if (string.IsNullOrEmpty(Character.SelectedDeathThresholdAttribute))
+            Character.SelectedDeathThresholdAttribute = "Prime";
+        if (string.IsNullOrEmpty(Character.SelectedRestPointsAttribute))
+            Character.SelectedRestPointsAttribute = nameof(Character.Might);
+        if (string.IsNullOrEmpty(Character.SelectedGritPointsAttribute))
+            Character.SelectedGritPointsAttribute = nameof(Character.Charisma);
+    }
+    
+    private int CalculateDeathThreshold()
+    {
+        int attributeValue = GetAttributeValue(Character.SelectedDeathThresholdAttribute);
+        return 0 - attributeValue;
+    }
+
+    private int CalculateRestPoints()
+    {
+        int attributeValue = GetAttributeValue(Character.SelectedRestPointsAttribute);
+        return Character.Level + attributeValue;
+    }
+
+    private int CalculateGritPoints()
+    {
+        int attributeValue = GetAttributeValue(Character.SelectedGritPointsAttribute);
+        return attributeValue + 2;
+    }
+
+    private int GetAttributeValue(string attributeName)
+    {
+        return attributeName switch
+        {
+            "Prime" => Character.PrimeModifier,
+            nameof(Character.Might) => Character.Might,
+            nameof(Character.Agility) => Character.Agility,
+            nameof(Character.Charisma) => Character.Charisma,
+            nameof(Character.Intelligence) => Character.Intelligence,
+            _ => 0
+        };
+    }
+
+    private async Task AddResource()
+    {
+        if (CanEdit)
+        {
+            Character.Resources.Add(new CharacterResource { Name = "New Resource", MaxValue = 0 });
+            await OnResourcesChanged.InvokeAsync();
+        }
+    }
+
+    private async Task RemoveResource(CharacterResource resource)
+    {
+        if (CanEdit)
+        {
+            Character.Resources.Remove(resource);
+            await OnResourcesChanged.InvokeAsync();
+        }
+    }
+}

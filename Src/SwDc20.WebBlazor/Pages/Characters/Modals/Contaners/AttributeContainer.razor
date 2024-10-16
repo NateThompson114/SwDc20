@@ -1,0 +1,125 @@
+﻿@using SwDc20.Core.Domain.Entities.Character
+
+<div class="card border-danger" aria-roledescription="Attribute and Prime Container" aria-description="Container card for attribute cards and prime modifier, these are the key values for your characters, and contain Might, Agility, Charisma, and Intelligence.">
+    <div class="card-header">
+        <h4>Attributes</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-lg-3 col-md-6">
+                <AttributeCardWithSave
+                    AttributeName="@nameof(Character.Might)"
+                    AttributeValue="@Character.Might"
+                    AttributeValueChanged="@((value) => UpdateAttribute(nameof(Character.Might), value))"
+                    SaveMastery="@Character.MightSaveMastery"
+                    SaveMasteryChanged="@((value) => UpdateSaveMastery(nameof(Character.MightSaveMastery), value))"
+                    UpdateSaveMasteries="@UpdateSaveMasteries"
+                    SelectedMasteriesCount="@SelectedMasteriesCount"
+                    SaveValue="@Character.CalculateSaves.CalculateMightSave(Character)"
+                    CanEdit="@CanEdit" />
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <AttributeCardWithSave
+                    AttributeName="@nameof(Character.Agility)"
+                    AttributeValue="@Character.Agility"
+                    AttributeValueChanged="@((value) => UpdateAttribute(nameof(Character.Agility), value))"
+                    SaveMastery="@Character.AgilitySaveMastery"
+                    SaveMasteryChanged="@((value) => UpdateSaveMastery(nameof(Character.AgilitySaveMastery), value))"
+                    UpdateSaveMasteries="@UpdateSaveMasteries"
+                    SelectedMasteriesCount="@SelectedMasteriesCount"
+                    SaveValue="@Character.CalculateSaves.CalculateAgilitySave(Character)"
+                    CanEdit="@CanEdit" />
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <AttributeCardWithSave
+                    AttributeName="@nameof(Character.Charisma)"
+                    AttributeValue="@Character.Charisma"
+                    AttributeValueChanged="@((value) => UpdateAttribute(nameof(Character.Charisma), value))"
+                    SaveMastery="@Character.CharismaSaveMastery"
+                    SaveMasteryChanged="@((value) => UpdateSaveMastery(nameof(Character.CharismaSaveMastery), value))"
+                    UpdateSaveMasteries="@UpdateSaveMasteries"
+                    SelectedMasteriesCount="@SelectedMasteriesCount"
+                    SaveValue="@Character.CalculateSaves.CalculateCharismaSave(Character)"
+                    CanEdit="@CanEdit" />
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <AttributeCardWithSave
+                    AttributeName="@nameof(Character.Intelligence)"
+                    AttributeValue="@Character.Intelligence"
+                    AttributeValueChanged="@((value) => UpdateAttribute(nameof(Character.Intelligence), value))"
+                    SaveMastery="@Character.IntelligenceSaveMastery"
+                    SaveMasteryChanged="@((value) => UpdateSaveMastery(nameof(Character.IntelligenceSaveMastery), value))"
+                    UpdateSaveMasteries="@UpdateSaveMasteries"
+                    SelectedMasteriesCount="@SelectedMasteriesCount"
+                    SaveValue="@Character.CalculateSaves.CalculateIntelligenceSave(Character)"
+                    CanEdit="@CanEdit" />
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <figure class="text-center border-info">
+            <blockquote class="blockquote">
+                <p>Prime Modifier: @Character.PrimeModifier</p>
+            </blockquote>
+        </figure>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Character Character { get; set; }
+    [Parameter] public EventCallback<Character> CharacterChanged { get; set; }
+    [Parameter] public bool CanEdit { get; set; } = true;
+    [Parameter] public EventCallback UpdateSaveMasteries { get; set; }
+
+    private int SelectedMasteriesCount =>
+        (Character.MightSaveMastery ? 1 : 0) +
+        (Character.AgilitySaveMastery ? 1 : 0) +
+        (Character.CharismaSaveMastery ? 1 : 0) +
+        (Character.IntelligenceSaveMastery ? 1 : 0);
+
+    private async Task UpdateAttribute(string attributeName, int value)
+    {
+        switch (attributeName)
+        {
+            case nameof(Character.Might):
+                Character.Might = value;
+                break;
+            case nameof(Character.Agility):
+                Character.Agility = value;
+                break;
+            case nameof(Character.Charisma):
+                Character.Charisma = value;
+                break;
+            case nameof(Character.Intelligence):
+                Character.Intelligence = value;
+                break;
+        }
+        await CharacterChanged.InvokeAsync(Character);
+        StateHasChanged();
+    }
+
+    private async Task UpdateSaveMastery(string saveMasteryName, bool value)
+    {
+        switch (saveMasteryName)
+        {
+            case nameof(Character.MightSaveMastery):
+                Character.MightSaveMastery = value;
+                break;
+            case nameof(Character.AgilitySaveMastery):
+                Character.AgilitySaveMastery = value;
+                break;
+            case nameof(Character.CharismaSaveMastery):
+                Character.CharismaSaveMastery = value;
+                break;
+            case nameof(Character.IntelligenceSaveMastery):
+                Character.IntelligenceSaveMastery = value;
+                break;
+        }
+        await CharacterChanged.InvokeAsync(Character);
+        await UpdateSaveMasteries.InvokeAsync();
+        StateHasChanged();
+    }
+}

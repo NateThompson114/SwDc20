@@ -4,4 +4,5 @@ public class CharacterResource
 {
     public string Name { get; set; }
     public int MaxValue { get; set; }
+    public int CurrentValue { get; set; }
 }

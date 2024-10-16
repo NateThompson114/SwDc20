@@ -19,7 +19,7 @@ public static class VariableExtensions
     //     // return evaluator.Calculate(variable);
     // }
     
-    public static void AddProperties(this Variable variable, params Property[] properties)
+    public static void AddProperties(this Variable variable, params VariableProperty[] properties)
     {
         if(variable.Properties == null)
         {
