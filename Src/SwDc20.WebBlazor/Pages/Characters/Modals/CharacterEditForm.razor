@@ -1,41 +1,50 @@
 ﻿@page "/character/{Id:guid}"
 @using SwDc20.Core.Domain.Entities.Character
 @using SwDc20.Core.Domain.Entities.Weapon.V0._8
+@using SwDc20.Core.Domain.Enums
+@using SwDc20.Core.Interfaces
 @using SwDc20.WebBlazor.Pages.Characters.Modals.Contaners
 @inject CharacterService CharacterService
 @inject SkillService SkillService
 @inject WeaponService WeaponService
 @inject NavigationManager NavigationManager
+@inject RollCommunicationService RollCommunicationService
+@inject DiceRollerService DiceRollerService
+@inject IScreenSizeService ScreenSizeService
+
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>@(Character?.Name ?? "New Character")</h1>
-    @* <div class="form-check form-switch"> *@
-    @*     <input class="form-check-input" type="checkbox" id="editToggle" @bind="CanEdit" @bind:after="UpdateUrl"> *@
-    @*     <label class="form-check-label" for="editToggle">Edit Mode</label> *@
-    @* </div> *@
     @if (showSaveIndicator)
     {
         <span class="save-indicator text-sm-center"> ✅Saved</span>
     }
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="editToggle" @bind="CanEdit" @bind:after="UpdateUrl">
+        <label class="form-check-label" for="editToggle">Edit Mode</label>
+    </div>
 </div>
+
+@* <button type="button" @onclick="() => SendRollToToolbox()">Send to Toolbox</button> *@
 
 
 <EditForm Model="@Character" OnValidSubmit="SaveCharacter">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
-    <FloatingDiceRoller/>
+    @* <FloatingDiceRoller/> *@
+    <Toolbar/>
 
     <div class="row">
         <div class="col-md-6">
             <div class="form-floating">
-                <InputText id="name" @bind-Value="Character.Name" class="form-control" @bind-Value:after="AutoSaveCharacter"/>
+                <InputText id="name" @bind-Value="Character.Name" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
                 <label for="name">Character Name</label>
             </div>
         </div>
 
         <div class="col-md-6">
             <div class="form-floating">
-                <InputText id="player" @bind-Value="Character.PlayerName" class="form-control" @bind-Value:after="AutoSaveCharacter"/>
+                <InputText id="player" @bind-Value="Character.PlayerName" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
                 <label for="player">Player:</label>
             </div>
         </div>
@@ -47,15 +56,15 @@
         <div class="form-floating">
             <div class="input-group">
                 <span class="input-group-text">Level:</span>
-                <InputNumber id="level" @bind-Value="Character.Level" class="form-control" min="0" max="20" @bind-Value:after="AutoSaveCharacter"/>
+                <InputNumber id="level" @bind-Value="Character.Level" class="form-control" min="0" max="20" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
                 <span class="input-group-text">Combat Mastery: @Character.CombatMastery</span>
             </div>
         </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" hidden="@(!CanEdit)">
         <label for="imageUrl">Image URL</label>
-        <InputText id="imageUrl" class="form-control" @bind-Value="Character.ImageUrl" @bind-Value:after="AutoSaveCharacter"/>
+        <InputText id="imageUrl" class="form-control" @bind-Value="Character.ImageUrl" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
     </div>
     @if (!string.IsNullOrEmpty(Character.ImageUrl))
     {
@@ -65,14 +74,14 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-floating">
-                <InputText id="class" @bind-Value="Character.Class" class="form-control" @bind-Value:after="AutoSaveCharacter"/>
+                <InputText id="class" @bind-Value="Character.Class" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
                 <label for="class">Class</label>
             </div>
         </div>
 
         <div class="col-md-6">
             <div class="form-floating">
-                <InputText id="subclass" @bind-Value="Character.Subclass" class="form-control" @bind-Value:after="AutoSaveCharacter"/>
+                <InputText id="subclass" @bind-Value="Character.Subclass" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
                 <label for="subclass">SubClass</label>
             </div>
         </div>
@@ -80,7 +89,7 @@
 
     <div class="form-group">
         <label for="ancestry">Ancestry</label>
-        <InputText id="ancestry" class="form-control" @bind-Value="Character.Ancestry" @bind-Value:after="AutoSaveCharacter"/>
+        <InputText id="ancestry" class="form-control" @bind-Value="Character.Ancestry" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
     </div>
 
     <hr/>
@@ -99,7 +108,9 @@
                         @bind-SaveMastery="Character.MightSaveMastery"
                         UpdateSaveMasteries="@UpdateSaveMasteries"
                         SelectedMasteriesCount="@SelectedMasteriesCount"
-                        SaveValue="@Character.CalculateSaves.CalculateMightSave(Character)"/>
+                        SaveValue="@Character.CalculateSaves.CalculateMightSave(Character)"
+                        IsMobile="@IsMobile"
+                        CanEdit="@CanEdit"/>
                 </div>
 
                 <div class="col-lg-3 col-md-6">
@@ -109,7 +120,9 @@
                         @bind-SaveMastery="Character.AgilitySaveMastery"
                         UpdateSaveMasteries="@UpdateSaveMasteries"
                         SelectedMasteriesCount="@SelectedMasteriesCount"
-                        SaveValue="@Character.CalculateSaves.CalculateAgilitySave(Character)"/>
+                        SaveValue="@Character.CalculateSaves.CalculateAgilitySave(Character)"
+                        IsMobile="@IsMobile"
+                        CanEdit="@CanEdit"/>
                 </div>
 
                 <div class="col-lg-3 col-md-6">
@@ -119,7 +132,9 @@
                         @bind-SaveMastery="Character.CharismaSaveMastery"
                         UpdateSaveMasteries="@UpdateSaveMasteries"
                         SelectedMasteriesCount="@SelectedMasteriesCount"
-                        SaveValue="@Character.CalculateSaves.CalculateCharismaSave(Character)"/>
+                        SaveValue="@Character.CalculateSaves.CalculateCharismaSave(Character)"
+                        IsMobile="@IsMobile"
+                        CanEdit="@CanEdit"/>
                 </div>
 
                 <div class="col-lg-3 col-md-6">
@@ -129,8 +144,9 @@
                         @bind-SaveMastery="Character.IntelligenceSaveMastery"
                         UpdateSaveMasteries="@UpdateSaveMasteries"
                         SelectedMasteriesCount="@SelectedMasteriesCount"
-                        SaveValue="@Character.CalculateSaves.CalculateIntelligenceSave(Character)"/>
-
+                        SaveValue="@Character.CalculateSaves.CalculateIntelligenceSave(Character)"
+                        IsMobile="@IsMobile"
+                        CanEdit="@CanEdit"/>
                 </div>
 
             </div>
@@ -204,6 +220,8 @@
 {
     [Parameter] public Guid Id { get; set; } = Guid.NewGuid();
     [Parameter] public bool CanEdit { get; set; } = true;
+    private bool IsMobile { get; set; } = false;
+    
     public Character Character { get; set; } = new()
     {
         Id = Guid.NewGuid(), 
@@ -215,6 +233,7 @@
     
     protected override async Task OnInitializedAsync()
     {
+        await CheckIfMobileAsync();
         var characterWrapper = await CharacterService.GetCharacterAsync(Id);
         
         Character = characterWrapper?.Document ?? new Character
@@ -262,6 +281,24 @@
 
 
         availableWeapons = await WeaponService.GetWeaponsAsync();
+    }
+    
+    // private void SendRollToToolbox()
+    // {
+    //     RollCommunicationService.RequestRoll(20, 1, 0, RollType.Normal, "Custom Roll", "This is a custom roll from another component");
+    // }
+    
+    private async Task CheckIfMobileAsync()
+    {
+        IsMobile = await ScreenSizeService.IsMobileAsync();
+        StateHasChanged();
+    }
+    
+    private void UpdateUrl()
+    {
+        var uri = NavigationManager.GetUriWithQueryParameter("canEdit", CanEdit);
+
+        NavigationManager.NavigateTo(uri, false);
     }
 
 

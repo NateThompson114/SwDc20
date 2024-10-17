@@ -1,5 +1,6 @@
 ﻿using Blazored.Toast.Services;
 using Microsoft.AspNetCore.Components;
+using SwDc20.Core.Domain.Entities;
 using SwDc20.Core.Domain.Enums;
 
 public class DiceRollerService
@@ -11,14 +12,17 @@ public class DiceRollerService
         _toastService = toastService;
     }
 
-    public (int Result, List<int> Rolls, int FinalResult) RollDice(int diceSize, int quantity, int modifier = 0, RollType rollType = RollType.Normal, string title = null, string description = null)
+    public RollResult RollDice(int diceSize, int quantity, int modifier = 0, RollType rollType = RollType.Normal, string title = null, string description = null, bool showRollResults = true)
     {
         var (result, rolls) = PerformRoll(diceSize, quantity, rollType);
         int finalResult = result + modifier;
 
-        ShowRollResult(diceSize, quantity, rollType, result, rolls, finalResult, modifier, title, description);
-
-        return (result, rolls, finalResult);
+        if (showRollResults)
+        {
+            ShowRollResult(diceSize, quantity, rollType, result, rolls, finalResult, modifier, title, description);
+        }
+        
+        return new RollResult(result, rolls, rollType, modifier, finalResult, title, description);
     }
 
     private (int Result, List<int> Rolls) PerformRoll(int diceSize, int quantity, RollType rollType)

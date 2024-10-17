@@ -1,44 +1,97 @@
-﻿<div class="card">
-    <h4 class="card-header">@AttributeName</h4>
+﻿@using SwDc20.Core.Domain.Enums
+@inject RollCommunicationService RollCommunicationService
+
+<div class="card">
+    <h4 class="card-header d-flex justify-content-between align-items-center mt-2">
+        @AttributeName
+        @if(!CanEdit)
+        {
+            <span>@AttributeValue</span>
+            <span class="badge bg-info">Save @SaveValue</span>
+        }
+    </h4>
     <div class="card-body">
-        <div class="form-floating">
-            <InputNumber id="@AttributeName.ToLower()" @bind-Value="AttributeValue" @bind-Value:after="OnAttributeValueChanged" class="form-control"/>
-            <label for="@AttributeName.ToLower()">@AttributeName</label>
-        </div>
-    </div>
-    <div class="card-footer">
-        <div class="input-group">
-            <span class="input-group-text">Save</span>
-            <div class="input-group-text">
-                <InputCheckbox @bind-Value="SaveMastery"
-                               @bind-Value:after="OnSaveMasteryChanged"
-                               disabled="@(SelectedMasteriesCount >= 4 && !SaveMastery)"
-                               id="@SaveCheckboxId"
-                               class="form-check-input"/>
+        @if (CanEdit)
+        {
+            <div class="form-floating">
+                <InputNumber id="@AttributeName.ToLower()" @bind-Value="AttributeValue" @bind-Value:after="OnAttributeValueChanged" class="form-control" disabled="@(!CanEdit)"/>
+                <label for="@AttributeName.ToLower()">@AttributeName</label>
             </div>
-            <span class="input-group-text">Value: @SaveValue</span>
-        </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-danger">Disadvantage</span>
+                    <span class="text-secondary">Normal</span>
+                    <span class="text-success">Advantage</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <input type="range" class="form-range" min="0" max="2" step="1" @bind-value="RollTypeIndex" @bind-value:event="oninput" />
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <button type="button" class="btn @GetRollButtonClass()" @onclick="() => Roll()">Check</button>
+                    @if (CurrentRollType != RollType.Normal)
+                    {
+                        <InputNumber @bind-Value="Quantity" class="form-control w-25" min="2" />
+                    }
+                    <button type="button" class="btn @GetRollButtonClass()" @onclick="() => Roll(true)">Save</button>
+
+                </div>
+            </div>
+        }
+        
     </div>
+    @if (CanEdit)
+    {
+        <div class="card-footer">
+            <div class="input-group">
+                <span class="input-group-text">Save</span>
+                <div class="input-group-text">
+                    <InputCheckbox @bind-Value="SaveMastery"
+                                   @bind-Value:after="OnSaveMasteryChanged"
+                                   disabled="@(!CanEdit)"
+                                   id="@SaveCheckboxId"
+                                   class="form-check-input"/>
+                </div>
+                <span class="input-group-text">Value: @SaveValue</span>
+            </div>
+        </div>
+    }
+    
 </div>
 
 @code {
     [Parameter] public string AttributeName { get; set; }
-
     [Parameter] public int AttributeValue { get; set; }
-
     [Parameter] public EventCallback<int> AttributeValueChanged { get; set; }
-
     [Parameter] public bool SaveMastery { get; set; }
-
     [Parameter] public EventCallback<bool> SaveMasteryChanged { get; set; }
-
     [Parameter] public EventCallback UpdateSaveMasteries { get; set; }
-
     [Parameter] public int SelectedMasteriesCount { get; set; }
-
     [Parameter] public int SaveValue { get; set; }
+    [Parameter] public bool IsMobile { get; set; } = false;
+    [Parameter] public bool CanEdit { get; set; }
 
     private string SaveCheckboxId => $"save-{AttributeName.ToLower()}";
+    private int RollTypeIndex { get; set; } = 1; // 0: Disadvantage, 1: Normal, 2: Advantage
+    private int Quantity { get; set; } = 2;
+
+    private RollType CurrentRollType => RollTypeIndex switch
+    {
+        0 => RollType.Low,
+        1 => RollType.Normal,
+        2 => RollType.High,
+        _ => RollType.Normal
+    };
+
+    private string CurrentRollTypeText => CurrentRollType switch
+    {
+        RollType.Low => "Disadvantage",
+        RollType.Normal => "Normal",
+        RollType.High => "Advantage",
+        _ => "Normal"
+    };
 
     private async Task OnAttributeValueChanged()
     {
@@ -52,4 +105,28 @@
         await UpdateSaveMasteries.InvokeAsync();
     }
 
+    private string GetRollButtonClass()
+    {
+        return CurrentRollType switch
+        {
+            RollType.Normal => "btn-info",
+            RollType.High => "btn-success",
+            RollType.Low => "btn-danger",
+            _ => "btn-secondary"
+        };
+    }
+
+    private void Roll(bool save = false)
+    {
+        int quantity = CurrentRollType == RollType.Normal ? 1 : Quantity;
+        var modifier = save ? SaveValue : AttributeValue;
+        RollCommunicationService.RequestRoll(20, quantity, modifier, CurrentRollType, $"{AttributeName} {(save ? "save":"check")}", null);
+        ResetRoll();
+    }
+
+    private void ResetRoll()
+    {
+        RollTypeIndex = 1; // Reset to Normal
+        Quantity = 2;
+    }
 }
