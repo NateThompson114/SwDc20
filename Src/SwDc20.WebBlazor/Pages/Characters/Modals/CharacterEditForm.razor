@@ -1,29 +1,35 @@
 ﻿@page "/character/{Id:guid}"
 @using SwDc20.Core.Domain.Entities.Character
 @using SwDc20.Core.Domain.Entities.Weapon.V0._8
+@using SwDc20.Core.Domain.Enums
 @using SwDc20.WebBlazor.Pages.Characters.Modals.Contaners
 @inject CharacterService CharacterService
 @inject SkillService SkillService
 @inject WeaponService WeaponService
 @inject NavigationManager NavigationManager
+@inject RollCommunicationService RollCommunicationService
+@inject DiceRollerService DiceRollerService
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>@(Character?.Name ?? "New Character")</h1>
-    @* <div class="form-check form-switch"> *@
-    @*     <input class="form-check-input" type="checkbox" id="editToggle" @bind="CanEdit" @bind:after="UpdateUrl"> *@
-    @*     <label class="form-check-label" for="editToggle">Edit Mode</label> *@
-    @* </div> *@
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="editToggle" @bind="CanEdit" @bind:after="UpdateUrl">
+        <label class="form-check-label" for="editToggle">Edit Mode</label>
+    </div>
     @if (showSaveIndicator)
     {
         <span class="save-indicator text-sm-center"> ✅Saved</span>
     }
 </div>
 
+@* <button type="button" @onclick="() => SendRollToToolbox()">Send to Toolbox</button> *@
+
 
 <EditForm Model="@Character" OnValidSubmit="SaveCharacter">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
-    <FloatingDiceRoller/>
+    @* <FloatingDiceRoller/> *@
+    <Toolbar/>
 
     <div class="row">
         <div class="col-md-6">
@@ -262,6 +268,18 @@
 
 
         availableWeapons = await WeaponService.GetWeaponsAsync();
+    }
+    
+    // private void SendRollToToolbox()
+    // {
+    //     RollCommunicationService.RequestRoll(20, 1, 0, RollType.Normal, "Custom Roll", "This is a custom roll from another component");
+    // }
+    
+    private void UpdateUrl()
+    {
+        var uri = NavigationManager.GetUriWithQueryParameter("canEdit", CanEdit);
+
+        NavigationManager.NavigateTo(uri, false);
     }
 
 

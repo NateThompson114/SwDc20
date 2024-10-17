@@ -1,0 +1,199 @@
+﻿@using SwDc20.Core.Domain.Entities
+@using SwDc20.Core.Domain.Enums
+@using SwDc20.Core.Interfaces
+@inject IScreenSizeService ScreenSizeService
+@inject DiceRollerService DiceRollerService
+@inject RollCommunicationService RollCommunicationService
+@implements IAsyncDisposable
+
+<div class="toolbar @(IsExpanded ? "expanded" : "") @(IsMobile ? "mobile" : "desktop")" style="@ToolbarStyle">
+    <div class="toolbar-header" @onclick="ToggleExpand">
+        <span class="oi @(IsExpanded ? "oi-chevron-bottom" : "oi-chevron-top")" aria-hidden="true"></span>
+        <span class="toolbar-text">@(IsMobile ? "Mobile " : "")Toolbar</span>
+    </div>
+
+    @if (IsExpanded)
+    {
+        <div class="toolbar-content">
+            @if (Rolls.Count > 0)
+            {
+                <div class="roll-history">
+                    @foreach (var roll in Rolls)
+                    {
+                        <div class="roll-item">
+                            @if (!string.IsNullOrEmpty(roll.Title))
+                            {
+                                <h5>@roll.Title</h5>
+                            }
+                            @if (!string.IsNullOrEmpty(roll.Description))
+                            {
+                                <p class="description">@roll.Description</p>
+                            }
+                            <p>Result: @roll.Result</p>
+                            <p>Dice: @string.Join(", ", roll.IndividualRolls)</p>
+                            <p>Type: @roll.ResultRollType</p>
+                            @if (roll.Modifier != 0)
+                            {
+                                <p>Modifier: @roll.Modifier</p>
+                            }
+                            <p>Final Result: @roll.FinalResult</p>
+                        </div>
+                    }
+                </div>
+                <button @onclick="ClearRolls" class="btn btn-secondary btn-sm mt-2">Clear Rolls</button>
+                <hr/>
+            }
+            <div class="input-group mb-2">
+                <label class="input-group-text" for="diceSize">d</label>
+                <input id="diceSize" type="number" @bind="DiceSize" min="2" max="100" class="form-control form-control-sm" placeholder="Size"/>
+                <label class="input-group-text" for="quantity">X</label>
+                <input id="quantity" type="number" @bind="Quantity" min="1" max="500" class="form-control form-control-sm" placeholder="Qty"/>
+                <select id="rollType" @bind="CurrentRollType" class="form-select form-select-sm">
+                    <option value="@RollType.Normal">Normal</option>
+                    <option value="@RollType.High">High</option>
+                    <option value="@RollType.Low">Low</option>
+                </select>
+                <button @onclick="RollDice" class="btn btn-primary btn-sm">Roll</button>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .toolbar {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #f8f9fa;
+        border: 1px solid #ffcd39;
+        border-radius: 5px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        z-index: 1000;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .toolbar.desktop {
+        width: 500px;
+    }
+
+    .toolbar.mobile {
+        width: 90%;
+    }
+
+    .toolbar-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        cursor: pointer;
+        background-color: #ffcd39;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .toolbar-text {
+        margin-left: 10px;
+        font-weight: bold;
+    }
+
+    .toolbar-content {
+        padding: 10px;
+    }
+
+    .roll-history {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 10px;
+    }
+
+    .roll-item {
+        background-color: #f1f3f5;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .roll-item p {
+        margin: 0;
+        padding: 2px 0;
+    }
+</style>
+
+@code {
+    private bool IsExpanded { get; set; } = true;
+    private bool IsMobile { get; set; } = false;
+    private List<RollResult> Rolls { get; set; } = new List<RollResult>();
+
+    private int _diceSize = 20;
+    private int DiceSize
+    {
+        get => _diceSize;
+        set => _diceSize = Math.Clamp(value, 2, 100);
+    }
+
+    private int _quantity = 1;
+    private int Quantity
+    {
+        get => _quantity;
+        set => _quantity = Math.Clamp(value, 1, 500);
+    }
+
+    private RollType CurrentRollType { get; set; } = RollType.Normal;
+
+    private string ToolbarStyle => IsMobile ? "width: 90%;" : "width: 500px;";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ScreenSizeService.InitializeAsync();
+        await CheckIfMobileAsync();
+        RollCommunicationService.OnRollRequested += HandleRollRequest;
+    }
+
+    private async Task CheckIfMobileAsync()
+    {
+        IsMobile = await ScreenSizeService.IsMobileAsync();
+        StateHasChanged();
+    }
+
+    private void RollDice()
+    {
+        PerformRoll(DiceSize, Quantity, 0, CurrentRollType, null, null);
+    }
+
+    private void HandleRollRequest(int diceSize, int quantity, int modifier, RollType rollType, string title, string description)
+    {
+        PerformRoll(diceSize, quantity, modifier, rollType, title, description);
+    }
+
+    private void PerformRoll(int diceSize, int quantity, int modifier, RollType rollType, string title, string description)
+    {
+        var result = DiceRollerService.RollDice(diceSize, quantity, modifier, rollType, title, description, !IsMobile);
+
+        if (!IsMobile) return;
+        
+        Rolls.Insert(0, result);
+        InvokeAsync(StateHasChanged);
+        // Rolls.Insert(0, result);
+        // InvokeAsync(StateHasChanged);
+    }
+
+    private void ClearRolls()
+    {
+        Rolls.Clear();
+        StateHasChanged();
+    }
+
+    private void ToggleExpand()
+    {
+        IsExpanded = !IsExpanded;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        RollCommunicationService.OnRollRequested -= HandleRollRequest;
+        await ScreenSizeService.DisposeAsync();
+    }
+}
