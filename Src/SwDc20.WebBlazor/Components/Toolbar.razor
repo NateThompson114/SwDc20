@@ -9,7 +9,7 @@
 <div class="toolbar @(IsExpanded ? "expanded" : "") @(IsMobile ? "mobile" : "desktop")" style="@ToolbarStyle">
     <div class="toolbar-header" @onclick="ToggleExpand">
         <span class="oi @(IsExpanded ? "oi-chevron-bottom" : "oi-chevron-top")" aria-hidden="true"></span>
-        <span class="toolbar-text">@(IsMobile ? "Mobile " : "")Toolbar</span>
+        <span class="toolbar-text">Toolbar</span>
     </div>
 
     @if (IsExpanded)
@@ -176,8 +176,6 @@
         
         Rolls.Insert(0, result);
         InvokeAsync(StateHasChanged);
-        // Rolls.Insert(0, result);
-        // InvokeAsync(StateHasChanged);
     }
 
     private void ClearRolls()
