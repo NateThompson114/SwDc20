@@ -151,6 +151,11 @@ public class Character: BaseEntity
             return save;
         }
     }
+
+    public int GetHitPoints()
+    {
+	    return CurrentHp + TemporaryHp;
+    }
 }
 
 public class CharacterCondition
