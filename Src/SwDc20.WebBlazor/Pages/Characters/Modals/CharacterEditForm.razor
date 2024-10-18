@@ -18,10 +18,13 @@
     {
         <span class="save-indicator text-sm-center"> ✅Saved</span>
     }
-    <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="editToggle" @bind="CanEdit" @bind:after="UpdateUrl">
-        <label class="form-check-label" for="editToggle">Edit Mode</label>
-    </div>
+    @if (ShowEditSlider)
+    {
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="editToggle" @bind="CanEdit" @bind:after="UpdateUrl">
+            <label class="form-check-label" for="editToggle">Edit Mode</label>
+        </div>
+    }
 </div>
 
 @* <button type="button" @onclick="() => SendRollToToolbox()">Send to Toolbox</button> *@
@@ -32,7 +35,7 @@
     <ValidationSummary/>
     @* <FloatingDiceRoller/> *@
     <Toolbar/>
-
+    
     <div class="row">
         <div class="col-md-6">
             <div class="form-floating">
@@ -220,6 +223,7 @@
     [Parameter] public Guid Id { get; set; } = Guid.NewGuid();
     [Parameter] public bool CanEdit { get; set; } = false;
     private bool IsMobile { get; set; } = false;
+    private bool ShowEditSlider { get; set; } = true;
     
     public Character CurrentCharacter { get; set; } = new()
     {
@@ -231,7 +235,7 @@
     private bool showSaveIndicator = false;
     
     protected override async Task OnInitializedAsync()
-    {
+    {        
         var uri = new Uri(NavigationManager.Uri);
         var query = HttpUtility.ParseQueryString(uri.Query);
 
@@ -289,6 +293,17 @@
 
 
         availableWeapons = await WeaponService.GetWeaponsAsync();
+        
+        
+        if (!CurrentCharacter.IsInitiallySaved)
+        {
+            ShowEditSlider = false;
+            CanEdit = true;
+        }
+        else
+        {
+            ShowEditSlider = true;
+        }
     }
     
     // private void SendRollToToolbox()
