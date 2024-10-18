@@ -55,21 +55,30 @@ namespace SwDc20.Infrastructure.Services
 
         private async Task UpdateScreenSizeAsync()
         {
-            var width = await _jsRuntime.InvokeAsync<int>("blazorScreenSize.getWidth");
-            var height = await _jsRuntime.InvokeAsync<int>("blazorScreenSize.getHeight");
-            var newIsMobile = width <= _mobileMaxWidth;
-
-            if (width != _currentWidth || height != _currentHeight)
+            try
             {
-                _currentWidth = width;
-                _currentHeight = height;
-                ScreenSizeChanged?.Invoke(this, (width, height));
+                var width = await _jsRuntime.InvokeAsync<int>("blazorScreenSize.getWidth");
+                var height = await _jsRuntime.InvokeAsync<int>("blazorScreenSize.getHeight");
+                var newIsMobile = width <= _mobileMaxWidth;
+
+                if (width != _currentWidth || height != _currentHeight)
+                {
+                    _currentWidth = width;
+                    _currentHeight = height;
+                    ScreenSizeChanged?.Invoke(this, (width, height));
+                }
+
+                if (newIsMobile != _isMobile)
+                {
+                    _isMobile = newIsMobile;
+                    IsMobileChanged?.Invoke(this, _isMobile);
+                }
+
+                Console.WriteLine($"Screen size updated: Width={width}, Height={height}, IsMobile={_isMobile}");
             }
-
-            if (newIsMobile != _isMobile)
+            catch (Exception ex)
             {
-                _isMobile = newIsMobile;
-                IsMobileChanged?.Invoke(this, _isMobile);
+                Console.Error.WriteLine($"Error updating screen size: {ex.Message}");
             }
         }
 

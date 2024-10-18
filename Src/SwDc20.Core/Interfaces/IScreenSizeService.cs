@@ -1,6 +1,6 @@
 ﻿namespace SwDc20.Core.Interfaces;
 
-public interface IScreenSizeService
+public interface IScreenSizeService : IAsyncDisposable
 {
     Task InitializeAsync();
     Task<bool> IsMobileAsync();
