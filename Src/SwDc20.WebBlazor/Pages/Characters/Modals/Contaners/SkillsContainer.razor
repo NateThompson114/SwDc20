@@ -2,6 +2,7 @@
 @inject SkillService SkillService
 @inject IModalService ModalService
 @inject DiceRollerService DiceRollerService
+@inject RollCommunicationService RollCommunicationService
 
 <div class="card border-info" aria-roledescription="Skills Container" aria-description="Container for your skills, this allows you to handle either your custom skills or default skills, once you do that you can then further customize.">
     <div class="card-header">
@@ -22,13 +23,19 @@
             <thead>
             <tr>
                 <th>Name</th>
-                <th>Attribute</th>
+                @if (!IsMobile)
+                {
+                    <th>Attribute</th>
+                }
                 @if (CanEdit)
                 {
                     <th>Tag</th>
                     <th>Rank</th>
                 }
-                <th>Value</th>
+                @if(!IsMobile)
+                {
+                    <th>Value</th>
+                }
                 @if (CanEdit)
                 {
                     <th>Actions</th>
@@ -45,8 +52,14 @@
             @foreach (var skill in Character.Skills)
             {
                 <tr>
-                    <td>@skill.Name</td>
-                    <td>@skill.AttributeUsed</td>
+                    <td>
+                        @($"{skill.Name}{(IsMobile ? $" ({skill.CalculateValue(Character)})" : "")}")
+                        
+                    </td>
+                    @if (!IsMobile)
+                    {
+                        <td>@skill.AttributeUsed</td>
+                    }
                     @if (CanEdit)
                     {
                         <td>@skill.Tag</td>
@@ -63,7 +76,10 @@
                     @*         @skill.Rank *@
                     @*     } *@
                     @* </td> *@
-                    <td>@skill.CalculateValue(Character)</td>
+                    @if (!IsMobile)
+                    {
+                        <td>@skill.CalculateValue(Character)</td>
+                    }
                     @if (CanEdit)
                     {
                         <td>
@@ -74,14 +90,26 @@
                     else
                     {
                         <td>
-                            <button @onclick="@(() => RollDice(1, skill.CalculateValue(Character), RollType.Normal, ($"Rolling {skill.Name}")))" class="btn btn-secondary btn-sm">Normal</button>
-                            <button @onclick="@(() => RollDice(2, skill.CalculateValue(Character), RollType.High, ($"Rolling {skill.Name} at Advantage")))" class="btn btn-success btn-sm">Adv</button>
-                            <button @onclick="@(() => RollDice(2, skill.CalculateValue(Character), RollType.Low, ($"Rolling {skill.Name} at Disadvantage")))" class="btn btn-warning btn-sm">DisAdv</button>
-                            <button @onclick="@(() => RollDice(3, skill.CalculateValue(Character), RollType.Low, ($"Rolling {skill.Name} at Disadvantage+")))" class="btn btn-warning btn-sm">DisAdv+</button>
-                            <button @onclick="@(() => RollDice(4, skill.CalculateValue(Character), RollType.Low, ($"Rolling {skill.Name} at Disadvantage++")))" class="btn btn-warning btn-sm">DisAdv++</button>
-                            <button @onclick="@(() => OpenDiceRollModal($"Manual {skill.Name} Check", null, skill.CalculateValue(Character)))" class="btn btn-primary btn-sm">
-                                @($"Manual {skill.Name} Check")
-                            </button>
+                            <div class="d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-danger">@(IsMobile ? "-" : "Disadvantage")</span>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <input type="range" class="form-range" min="0" max="2" step="1" @bind-value="RollTypeIndex" @bind-value:event="oninput"/>
+                                </div>
+                                <span class="text-success">@(IsMobile ? "+" : "Advantage")</span>
+                                @if (CurrentRollType != RollType.Normal)
+                                {
+                                    <InputNumber @bind-Value="Quantity" class="form-control w-25" min="2"/>
+                                }
+                                else
+                                {
+                                    <input type="number" class="form-control w-25" value="1" disabled="disabled"/>
+                                    @* <InputNumber Value="1" class="form-control w-25" min="1" disabled="true"/> *@
+                                }
+                                <button type="button" class="btn @GetRollButtonClass()" @onclick="() => Roll(skill)">Check</button>
+                                
+                                </div>
+                            </div>
                         </td>
                     }
 
@@ -117,6 +145,7 @@
     [Parameter] public Character Character { get; set; }
     [Parameter] public bool CanEdit { get; set; } = true;
     [Parameter] public EventCallback<Character> OnChanged  { get; set; }
+    [Parameter] public bool IsMobile { get; set; }
 
     private async Task OnResourceChanged()
     {
@@ -269,5 +298,53 @@
         if (!CanEdit) return;
         Character.Skills.Remove(skill);
     }
+
+    #region Better Roll Setup
+    //todo: Move this to a shared component, takes in skill info and rolls the dice
+    
+    private int RollTypeIndex { get; set; } = 1; // 0: Disadvantage, 1: Normal, 2: Advantage
+    private int Quantity { get; set; } = 2;
+
+    private RollType CurrentRollType => RollTypeIndex switch
+    {
+        0 => RollType.Low,
+        1 => RollType.Normal,
+        2 => RollType.High,
+        _ => RollType.Normal
+    };
+
+    private string CurrentRollTypeText => CurrentRollType switch
+    {
+        RollType.Low => "Disadvantage",
+        RollType.Normal => "Normal",
+        RollType.High => "Advantage",
+        _ => "Normal"
+    };
+    
+    private string GetRollButtonClass()
+    {
+        return CurrentRollType switch
+        {
+            RollType.Normal => "btn-info",
+            RollType.High => "btn-success",
+            RollType.Low => "btn-danger",
+            _ => "btn-secondary"
+        };
+    }
+    
+    private void Roll(Skill skill)
+    {
+        int quantity = CurrentRollType == RollType.Normal ? 1 : Quantity;
+        
+        RollCommunicationService.RequestRoll(20, quantity, skill.CalculateValue(Character), CurrentRollType, $"{skill.Name} check", null);
+        ResetRoll();
+    }
+
+    private void ResetRoll()
+    {
+        RollTypeIndex = 1; // Reset to Normal
+        Quantity = 2;
+    }
+    #endregion
 
 }

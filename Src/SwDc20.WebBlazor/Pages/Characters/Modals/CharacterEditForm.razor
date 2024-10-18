@@ -169,7 +169,7 @@
 
     <hr/>
 
-    <SkillsContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnChanged="@AutoSaveCharacter"/>
+    <SkillsContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnChanged="@AutoSaveCharacter"/>
 
     <hr/>
 
@@ -182,11 +182,11 @@
 
     <hr/>
 
-    <CombatContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnCombatChanged="AutoSaveCharacter"/>
+    <CombatContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnCombatChanged="AutoSaveCharacter"/>
 
     <hr/>
 
-    <InventoryContainer Character="@CurrentCharacter" OnInventoryChanged="@AutoSaveCharacter" CanEdit="@CanEdit"/>
+    <InventoryContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnInventoryChanged="@AutoSaveCharacter"/>
 
     <hr/>
 
