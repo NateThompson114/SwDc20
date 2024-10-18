@@ -10,6 +10,7 @@
 @inject RollCommunicationService RollCommunicationService
 @inject DiceRollerService DiceRollerService
 @inject IScreenSizeService ScreenSizeService
+@implements IDisposable
 
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -34,7 +35,7 @@
     <DataAnnotationsValidator/>
     <ValidationSummary/>
     @* <FloatingDiceRoller/> *@
-    <Toolbar/>
+    <Toolbar IsMobile="@IsMobile"/>
     
     <div class="row">
         <div class="col-md-6">
@@ -245,7 +246,10 @@
             CanEdit = editQuery.Equals("true", StringComparison.InvariantCultureIgnoreCase);
         }
         
+        await base.OnInitializedAsync();
         await CheckIfMobileAsync();
+        ScreenSizeService.IsMobileChanged += OnIsMobileChanged;
+        
         var characterWrapper = await CharacterService.GetCharacterAsync(Id);
         
         CurrentCharacter = characterWrapper?.Document ?? new Character
@@ -305,17 +309,28 @@
             ShowEditSlider = true;
         }
     }
-    
-    // private void SendRollToToolbox()
-    // {
-    //     RollCommunicationService.RequestRoll(20, 1, 0, RollType.Normal, "Custom Roll", "This is a custom roll from another component");
-    // }
-    
+
+    #region Mobile Phone Check
+
     private async Task CheckIfMobileAsync()
     {
         IsMobile = await ScreenSizeService.IsMobileAsync();
         StateHasChanged();
     }
+
+    private void OnIsMobileChanged(object sender, bool isMobile)
+    {
+        IsMobile = isMobile;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ScreenSizeService.IsMobileChanged -= OnIsMobileChanged;
+    }
+
+    #endregion
+    
     
     private void UpdateUrl()
     {

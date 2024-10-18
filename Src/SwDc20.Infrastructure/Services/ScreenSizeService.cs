@@ -1,4 +1,6 @@
 ﻿using Microsoft.JSInterop;
+using System;
+using System.Threading.Tasks;
 using SwDc20.Core.Interfaces;
 
 namespace SwDc20.Infrastructure.Services
@@ -9,6 +11,12 @@ namespace SwDc20.Infrastructure.Services
         private readonly int _mobileMaxWidth;
         private DotNetObjectReference<ScreenSizeService> _dotNetReference;
         private bool _isInitialized = false;
+        private bool _isMobile;
+        private int _currentWidth;
+        private int _currentHeight;
+
+        public event EventHandler<bool> IsMobileChanged;
+        public event EventHandler<(int Width, int Height)> ScreenSizeChanged;
 
         public ScreenSizeService(IJSRuntime jsRuntime, int mobileMaxWidth = 768)
         {
@@ -22,6 +30,7 @@ namespace SwDc20.Infrastructure.Services
             {
                 _dotNetReference = DotNetObjectReference.Create(this);
                 await _jsRuntime.InvokeVoidAsync("blazorScreenSize.init", _dotNetReference);
+                await UpdateScreenSizeAsync();
                 _isInitialized = true;
             }
         }
@@ -29,24 +38,39 @@ namespace SwDc20.Infrastructure.Services
         public async Task<bool> IsMobileAsync()
         {
             await EnsureInitializedAsync();
-            var width = await _jsRuntime.InvokeAsync<int>("blazorScreenSize.getWidth");
-            return width <= _mobileMaxWidth;
+            return _isMobile;
         }
 
         public async Task<(int Width, int Height)> GetScreenSizeAsync()
         {
             await EnsureInitializedAsync();
-            var width = await _jsRuntime.InvokeAsync<int>("blazorScreenSize.getWidth");
-            var height = await _jsRuntime.InvokeAsync<int>("blazorScreenSize.getHeight");
-            return (width, height);
+            return (_currentWidth, _currentHeight);
         }
 
         [JSInvokable]
-        public Task OnBrowserResize()
+        public async Task OnBrowserResize()
         {
-            // This method can be used to trigger events or update state when the browser is resized
-            // For now, it's empty as we're checking size on-demand
-            return Task.CompletedTask;
+            await UpdateScreenSizeAsync();
+        }
+
+        private async Task UpdateScreenSizeAsync()
+        {
+            var width = await _jsRuntime.InvokeAsync<int>("blazorScreenSize.getWidth");
+            var height = await _jsRuntime.InvokeAsync<int>("blazorScreenSize.getHeight");
+            var newIsMobile = width <= _mobileMaxWidth;
+
+            if (width != _currentWidth || height != _currentHeight)
+            {
+                _currentWidth = width;
+                _currentHeight = height;
+                ScreenSizeChanged?.Invoke(this, (width, height));
+            }
+
+            if (newIsMobile != _isMobile)
+            {
+                _isMobile = newIsMobile;
+                IsMobileChanged?.Invoke(this, _isMobile);
+            }
         }
 
         private async Task EnsureInitializedAsync()

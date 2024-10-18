@@ -123,8 +123,8 @@
 </style>
 
 @code {
+    [Parameter] public bool IsMobile { get; set; }
     private bool IsExpanded { get; set; } = true;
-    private bool IsMobile { get; set; } = false;
     private List<RollResult> Rolls { get; set; } = new List<RollResult>();
 
     private int _diceSize = 20;
@@ -148,14 +148,7 @@
     protected override async Task OnInitializedAsync()
     {
         await ScreenSizeService.InitializeAsync();
-        await CheckIfMobileAsync();
         RollCommunicationService.OnRollRequested += HandleRollRequest;
-    }
-
-    private async Task CheckIfMobileAsync()
-    {
-        IsMobile = await ScreenSizeService.IsMobileAsync();
-        StateHasChanged();
     }
 
     private void RollDice()
@@ -192,6 +185,5 @@
     public async ValueTask DisposeAsync()
     {
         RollCommunicationService.OnRollRequested -= HandleRollRequest;
-        await ScreenSizeService.DisposeAsync();
     }
 }

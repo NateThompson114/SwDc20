@@ -5,5 +5,6 @@ public interface IScreenSizeService
     Task InitializeAsync();
     Task<bool> IsMobileAsync();
     Task<(int Width, int Height)> GetScreenSizeAsync();
-    ValueTask DisposeAsync();
+    event EventHandler<bool> IsMobileChanged;
+    event EventHandler<(int Width, int Height)> ScreenSizeChanged;
 }
