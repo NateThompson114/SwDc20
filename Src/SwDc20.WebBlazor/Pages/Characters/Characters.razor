@@ -41,7 +41,7 @@ else
                             </div>
                         </div>
                         
-                        <button class="btn btn-success mr-2" @onclick="() => PlayCharacter(characterWrapper.Document)">Play</button>
+                        <button class="btn btn-success mr-2" @onclick="() => PlayCharacter(characterWrapper.Document.Id)">Play</button>
                         <button class="btn btn-primary mr-2" @onclick="() => EditCharacter(characterWrapper.Document.Id)">Edit</button>
                         <button class="btn btn-danger" @onclick="() => DeleteCharacter(characterWrapper.Document.Id)">Delete</button>
                     </div>
@@ -67,7 +67,7 @@ else
 
     private void EditCharacter(Guid id)
     {
-        NavigationManager.NavigateTo($"/character/{id}");
+        NavigationManager.NavigateTo($"/character/{id}?edit=True");
     }
 
     private async Task DeleteCharacter(Guid id)
@@ -89,16 +89,8 @@ else
         StateHasChanged();
     }
 
-    private void PlayCharacter(Character character)
+    private void PlayCharacter(Guid id)
     {
-        if (character != null)
-        {
-            // Implement play character logic here
-            Console.WriteLine($"Playing character: {character.Name}");
-        }
-        else
-        {
-            Console.Error.WriteLine("Attempted to play a null character");
-        }
+        NavigationManager.NavigateTo($"/character/{id}");
     }
 }

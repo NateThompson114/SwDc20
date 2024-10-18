@@ -89,7 +89,8 @@ public class Character: BaseEntity
     public List<CharacterResource> Resources { get; set; } = new List<CharacterResource>();
     public int Currency { get; set; }
 
-    
+    public bool IsInitiallySaved { get; set; }
+    public DateTime CreatedTimestamp { get; set; }
     public string SelectedDeathThresholdAttribute { get; set; } = "Prime";
     public string SelectedRestPointsAttribute { get; set; } = nameof(Might);
     public string SelectedGritPointsAttribute { get; set; } = nameof(Charisma);
@@ -149,6 +150,11 @@ public class Character: BaseEntity
             }
             return save;
         }
+    }
+
+    public int GetHitPoints()
+    {
+	    return CurrentHp + TemporaryHp;
     }
 }
 

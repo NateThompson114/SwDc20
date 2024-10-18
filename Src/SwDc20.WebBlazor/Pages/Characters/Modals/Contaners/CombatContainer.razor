@@ -1,7 +1,8 @@
-﻿@using SwDc20.Core.Domain.Entities.Character
-@using SwDc20.Core.Domain.Entities.Weapon.V0._8
+﻿@using SwDc20.Core.Domain.Entities.Weapon.V0._8
+@using SwDc20.Core.Domain.Enums
 @inject WeaponService WeaponService
 @inject IModalService ModalService
+@inject RollCommunicationService RollCommunicationService
 
 <div class="card border-danger" aria-roledescription="Combat Container" aria-description="Container for your weapons and feed into the actions, this handles custom and prebuilt weapons.">
     <div class="card-header">
@@ -138,6 +139,30 @@
                             <button type="button" class="btn btn-sm btn-danger mt-2" @onclick="() => RemoveWeapon(weapon)">Remove</button>
                         </div>
                     }
+                    else
+                    {
+                        <div class="d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-danger">Disadvantage</span>
+                                <span class="text-secondary">Normal</span>
+                                <span class="text-success">Advantage</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <input type="range" class="form-range" min="0" max="2" step="1" @bind-value="RollTypeIndex" @bind-value:event="oninput" />
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                @if (CurrentRollType != RollType.Normal)
+                                {
+                                    <InputNumber @bind-Value="Quantity" class="form-control w-25" min="2" />
+                                }
+                                else
+                                {
+                                    <input type="number" class="form-control w-25" value="1" disabled="disabled"/>
+                                }
+                                <button type="button" class="btn @GetRollButtonClass()" @onclick="() => Roll(weapon)">Check</button>
+                            </div>
+                        </div>
+                    }
                 </div>
             }
         </div>
@@ -165,7 +190,8 @@
 @code {
     [Parameter] public Character Character { get; set; }
     [Parameter] public EventCallback OnCombatChanged { get; set; }
-    [Parameter] public bool CanEdit { get; set; } = true;
+    [Parameter] public bool CanEdit { get; set; }
+    [Parameter] public bool IsMobile { get; set; }
 
     private string MartialSkillsAvailable() =>
         string.Join(" or ", Character.Skills
@@ -300,5 +326,52 @@
         Character.Weapons.Remove(weapon);
         await OnCombatChanged.InvokeAsync();
     }
+    
+    #region Better Roll Setup
+    //todo: Move this to a shared component, takes in skill info and rolls the dice
+    
+    private int RollTypeIndex { get; set; } = 1; // 0: Disadvantage, 1: Normal, 2: Advantage
+    private int Quantity { get; set; } = 2;
 
+    private RollType CurrentRollType => RollTypeIndex switch
+    {
+        0 => RollType.Low,
+        1 => RollType.Normal,
+        2 => RollType.High,
+        _ => RollType.Normal
+    };
+
+    private string CurrentRollTypeText => CurrentRollType switch
+    {
+        RollType.Low => "Disadvantage",
+        RollType.Normal => "Normal",
+        RollType.High => "Advantage",
+        _ => "Normal"
+    };
+    
+    private string GetRollButtonClass()
+    {
+        return CurrentRollType switch
+        {
+            RollType.Normal => "btn-info",
+            RollType.High => "btn-success",
+            RollType.Low => "btn-danger",
+            _ => "btn-secondary"
+        };
+    }
+    
+    private void Roll(CharacterWeapon weapon)
+    {
+        int quantity = CurrentRollType == RollType.Normal ? 1 : Quantity;
+        var modifier = Character.AttackSpellCheck > 0 ? Character.AttackSpellCheck : Character.CombatMastery + Character.PrimeModifier;
+        RollCommunicationService.RequestRoll(20, quantity, modifier, CurrentRollType, $"{weapon.Name} check", weapon.Description);
+        ResetRoll();
+    }
+
+    private void ResetRoll()
+    {
+        RollTypeIndex = 1; // Reset to Normal
+        Quantity = 2;
+    }
+    #endregion
 }
