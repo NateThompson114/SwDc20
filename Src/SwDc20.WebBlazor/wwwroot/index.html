@@ -31,13 +31,15 @@
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
     <script>
-        navigator.serviceWorker.register('service-worker.js?v=1.0.005');
+        navigator.serviceWorker.register('service-worker.js?v=1.0.006');
 
         window.blazorScreenSize = {
             dotNetReference: null,
             init: function (dotNetReference) {
                 this.dotNetReference = dotNetReference;
                 window.addEventListener('resize', this.onResize.bind(this));
+                // Trigger initial resize to set the correct size immediately
+                this.onResize();
             },
             onResize: function () {
                 if (this.dotNetReference) {
@@ -45,14 +47,24 @@
                 }
             },
             getWidth: function () {
-                return window.innerWidth;
+                return window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
             },
             getHeight: function () {
-                return window.innerHeight;
+                return window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
             },
             dispose: function () {
                 window.removeEventListener('resize', this.onResize);
                 this.dotNetReference = null;
+            },
+            getDevicePixelRatio: function () {
+                return window.devicePixelRatio || 1;
+            },
+            getScreenInfo: function () {
+                return {
+                    width: this.getWidth(),
+                    height: this.getHeight(),
+                    pixelRatio: this.getDevicePixelRatio()
+                };
             }
         };
     </script>
