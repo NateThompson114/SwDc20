@@ -55,6 +55,16 @@
             dispose: function () {
                 window.removeEventListener('resize', this.onResize);
                 this.dotNetReference = null;
+            },
+            getDevicePixelRatio: function () {
+                return window.devicePixelRatio || 1;
+            },
+            getScreenInfo: function () {
+                return {
+                    width: this.getWidth(),
+                    height: this.getHeight(),
+                    pixelRatio: this.getDevicePixelRatio()
+                };
             }
         };
     </script>
