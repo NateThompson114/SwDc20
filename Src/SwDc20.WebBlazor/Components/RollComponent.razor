@@ -1,0 +1,179 @@
+﻿@using SwDc20.Core.Domain.Entities
+@using SwDc20.Core.Domain.Entities.Roll
+@using SwDc20.Core.Domain.Enums
+@inject RollCommunicationService RollCommunicationService
+@inject DiceRollerService DiceRollerService
+@inject IJSRuntime JSRuntime
+
+<div class="roll-component">
+    <span class="roll-value @(isPressed ? "pressed" : "")"
+          @onclick="PerformNormalRoll"
+          @oncontextmenu="OpenRollModal"
+          @oncontextmenu:preventDefault
+          @onmousedown="StartPress"
+          @onmouseup="EndPress"
+          @onmouseleave="EndPress"
+          @ontouchstart="StartPress"
+          @ontouchend="EndPress">
+        @GetDisplayValue()
+    </span>
+</div>
+
+@if (showModal)
+{
+    <div class="modal" style="display:block; position: fixed; left: @(_left)px; top: @(_top)px;">
+        <div class="modal-content" style="width: 300px;">
+            <div class="modal-header">
+                <h5 class="modal-title">Roll @Model.Name</h5>
+                <button type="button" class="close" @onclick="CloseModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="rollType">Roll Type:</label>
+                    <select id="rollType" class="form-control" @bind="selectedRollType">
+                        <option value="@RollType.Normal">Normal</option>
+                        <option value="@RollType.High">Advantage</option>
+                        <option value="@RollType.Low">Disadvantage</option>
+                    </select>
+                </div>
+                @if (selectedRollType != RollType.Normal)
+                {
+                    <div class="form-group">
+                        <label for="diceCount">Number of dice:</label>
+                        <input type="number" id="diceCount" class="form-control" @bind="diceCount" min="2" max="10" />
+                    </div>
+                }
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" @bind="isSaveRoll" /> Save Roll
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" @onclick="PerformModalRoll">Roll</button>
+                <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .roll-value {
+        display: inline-block;
+        border: 2px solid #007bff;
+        border-radius: 4px;
+        padding: 5px 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .roll-value:hover {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .roll-value.pressed {
+        background-color: #0056b3;
+        color: white;
+    }
+</style>
+
+@code {
+    [Parameter] public RollRequest Model { get; set; }
+
+    private bool showModal = false;
+    private RollType selectedRollType = RollType.Normal;
+    private int diceCount = 2;
+    private bool isSaveRoll;
+    private double _left;
+    private double _top;
+    private bool isPressed = false;
+    private System.Timers.Timer pressTimer;
+
+    protected override void OnInitialized()
+    {
+        pressTimer = new System.Timers.Timer(500);
+        pressTimer.Elapsed += (sender, e) => InvokeAsync(() => HandleLongPress());
+        pressTimer.AutoReset = false;
+    }
+
+    private string GetDisplayValue()
+    {
+        return (Model.IsSave ? Model.Modifier : Model.Value).ToString("+#;-#;+0");
+    }
+
+    private void PerformNormalRoll()
+    {
+        int modifier = Model.IsSave ? Model.Modifier : Model.Value;
+        RollCommunicationService.RequestRoll(20, 1, modifier, RollType.Normal, $"{Model.Name} {(Model.IsSave ? "save" : "check")}", Model.Description);
+    }
+
+    private async Task OpenRollModal(MouseEventArgs e)
+    {
+        await SetModalPosition(e.ClientX, e.ClientY);
+    }
+
+    private async Task SetModalPosition(double clientX, double clientY)
+    {
+        showModal = true;
+        isSaveRoll = Model.IsSave;
+
+        var windowWidth = await JSRuntime.InvokeAsync<int>("eval", "window.innerWidth");
+        var windowHeight = await JSRuntime.InvokeAsync<int>("eval", "window.innerHeight");
+
+        _left = Math.Min(clientX, windowWidth - 300);
+        _top = Math.Min(clientY, windowHeight - 300);
+
+        StateHasChanged();
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+
+    private void PerformModalRoll()
+    {
+        int modifier = isSaveRoll ? Model.Modifier : Model.Value;
+        int quantity = selectedRollType == RollType.Normal ? 1 : diceCount;
+        string rollType = isSaveRoll ? "save" : "check";
+        
+        RollCommunicationService.RequestRoll(20, quantity, modifier, selectedRollType, $"{Model.Name} {rollType}", Model.Description);
+        CloseModal();
+    }
+
+    private void StartPress()
+    {
+        isPressed = true;
+        pressTimer.Start();
+    }
+
+    private void EndPress()
+    {
+        isPressed = false;
+        pressTimer.Stop();
+    }
+
+    private async Task HandleLongPress()
+    {
+        isPressed = false;
+        await InvokeAsync(async () =>
+        {
+            var boundingRect = await JSRuntime.InvokeAsync<BoundingClientRect>("eval", "document.querySelector('.roll-value').getBoundingClientRect()");
+            await SetModalPosition(boundingRect.Left, boundingRect.Bottom);
+        });
+    }
+
+    public class BoundingClientRect
+    {
+        public double Left { get; set; }
+        public double Top { get; set; }
+        public double Right { get; set; }
+        public double Bottom { get; set; }
+    }
+
+    public void Dispose()
+    {
+        pressTimer?.Dispose();
+    }
+}

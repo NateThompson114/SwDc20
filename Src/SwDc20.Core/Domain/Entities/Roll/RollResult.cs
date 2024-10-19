@@ -1,6 +1,6 @@
 ﻿using SwDc20.Core.Domain.Enums;
 
-namespace SwDc20.Core.Domain.Entities;
+namespace SwDc20.Core.Domain.Entities.Roll;
 
 public class RollResult
 {

@@ -1,6 +1,6 @@
 ﻿using Blazored.Toast.Services;
 using Microsoft.AspNetCore.Components;
-using SwDc20.Core.Domain.Entities;
+using SwDc20.Core.Domain.Entities.Roll;
 using SwDc20.Core.Domain.Enums;
 
 public class DiceRollerService
