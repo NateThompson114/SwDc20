@@ -202,7 +202,7 @@
 
     <ResourceContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnResourcesChanged="@AutoSaveCharacter"/>
 
-    <hr/>
+    
 
     @* <div class="card" aria-roledescription="" aria-description=""> *@
     @*     <div class="card-header"></div> *@
@@ -213,13 +213,18 @@
 
     @if (CanEdit)
     {
+        <hr/>
         <button type="submit" class="btn btn-primary" @onclick="SaveCharacterAndClose">Save Character</button>
+        <hr/>
     }
 
     @* <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button> *@
-
+    
 
 </EditForm>
+
+<div class="row pt-5 mt-5"></div>
+
 
 @code
 {

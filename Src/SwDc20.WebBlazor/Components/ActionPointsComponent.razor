@@ -1,0 +1,70 @@
+﻿@using SwDc20.Core.Domain.Entities.Character
+
+<div class="d-flex flex-column align-items-left pb-1">
+    <div class="d-flex align-items-left mb-2">
+        @for (int i = 0; i < Character.ActionPoints; i++)
+        {
+            int index = i;
+            <button class="btn btn-circle @(Character.CurrentActionPoints > i ? "btn-primary" : "btn-outline-primary")" 
+                    @onclick="() => ToggleActionPoint(index)">
+            </button>
+        }
+    </div>
+    <div class="align-items-left text-left mb-2">
+        Action Points: @Character.CurrentActionPoints/@Character.ActionPoints
+    </div>
+    <div class="d-flex justify-content-left">
+        <button class="btn btn-outline-secondary me-2" @onclick="ResetActionPoints">
+            Reset
+        </button>
+        <button class="btn btn-outline-danger" @onclick="UseAllActionPoints">
+            Use All
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Character Character { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnActionPointsChanged { get; set; }
+
+    private async Task ToggleActionPoint(int index)
+    {
+        if (index + 1 == Character.CurrentActionPoints)
+        {
+            Character.CurrentActionPoints = index;
+        }
+        else
+        {
+            Character.CurrentActionPoints = index + 1;
+        }
+        await OnActionPointsChanged.InvokeAsync(Character.CurrentActionPoints);
+    }
+
+    private async Task ResetActionPoints()
+    {
+        Character.CurrentActionPoints = Character.ActionPoints;
+        await OnActionPointsChanged.InvokeAsync(Character.CurrentActionPoints);
+    }
+
+    private async Task UseAllActionPoints()
+    {
+        Character.CurrentActionPoints = 0;
+        await OnActionPointsChanged.InvokeAsync(Character.CurrentActionPoints);
+    }
+}
+
+<style>
+    .btn-circle {
+        width: 30px;
+        height: 30px;
+        padding: 6px 0px;
+        border-radius: 15px;
+        text-align: center;
+        font-size: 12px;
+        line-height: 1.42857;
+        margin-right: 5px;
+    }
+</style>
