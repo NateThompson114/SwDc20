@@ -10,23 +10,26 @@
         <div class="row align-items-center">
             <div class="col">
                 <h4>Skills</h4>
-                <row class="d-flex flex-nowrap">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="versionTwo" @bind="VersionTwo" @bind:after="VersionTwoAlignment">
-                        <label class="form-check-label" for="versionTwo">Version Two</label>
-                    </div>
-                    @if (VersionTwo)
-                    {
+                @if(DemoMode)
+                {
+                    <row class="d-flex flex-nowrap">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="versionTwo" @bind="VersionTwo" @bind:after="VersionTwoAlignment">
+                            <label class="form-check-label" for="versionTwo">Version Two</label>
+                        </div>
+                        @if (VersionTwo)
+                        {
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="compact" @bind="CompactVersion">
                             <label class="form-check-label" for="compact">Compact Version Two</label>
                         </div>
-                    }
-                </row>
-                <row>
-                    <p class="small">The goal for version two is to be more compact and have elements side by side, attributes on the right, skills in the middle, Action/Inventory etc on the right</p>
-                    <p class="small">You can right click on the Value, or Long press (this is meant for mobile) to bring up the Advantage/Disadvantage Roller</p>
-                </row>
+                        }
+                    </row>
+                    <row>
+                        <p class="small">The goal for version two is to be more compact and have elements side by side, attributes on the right, skills in the middle, Action/Inventory etc on the right</p>
+                        <p class="small">You can right click on the Value, or Long press (this is meant for mobile) to bring up the Advantage/Disadvantage Roller</p>
+                    </row>
+                }
             </div>
             @if (CanEdit)
             {
@@ -110,7 +113,7 @@
                         @if (VersionTwo)
                         {
                             <td>
-                                <RollComponent Model="new RollRequest { Name = skill.Name, Value = skill.CalculateValue(Character), Modifier = skill.Rank, Description = skill.Tag, IsSave = false }"/>
+                                <RollComponent Model="new RollRequest { Name = skill.Name, Modifier = skill.CalculateValue(Character), Description = skill.Tag, IsSave = false }"/>
                             </td>    
                         }
                         else
@@ -173,8 +176,11 @@
     [Parameter] public bool CanEdit { get; set; } = true;
     [Parameter] public EventCallback<Character> OnChanged { get; set; }
     [Parameter] public bool IsMobile { get; set; }
-    [Parameter] public bool CompactVersion { get; set; } = false;
-    private bool VersionTwo { get; set; } = true;
+    
+    
+    [Parameter] public bool CompactVersion { get; set; }
+    [Parameter] public bool VersionTwo { get; set; } = true;
+    [Parameter] public bool DemoMode { get; set; } = true;
 
     private async Task OnResourceChanged()
     {

@@ -24,7 +24,7 @@
     <div class="modal" style="display:block; position: fixed; left: @(_left)px; top: @(_top)px;">
         <div class="modal-content" style="width: 300px;">
             <div class="modal-header">
-                <h5 class="modal-title">Roll @Model.Name</h5>
+                <h5 class="modal-title">Roll @Model.Name @(Model.IsSave ? "Save" : "Check")</h5>
                 <button type="button" class="close" @onclick="CloseModal">&times;</button>
             </div>
             <div class="modal-body">
@@ -41,14 +41,6 @@
                     <div class="form-group">
                         <label for="diceCount">Number of dice:</label>
                         <input type="number" id="diceCount" class="form-control" @bind="diceCount" min="2" max="10" />
-                    </div>
-                }
-                @if (IsSave)
-                {
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" @bind="isSaveRoll" /> Save Roll
-                        </label>
                     </div>
                 }
             </div>
@@ -83,12 +75,10 @@
 
 @code {
     [Parameter] public RollRequest Model { get; set; }
-    [Parameter] public bool IsSave { get; set; }
 
     private bool showModal = false;
     private RollType selectedRollType = RollType.Normal;
     private int diceCount = 2;
-    private bool isSaveRoll;
     private double _left;
     private double _top;
     private bool isPressed = false;
@@ -103,13 +93,12 @@
 
     private string GetDisplayValue()
     {
-        return (Model.IsSave ? Model.Modifier : Model.Value).ToString("+#;-#;+0");
+        return Model.Modifier.ToString("+#;-#;+0");
     }
 
     private void PerformNormalRoll()
     {
-        int modifier = Model.IsSave ? Model.Modifier : Model.Value;
-        RollCommunicationService.RequestRoll(20, 1, modifier, RollType.Normal, $"{Model.Name} {(Model.IsSave ? "save" : "check")}", Model.Description);
+        RollCommunicationService.RequestRoll(Model.Value, 1, Model.Modifier, RollType.Normal, $"{Model.Name} {(Model.IsSave ? "save" : "check")}", Model.Description);
     }
 
     private async Task OpenRollModal(MouseEventArgs e)
@@ -120,7 +109,6 @@
     private async Task SetModalPosition(double clientX, double clientY)
     {
         showModal = true;
-        isSaveRoll = Model.IsSave;
 
         var windowWidth = await JSRuntime.InvokeAsync<int>("eval", "window.innerWidth");
         var windowHeight = await JSRuntime.InvokeAsync<int>("eval", "window.innerHeight");
@@ -140,16 +128,14 @@
     {
         selectedRollType = RollType.Normal;
         diceCount = 2;
-        isSaveRoll = false;
     }
     
     private void PerformModalRoll()
     {
-        int modifier = isSaveRoll ? Model.Modifier : Model.Value;
         int quantity = selectedRollType == RollType.Normal ? 1 : diceCount;
-        string rollType = isSaveRoll ? "save" : "check";
+        string rollType = Model.IsSave ? "Save" : "Check";
         
-        RollCommunicationService.RequestRoll(20, quantity, modifier, selectedRollType, $"{Model.Name} {rollType}", Model.Description);
+        RollCommunicationService.RequestRoll(Model.Value, quantity, Model.Modifier, selectedRollType, $"{Model.Name} {rollType}", Model.Description);
         
         DefaultedValues();
         CloseModal();
