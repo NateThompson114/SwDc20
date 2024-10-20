@@ -43,11 +43,14 @@
                         <input type="number" id="diceCount" class="form-control" @bind="diceCount" min="2" max="10" />
                     </div>
                 }
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" @bind="isSaveRoll" /> Save Roll
-                    </label>
-                </div>
+                @if (IsSave)
+                {
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" @bind="isSaveRoll" /> Save Roll
+                        </label>
+                    </div>
+                }
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" @onclick="PerformModalRoll">Roll</button>
@@ -80,6 +83,7 @@
 
 @code {
     [Parameter] public RollRequest Model { get; set; }
+    [Parameter] public bool IsSave { get; set; }
 
     private bool showModal = false;
     private RollType selectedRollType = RollType.Normal;
@@ -132,6 +136,13 @@
         showModal = false;
     }
 
+    private void DefaultedValues()
+    {
+        selectedRollType = RollType.Normal;
+        diceCount = 2;
+        isSaveRoll = false;
+    }
+    
     private void PerformModalRoll()
     {
         int modifier = isSaveRoll ? Model.Modifier : Model.Value;
@@ -139,6 +150,8 @@
         string rollType = isSaveRoll ? "save" : "check";
         
         RollCommunicationService.RequestRoll(20, quantity, modifier, selectedRollType, $"{Model.Name} {rollType}", Model.Description);
+        
+        DefaultedValues();
         CloseModal();
     }
 
