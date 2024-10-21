@@ -1,0 +1,28 @@
+﻿@inject IJSRuntime JSRuntime
+
+<button type="button" class="btn btn-info" @onclick="CheckForUpdate">Check for Update</button>
+
+@code {
+    private async Task CheckForUpdate()
+    {
+        var result = await JSRuntime.InvokeAsync<UpdateCheckResult>("checkForUpdate");
+
+        if (result.UpdateAvailable)
+        {
+            if (await JSRuntime.InvokeAsync<bool>("confirm", "An update is available. Would you like to apply it now?"))
+            {
+                await JSRuntime.InvokeVoidAsync("applyUpdate");
+                await JSRuntime.InvokeVoidAsync("location.reload");
+            }
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "No update available.");
+        }
+    }
+
+    private class UpdateCheckResult
+    {
+        public bool UpdateAvailable { get; set; }
+    }
+}
