@@ -4,88 +4,101 @@
     <div class="card-header">
         <h4>Defenses</h4>
     </div>
-    <div class="card-body">
+    <div class="card-body ">
         <div class="card-group">
             <div class="card col-md-6">
                 <div class="card-header">
-                    <h6>Physical Defense</h6>
+                    <h6>@(VersionTwo ? "PD" : "Physical Defense")</h6>
                 </div>
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item">
-                            <div class="form-floating">
-                                @if (CanEdit)
-                                {
-                                    <InputNumber id="physicalDefense" @bind-Value="Character.PhysicalDefense" class="form-control"/>
-                                }
-                                else
-                                {
-                                    <input type="number" id="physicalDefense" class="form-control" value="@Character.PhysicalDefense" disabled />
-                                }
-                                <label for="physicalDefense">Physical Defense</label>
-                            </div>
+                            @if (VersionTwo)
+                            {
+                                <div class="form-group">
+                                    <InputNumber id="physicalDefense" @bind-Value="Character.PhysicalDefense" class="form-control" disabled="@(!CanEdit)"/>    
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-floating">
+                                    <InputNumber id="physicalDefense" @bind-Value="Character.PhysicalDefense" class="form-control" disabled="@(!CanEdit)"/>
+                                    <label for="physicalDefense">Physical Defense</label>
+                                </div>
+                            }
+                           
                         </li>
                         <li class="list-group-item">
-                            <p>Heavy: @(Character.PhysicalDefense+5)</p>
+                            <p class="small">Heavy: @(Character.PhysicalDefense+5)</p>
                         </li>
                         <li class="list-group-item">
-                            <p>Brutal: @(Character.PhysicalDefense+10)</p>
+                            <p class="small">Brutal: @(Character.PhysicalDefense+10)</p>
                         </li>
                     </ul>
                 </div>
                 <div class="card-footer">
-                    <div class="form-floating">
-                        @if (CanEdit)
-                        {
-                            <InputNumber id="physicalDefenseReduction" @bind-Value="Character.PhysicalDamageReduction" class="form-control"/>
-                        }
-                        else
-                        {
-                            <input type="number" id="physicalDefenseReduction" class="form-control" value="@Character.PhysicalDamageReduction" disabled />
-                        }
-                        <label for="physicalDefenseReduction">Physical Defense Reduction</label>
-                    </div>
+                    @if (VersionTwo)
+                    {
+                        <div class="form-group">
+                            <label class="small" for="physicalDefenseReduction">PDR</label>
+                            <InputNumber id="physicalDefenseReduction" @bind-Value="Character.PhysicalDamageReduction" class="form-control" disabled="@(!CanEdit)"/>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-floating">
+                            <InputNumber id="physicalDefenseReduction" @bind-Value="Character.PhysicalDamageReduction" class="form-control" disabled="@(!CanEdit)"/>
+                            <label for="physicalDefenseReduction">Physical Defense Reduction</label>
+                        </div>
+                    }
+                    
                 </div>
             </div>
+            
             <div class="card col-md-6">
                 <div class="card-header">
-                    <h6>Mystical Defense</h6>
+                    <h6>@(VersionTwo ? "MD" : "Mystical Defense")</h6>
                 </div>
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item">
-                            <div class="form-floating">
-                                @if (CanEdit)
-                                {
-                                    <InputNumber id="mysticalDefense" @bind-Value="Character.MysticalDefense" class="form-control"/>
-                                }
-                                else
-                                {
-                                    <input type="number" id="mysticalDefense" class="form-control" value="@Character.MysticalDefense" disabled />
-                                }
-                                <label for="mysticalDefense">Mystical Defense</label>
-                            </div>
+                            @if (VersionTwo)
+                            {
+                                <div class="form-group">
+                                    <InputNumber id="mysticalDefense" @bind-Value="Character.MysticalDefense" class="form-control" disabled="@(!CanEdit)"/>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-floating">
+                                    <InputNumber id="mysticalDefense" @bind-Value="Character.MysticalDefense" class="form-control" disabled="@(!CanEdit)"/>
+                                    <label for="mysticalDefense">Mystical Defense</label>
+                                </div>
+                            }
                         </li>
                         <li class="list-group-item">
-                            <p>Heavy: @(Character.MysticalDefense+5)</p>
+                            <p class="small">Heavy: @(Character.MysticalDefense+5)</p>
                         </li>
                         <li class="list-group-item">
-                            <p>Brutal: @(Character.MysticalDefense+10)</p>
+                            <p class="small">Brutal: @(Character.MysticalDefense+10)</p>
                         </li>
                     </ul>
                 </div>
                 <div class="card-footer">
-                    <div class="form-floating">
-                        @if (CanEdit)
-                        {
-                            <InputNumber id="mysticalDefenseReduction" @bind-Value="Character.MysticalDamageReduction" class="form-control"/>
-                        }
-                        else
-                        {
-                            <input type="number" id="mysticalDefenseReduction" class="form-control" value="@Character.MysticalDamageReduction" disabled />
-                        }
-                        <label for="mysticalDefenseReduction">Mystical Defense Reduction</label>
-                    </div>
+                    @if (VersionTwo)
+                    {
+                        <div class="form-group">
+                            <label class="small" for="mysticalDefenseReduction">MDR</label>
+                            <InputNumber id="mysticalDefenseReduction" @bind-Value="Character.MysticalDamageReduction" class="form-control" disabled="@(!CanEdit)"/>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-floating">
+                            <InputNumber id="mysticalDefenseReduction" @bind-Value="Character.MysticalDamageReduction" class="form-control" disabled="@(!CanEdit)"/>
+                            <label for="mysticalDefenseReduction">Mystical Defense Reduction</label>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -96,4 +109,5 @@
     [Parameter] public Character Character { get; set; }
     [Parameter] public bool CanEdit { get; set; } = true;
     [Parameter] public EventCallback OnDefensesChanged { get; set; }
+    [Parameter] public bool VersionTwo { get; set; }
 }

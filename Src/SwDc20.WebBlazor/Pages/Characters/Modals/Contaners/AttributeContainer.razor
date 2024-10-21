@@ -3,6 +3,19 @@
 <div class="card border-danger" aria-roledescription="Attribute and Prime Container" aria-description="Container card for attribute cards and prime modifier, these are the key values for your characters, and contain Might, Agility, Charisma, and Intelligence.">
     <div class="card-header">
         <h4>Attributes</h4>
+        @if(DemoMode)
+        {
+            <row class="d-flex flex-nowrap">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="versionTwo" @bind="VersionTwo">
+                    <label class="form-check-label" for="versionTwo">Version Two</label>
+                </div>
+            </row>
+            <row>
+                <p class="small">The goal for version two is to be more compact and have elements side by side, attributes on the right, skills in the middle, Action/Inventory etc on the right</p>
+                <p class="small">You can right click on the Value, or Long press (this is meant for mobile) to bring up the Advantage/Disadvantage Roller</p>
+            </row>
+        }
     </div>
     <div class="card-body">
         <div class="row">
@@ -16,7 +29,9 @@
                     UpdateSaveMasteries="@UpdateSaveMasteries"
                     SelectedMasteriesCount="@SelectedMasteriesCount"
                     SaveValue="@Character.CalculateSaves.CalculateMightSave(Character)"
-                    CanEdit="@CanEdit" />
+                    CanEdit="@CanEdit" 
+                    VersionTwo="@VersionTwo"
+                    CompactVersion="CompactVersion"/>
             </div>
 
             <div class="col-lg-3 col-md-6">
@@ -29,7 +44,9 @@
                     UpdateSaveMasteries="@UpdateSaveMasteries"
                     SelectedMasteriesCount="@SelectedMasteriesCount"
                     SaveValue="@Character.CalculateSaves.CalculateAgilitySave(Character)"
-                    CanEdit="@CanEdit" />
+                    CanEdit="@CanEdit"
+                    VersionTwo="@VersionTwo"
+                    CompactVersion="CompactVersion"/>
             </div>
 
             <div class="col-lg-3 col-md-6">
@@ -42,7 +59,9 @@
                     UpdateSaveMasteries="@UpdateSaveMasteries"
                     SelectedMasteriesCount="@SelectedMasteriesCount"
                     SaveValue="@Character.CalculateSaves.CalculateCharismaSave(Character)"
-                    CanEdit="@CanEdit" />
+                    CanEdit="@CanEdit"
+                    VersionTwo="@VersionTwo"
+                    CompactVersion="CompactVersion"/>
             </div>
 
             <div class="col-lg-3 col-md-6">
@@ -55,17 +74,22 @@
                     UpdateSaveMasteries="@UpdateSaveMasteries"
                     SelectedMasteriesCount="@SelectedMasteriesCount"
                     SaveValue="@Character.CalculateSaves.CalculateIntelligenceSave(Character)"
-                    CanEdit="@CanEdit" />
+                    CanEdit="@CanEdit"
+                    VersionTwo="@VersionTwo"
+                    CompactVersion="CompactVersion"/>
             </div>
         </div>
     </div>
-    <div class="card-footer">
-        <figure class="text-center border-info">
-            <blockquote class="blockquote">
-                <p>Prime Modifier: @Character.PrimeModifier</p>
-            </blockquote>
-        </figure>
-    </div>
+    @if (!VersionTwo)
+    {
+        <div class="card-footer">
+            <figure class="text-center border-info">
+                <blockquote class="blockquote">
+                    <p>Prime Modifier: @Character.PrimeModifier</p>
+                </blockquote>
+            </figure>
+        </div>
+    }
 </div>
 
 @code {
@@ -73,7 +97,11 @@
     [Parameter] public EventCallback<Character> CharacterChanged { get; set; }
     [Parameter] public bool CanEdit { get; set; } = true;
     [Parameter] public EventCallback UpdateSaveMasteries { get; set; }
-
+    
+    [Parameter] public bool CompactVersion { get; set; }
+    [Parameter] public bool VersionTwo { get; set; } = true;
+    [Parameter] public bool DemoMode { get; set; } = true;
+    
     private int SelectedMasteriesCount =>
         (Character.MightSaveMastery ? 1 : 0) +
         (Character.AgilitySaveMastery ? 1 : 0) +

@@ -33,29 +33,4 @@ builder.Services.AddBlazoredLocalStorage();
 
 var host = builder.Build();
 
-await host.Services.GetRequiredService<IJSRuntime>().InvokeVoidAsync("eval", @"
-    if (window.blazorScreenSize === undefined) {
-        window.blazorScreenSize = {
-            dotNetReference: null,
-            init: function (dotNetReference) {
-                this.dotNetReference = dotNetReference;
-                window.addEventListener('resize', this.onResize.bind(this));
-            },
-            onResize: function () {
-                this.dotNetReference.invokeMethodAsync('OnBrowserResize');
-            },
-            getWidth: function () {
-                return window.innerWidth;
-            },
-            getHeight: function () {
-                return window.innerHeight;
-            },
-            dispose: function () {
-                window.removeEventListener('resize', this.onResize);
-                this.dotNetReference = null;
-            }
-        };
-    }
-");
-
 await host.RunAsync();

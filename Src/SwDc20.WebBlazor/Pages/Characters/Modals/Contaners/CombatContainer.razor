@@ -1,4 +1,5 @@
-﻿@using SwDc20.Core.Domain.Entities.Weapon.V0._8
+﻿@using SwDc20.Core.Domain.Entities.Roll
+@using SwDc20.Core.Domain.Entities.Weapon.V0._8
 @using SwDc20.Core.Domain.Enums
 @inject WeaponService WeaponService
 @inject IModalService ModalService
@@ -7,75 +8,203 @@
 <div class="card border-danger" aria-roledescription="Combat Container" aria-description="Container for your weapons and feed into the actions, this handles custom and prebuilt weapons.">
     <div class="card-header">
         <h4>Combat</h4>
+        @if (DemoMode)
+        {
+            <div class="d-flex flex-nowrap">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="versionTwo" @bind="VersionTwo">
+                    <label class="form-check-label" for="versionTwo">Version Two</label>
+                </div>
+            </div>
+            <div>
+                <p class="small">The goal for version two is to be more to list the weapons better and have the new roller option</p>
+                <p class="small">You can right click on the Value, or Long press (this is meant for mobile) to bring up the Advantage/Disadvantage Roller</p>
+            </div>
+        }
     </div>
-    <div class="card-body">
-        <div class="row row-cols-1 row-cols-md-3">
-            <div class="input-group">
-                <label class="input-group-text">
-                    @(Character.AttackSpellCheck > 0 ? Character.AttackSpellCheck : Character.CombatMastery + Character.PrimeModifier)
-                </label>
-                <label class="input-group-text">Attack/Spell Check (CM+Prime)</label>
-                @if (CanEdit)
-                {
-                    <InputNumber id="attackSpellCheck" class="form-control" @bind-Value="Character.AttackSpellCheck" @bind-Value:after="OnChange"/>
-                }
-                else
-                {
-                    <input type="number" id="attackSpellCheck" class="form-control" value="@Character.AttackSpellCheck" disabled/>
-                }
-            </div>
-            <div class="input-group">
-                <label class="input-group-text">
-                    @(Character.SaveDifficultyCheck > 0 ? Character.SaveDifficultyCheck : (Character.CombatMastery + Character.PrimeModifier + 10))
-                </label>
-                <label class="input-group-text">Save DC (CM+Prime+10)</label>
-                @if (CanEdit)
-                {
-                    <InputNumber id="damageBonus" class="form-control" @bind-Value="Character.SaveDifficultyCheck" @bind-Value:after="OnChange"/>
-                }
-                else
-                {
-                    <input type="number" id="damageBonus" class="form-control" value="@Character.SaveDifficultyCheck" disabled/>
-                }
-            </div>
-            <div class="input-group">
-                <label class="input-group-text">
-                    @GetMartialCheckValue()
-                </label>
-                <label class="input-group-text">Martial Check (@MartialSkillsAvailable())</label>
-                @if (CanEdit)
-                {
-                    <select class="form-control" value="@Character.SelectedMartialCheckOption" @onchange="OnMartialCheckOptionChanged">
-                        <option value="">Take Default Maximum</option>
-                        @foreach (var skill in Character.Skills.Where(sk => sk.UseForMartialCheck))
-                        {
-                            <option value="@skill.Id">@skill.Name (@skill.CalculateValue(Character))</option>
-                        }
-                    </select>
-                }
-                else
-                {
-                    <select class="form-control" disabled>
-                        <option>@GetMartialCheckSkillsString()</option>
-                    </select>
-                }
-            </div>
-        </div>
 
+    <div class="card-body">
+        @if (VersionTwo)
+        {
+            <div class="container-fluid">
+                <div class="row align-items-start mb-2">
+                    <div class="col-auto">
+                        <RollComponent Model="AttackSpellCheckRollRequest()"/>
+                    </div>
+                    <div class="col-auto">
+                        <p class="mb-0">Attack/Spell Check (CM+Prime)</p>
+                    </div>
+                    @if (CanEdit)
+                    {
+                        <div class="col-auto">
+                            <InputNumber id="attackSpellCheck" class="form-control" @bind-Value="Character.AttackSpellCheck" @bind-Value:after="OnChange"/>
+                        </div>
+                    }
+                </div>
+
+                <div class="row align-items-start mb-2">
+                    <div class="col-auto">
+                        @* <RollComponent Model="SaveDcRollRequest()"/> *@
+                        <p>@(Character.SaveDifficultyCheck > 0 ? Character.SaveDifficultyCheck : (Character.CombatMastery + Character.PrimeModifier + 10))</p>
+                    </div>
+                    <div class="col-auto">
+                        <p class="mb-0">Save DC (CM+Prime+10)</p>
+                    </div>
+                    @if (CanEdit)
+                    {
+                        <div class="col-auto">
+                            <InputNumber id="damageBonus" class="form-control" @bind-Value="Character.SaveDifficultyCheck" @bind-Value:after="OnChange"/>
+                        </div>
+                    }
+                </div>
+                
+                <div class="row align-items-start mb-2">
+                    <div class="col-auto">
+                        <RollComponent Model="MartialCheckRollRequest()"/>
+                    </div>
+                    <div class="col-auto">
+                        <p class="mb-0">Martial Check (@MartialSkillsAvailable())</p>
+                    </div>
+                    @if (CanEdit)
+                    {
+                        <div class="col-auto">
+                            <select class="form-control" value="@Character.SelectedMartialCheckOption" @onchange="OnMartialCheckOptionChanged">
+                                <option value="">Take Default Maximum</option>
+                                @foreach (var skill in Character.Skills.Where(sk => sk.UseForMartialCheck))
+                                {
+                                    <option value="@skill.Id">@skill.Name (@skill.CalculateValue(Character))</option>
+                                }
+                            </select>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-md-3">
+                <div class="input-group">
+                    <label class="input-group-text">
+                        @(Character.AttackSpellCheck > 0 ? Character.AttackSpellCheck : Character.CombatMastery + Character.PrimeModifier)
+                    </label>
+                    <label class="input-group-text">Attack/Spell Check (CM+Prime)</label>
+                    @if (CanEdit)
+                    {
+                        <InputNumber id="attackSpellCheck" class="form-control" @bind-Value="Character.AttackSpellCheck" @bind-Value:after="OnChange"/>
+                    }
+                    else
+                    {
+                        <input type="number" id="attackSpellCheck" class="form-control" value="@Character.AttackSpellCheck" disabled/>
+                    }
+                </div>
+
+                <div class="input-group">
+                    <label class="input-group-text">
+                        @(Character.SaveDifficultyCheck > 0 ? Character.SaveDifficultyCheck : (Character.CombatMastery + Character.PrimeModifier + 10))
+                    </label>
+                    <label class="input-group-text">Save DC (CM+Prime+10)</label>
+                    @if (CanEdit)
+                    {
+                        <InputNumber id="damageBonus" class="form-control" @bind-Value="Character.SaveDifficultyCheck" @bind-Value:after="OnChange"/>
+                    }
+                    else
+                    {
+                        <input type="number" id="damageBonus" class="form-control" value="@Character.SaveDifficultyCheck" disabled/>
+                    }
+                </div>
+
+                <div class="input-group">
+                    <label class="input-group-text">
+                        @GetMartialCheckValue()
+                    </label>
+                    <label class="input-group-text">Martial Check (@MartialSkillsAvailable())</label>
+                    @if (CanEdit)
+                    {
+                        <select class="form-control" value="@Character.SelectedMartialCheckOption" @onchange="OnMartialCheckOptionChanged">
+                            <option value="">Take Default Maximum</option>
+                            @foreach (var skill in Character.Skills.Where(sk => sk.UseForMartialCheck))
+                            {
+                                <option value="@skill.Id">@skill.Name (@skill.CalculateValue(Character))</option>
+                            }
+                        </select>
+                    }
+                    else
+                    {
+                        <select class="form-control" disabled>
+                            <option>@GetMartialCheckSkillsString()</option>
+                        </select>
+                    }
+                </div>
+            </div>
+        }
+        
         <hr/>
 
         <div class="row align-items-center">
             <div class="col">
                 <h4>Weapons</h4>
             </div>
-            @if (CanEdit)
-            {
-                <div class="col-auto">
-                    <button type="button" class="btn btn-primary btn-sm" @onclick="AddCustomWeapon" title="Add Trade">+ Add Custom Weapon Modal</button>
-                </div>
-            }
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary btn-sm" @onclick="AddCustomWeapon" title="Add Trade">+ Add Custom Weapon Modal</button>
+            </div>
         </div>
-        <div class="row row-cols-1 row-cols-md-2">
+        
+        @if (VersionTwo)
+        {
+            <table class="table table-borderless table-sm table-striped">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Damage</th>
+                    <th>Type</th>
+                    <th>Quantity</th>
+                    <th>Equipped</th>
+                    <th>Primary</th>
+                    <th>Secondary</th>
+                    <th>Description</th>
+                    @if (CanEdit)
+                    {
+                        <th>Actions</th>
+                    }
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var weapon in Character.Weapons)
+                {
+                    <tr>
+                        <td>
+                            <RollComponent Model="new RollRequest { Name = weapon.Name, Description = weapon.Description, Modifier = AttackSpellCheckRollValue }" NameOverride="@weapon.Name"/>
+                        </td>
+                        <td>@weapon.Damage @weapon.DamageType</td>
+                        <td>@weapon.WeaponType</td>
+                        <td>
+                            <InputNumber id="@($"weaponQuantity_{weapon.Name}")" class="form-control" @bind-Value="weapon.Quantity" @bind-Value:after="OnChange"/>
+                        </td>
+                        <td>
+                            <InputCheckbox id="@($"weaponEquipped_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.Equipped" @bind-Value:after="OnChange"/>
+                        </td>
+                        <td>
+                            <InputCheckbox id="@($"weaponPrimary_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.IsPrimary" @bind-Value:after="OnChange"/>
+                        </td>
+                        <td>
+                            <InputCheckbox id="@($"weaponSecondary_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.IsSecondary" @bind-Value:after="OnChange"/>
+                        </td>
+                        <td>@weapon.Description</td>
+                        @if (CanEdit)
+                        {
+                            <td>
+                                <button type="button" class="btn btn-sm btn-secondary" @onclick="() => EditWeapon(weapon)">Edit</button>
+                                <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveWeapon(weapon)">Remove</button>
+                            </td>
+                        }
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-md-2">
             @foreach (var weapon in Character.Weapons)
             {
                 <div class="card">
@@ -148,12 +277,12 @@
                                 <span class="text-success">Advantage</span>
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
-                                <input type="range" class="form-range" min="0" max="2" step="1" @bind-value="RollTypeIndex" @bind-value:event="oninput" />
+                                <input type="range" class="form-range" min="0" max="2" step="1" @bind-value="RollTypeIndex" @bind-value:event="oninput"/>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mt-2">
                                 @if (CurrentRollType != RollType.Normal)
                                 {
-                                    <InputNumber @bind-Value="Quantity" class="form-control w-25" min="2" />
+                                    <InputNumber @bind-Value="Quantity" class="form-control w-25" min="2"/>
                                 }
                                 else
                                 {
@@ -166,6 +295,8 @@
                 </div>
             }
         </div>
+        }
+        
     </div>
     @if (CanEdit)
     {
@@ -192,6 +323,10 @@
     [Parameter] public EventCallback OnCombatChanged { get; set; }
     [Parameter] public bool CanEdit { get; set; }
     [Parameter] public bool IsMobile { get; set; }
+
+    [Parameter] public bool CompactVersion { get; set; }
+    [Parameter] public bool VersionTwo { get; set; } = true;
+    [Parameter] public bool DemoMode { get; set; } = true;
 
     private string MartialSkillsAvailable() =>
         string.Join(" or ", Character.Skills
@@ -326,10 +461,11 @@
         Character.Weapons.Remove(weapon);
         await OnCombatChanged.InvokeAsync();
     }
-    
+
     #region Better Roll Setup
+
     //todo: Move this to a shared component, takes in skill info and rolls the dice
-    
+
     private int RollTypeIndex { get; set; } = 1; // 0: Disadvantage, 1: Normal, 2: Advantage
     private int Quantity { get; set; } = 2;
 
@@ -348,7 +484,7 @@
         RollType.High => "Advantage",
         _ => "Normal"
     };
-    
+
     private string GetRollButtonClass()
     {
         return CurrentRollType switch
@@ -359,7 +495,12 @@
             _ => "btn-secondary"
         };
     }
-    
+
+    private int CurrentWeaponModifier(CharacterWeapon weapon)
+    {
+        return Character.AttackSpellCheck > 0 ? Character.AttackSpellCheck : Character.CombatMastery + Character.PrimeModifier;
+    }
+
     private void Roll(CharacterWeapon weapon)
     {
         int quantity = CurrentRollType == RollType.Normal ? 1 : Quantity;
@@ -373,5 +514,24 @@
         RollTypeIndex = 1; // Reset to Normal
         Quantity = 2;
     }
+
     #endregion
+
+    private int AttackSpellCheckRollValue => Character.AttackSpellCheck > 0 ? Character.AttackSpellCheck : Character.CombatMastery + Character.PrimeModifier;
+
+    private RollRequest AttackSpellCheckRollRequest()
+    {
+        return new RollRequest { Name = "Attack/Spell", Description = "Attack Roll", Modifier = AttackSpellCheckRollValue };
+    }
+
+    private RollRequest SaveDcRollRequest()
+    {
+        return new RollRequest { Name = "Save DC", Description = "Save Difficulty Check", Modifier = Character.SaveDifficultyCheck > 0 ? Character.SaveDifficultyCheck : (Character.CombatMastery + Character.PrimeModifier + 10) };
+    }
+
+    private RollRequest MartialCheckRollRequest()
+    {
+        return new RollRequest { Name = "Martial", Description = "Martial Check", Modifier = GetMartialCheckValue() };
+    }
+
 }

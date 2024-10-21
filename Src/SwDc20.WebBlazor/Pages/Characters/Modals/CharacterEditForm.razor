@@ -13,32 +13,279 @@
 @implements IDisposable
 @implements IAsyncDisposable
 
-<h1>Mobile: @IsMobile</h1>
+@if (DemoMode)
+{
+    <h1>Mobile: @IsMobile</h1>
+}
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>@(CurrentCharacter?.Name ?? "New Character")</h1>
+<div class="d-flex justify-content-between align-items-center mb-3 @(VersionTwoForm ? "border-1 border-secondary" : "")">
+    @if (VersionTwoForm)
+    {
+        <div class="row">
+            <h1>@(CurrentCharacter?.Name ?? "New Character")</h1>
+            @if (!CanEdit)
+            {
+                <h5>Player: @(CurrentCharacter?.PlayerName ?? "Unknown")</h5>
+            }
+        </div>
+    }
+    else
+    {
+        <h1>@(CurrentCharacter?.Name ?? "New Character")</h1>
+    }
+
     @if (showSaveIndicator)
     {
         <span class="save-indicator text-sm-center"> ✅Saved</span>
     }
+    
     @if (ShowEditSlider)
+    {
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="versionToggle" @bind="VersionTwoForm" @bind:after="VersionTwoAlignment">
+            <label class="form-check-label" for="versionToggle">Version Two Form</label>
+        </div>
+    }
+
+    @if (!VersionTwoForm)
+    {
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="demoToggle" @bind="DemoMode" @bind:after="AlignDemo">
+            <label class="form-check-label" for="demoToggle">Demo Mode</label>
+        </div>
+    }
+
+    @if (ShowEditSlider && !VersionTwoForm)
     {
         <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" id="editToggle" @bind="CanEdit" @bind:after="UpdateUrl">
             <label class="form-check-label" for="editToggle">Edit Mode</label>
         </div>
     }
+
+    @if (!string.IsNullOrEmpty(CurrentCharacter.ImageUrl))
+    {
+        <img src="@CurrentCharacter.ImageUrl" alt="Character Image" style="max-width: 100px; max-height: 100px;"/>
+    }
+
 </div>
+
 
 @* <button type="button" @onclick="() => SendRollToToolbox()">Send to Toolbox</button> *@
 
 
 <EditForm Model="@CurrentCharacter" OnValidSubmit="SaveCharacter">
-    <DataAnnotationsValidator/>
-    <ValidationSummary/>
-    @* <FloatingDiceRoller/> *@
-    <Toolbar IsMobile="@IsMobile"/>
+<DataAnnotationsValidator/>
+<ValidationSummary/>
+@* <FloatingDiceRoller/> *@
+<Toolbar IsMobile="@IsMobile"/>
+
+@if (VersionTwoForm)
+{
+    <div class="container-fluid">
+        @if (CanEdit)
+        {
+        <div class="row mb-2">
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <InputText id="name" @bind-Value="CurrentCharacter.Name" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
+                    <label for="name">Character Name</label>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <InputText id="player" @bind-Value="CurrentCharacter.PlayerName" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
+                    <label for="player">Player:</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mb-2" hidden="@(!CanEdit)">
+            <label for="imageUrl">Image URL</label>
+            <InputText id="imageUrl" class="form-control" @bind-Value="CurrentCharacter.ImageUrl" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
+        </div>
+        }
+
+
+        <div class="row mb-2">
+            <div class="form-floating">
+                <div class="input-group">
+                    <span class="input-group-text">Level:</span>
+                    <InputNumber id="level" @bind-Value="CurrentCharacter.Level" class="form-control" min="0" max="20" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
+                    <span class="input-group-text">Combat Mastery: @CurrentCharacter.CombatMastery</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-md-4">
+                <div class="form-floating">
+                    <InputText id="class" @bind-Value="CurrentCharacter.Class" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
+                    <label for="class">Class</label>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-floating">
+                    <InputText id="subclass" @bind-Value="CurrentCharacter.Subclass" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
+                    <label for="subclass">SubClass</label>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-floating">
+                    <InputText id="ancestry" class="form-control" @bind-Value="CurrentCharacter.Ancestry" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
+                    <label for="ancestry">Ancestry</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">
+                <div class="card border-danger" aria-roledescription="Attribute and Prime Container" aria-description="Container card for attribute cards and prime modifier, these are the key values for your characters, and contain Might, Agility, Charisma, and Intelligence.">
+                    <div class="card-header">
+                        <h4>Attributes</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="col-lg-auto col-md-6 m-2">
+                            <div class="col-lg-auto col-md-6">
+                                <SwDc20.WebBlazor.Components.AttributeCardWithSave
+                                    AttributeName="Prime"
+                                    AttributeValue="CurrentCharacter.PrimeModifier"
+                                    IsMobile="@IsMobile"
+                                    CanEdit="@CanEdit"
+                                    VersionTwo="true"
+                                    CompactVersion="true"
+                                    NoRolls="true"/>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-auto col-md-6 m-2">
+                            <SwDc20.WebBlazor.Components.AttributeCardWithSave
+                                AttributeName="@nameof(CurrentCharacter.Might)"
+                                @bind-AttributeValue="CurrentCharacter.Might"
+                                @bind-SaveMastery="CurrentCharacter.MightSaveMastery"
+                                UpdateSaveMasteries="@UpdateSaveMasteries"
+                                SelectedMasteriesCount="@SelectedMasteriesCount"
+                                SaveValue="@Character.CalculateSaves.CalculateMightSave(CurrentCharacter)"
+                                IsMobile="@IsMobile"
+                                CanEdit="@CanEdit"
+                                VersionTwo="true"
+                                CompactVersion="true"/>
+                        </div>
+
+                        <div class="col-lg-auto col-md-6 m-2">
+                            <SwDc20.WebBlazor.Components.AttributeCardWithSave
+                                AttributeName="@nameof(CurrentCharacter.Agility)"
+                                @bind-AttributeValue="CurrentCharacter.Agility"
+                                @bind-SaveMastery="CurrentCharacter.AgilitySaveMastery"
+                                UpdateSaveMasteries="@UpdateSaveMasteries"
+                                SelectedMasteriesCount="@SelectedMasteriesCount"
+                                SaveValue="@Character.CalculateSaves.CalculateAgilitySave(CurrentCharacter)"
+                                IsMobile="@IsMobile"
+                                CanEdit="@CanEdit"
+                                VersionTwo="true"
+                                CompactVersion="true"/>
+                        </div>
+
+                        <div class="col-lg-auto col-md-6 m-2">
+                            <SwDc20.WebBlazor.Components.AttributeCardWithSave
+                                AttributeName="@nameof(CurrentCharacter.Charisma)"
+                                @bind-AttributeValue="CurrentCharacter.Charisma"
+                                @bind-SaveMastery="CurrentCharacter.CharismaSaveMastery"
+                                UpdateSaveMasteries="@UpdateSaveMasteries"
+                                SelectedMasteriesCount="@SelectedMasteriesCount"
+                                SaveValue="@Character.CalculateSaves.CalculateCharismaSave(CurrentCharacter)"
+                                IsMobile="@IsMobile"
+                                CanEdit="@CanEdit"
+                                VersionTwo="true"
+                                CompactVersion="true"/>
+                        </div>
+
+                        <div class="col-lg-auto col-md-6 m-2">
+                            <SwDc20.WebBlazor.Components.AttributeCardWithSave
+                                AttributeName="@nameof(CurrentCharacter.Intelligence)"
+                                @bind-AttributeValue="CurrentCharacter.Intelligence"
+                                @bind-SaveMastery="CurrentCharacter.IntelligenceSaveMastery"
+                                UpdateSaveMasteries="@UpdateSaveMasteries"
+                                SelectedMasteriesCount="@SelectedMasteriesCount"
+                                SaveValue="@Character.CalculateSaves.CalculateIntelligenceSave(CurrentCharacter)"
+                                IsMobile="@IsMobile"
+                                CanEdit="@CanEdit"
+                                VersionTwo="true"
+                                CompactVersion="true"/>
+                        </div>
+
+                        <div class="row"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <SkillsContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnChanged="@AutoSaveCharacter" VersionTwo="true" CompactVersion="true" DemoMode="false"/>
+            </div>
+            <div class="col-md-7">
+                <div class="row">
+                    <div class="col-md-8">
+                        <HealthStaminaManaContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnChanged="@AutoSaveCharacter"/>
+                    </div>
+                    <div class="col-md-4">
+                        <DefenseContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnDefensesChanged="@AutoSaveCharacter" VersionTwo="true"/>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
     
+
+    <hr/>
+
+    
+
+    <hr/>
+
+    
+
+    <hr/>
+
+    
+
+    <hr/>
+
+    <TradesContainer Character="@CurrentCharacter" OnTradesChanged="@AutoSaveCharacter" CanEdit="@CanEdit"/>
+
+    <hr/>
+
+    <LanguageContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnLanguagesChanged="@AutoSaveCharacter"/>
+
+
+    <hr/>
+
+    <CombatContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnCombatChanged="AutoSaveCharacter" VersionTwo="@VersionTwo" CompactVersion="@CompactVersion" DemoMode="@DemoMode"/>
+
+    <hr/>
+
+    <InventoryContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnInventoryChanged="@AutoSaveCharacter"/>
+
+    <hr/>
+
+    <FeaturesContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnFeaturesChanged="@AutoSaveCharacter"/>
+
+    <hr/>
+
+    <ResourceContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnResourcesChanged="@AutoSaveCharacter"/>
+
+
+    @if (CanEdit)
+    {
+        <hr/>
+        <button type="submit" class="btn btn-primary" @onclick="SaveCharacterAndClose">Save Character</button>
+        <hr/>
+    }
+}
+else
+{
     <div class="row">
         <div class="col-md-6">
             <div class="form-floating">
@@ -102,6 +349,26 @@
     <div class="card border-danger" aria-roledescription="Attribute and Prime Container" aria-description="Container card for attribute cards and prime modifier, these are the key values for your characters, and contain Might, Agility, Charisma, and Intelligence.">
         <div class="card-header">
             <h4>Attributes</h4>
+            @if (DemoMode)
+            {
+                <div class="d-flex flex-nowrap">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="versionTwo" @bind="VersionTwo">
+                        <label class="form-check-label" for="versionTwo">Version Two</label>
+                    </div>
+                </div>
+                <div>
+                    <p class="small">The goal for version two is to be more compact and have elements side by side, attributes on the right, skills in the middle, Action/Inventory etc on the right</p>
+                    <p class="small">You can right click on the Value, or Long press (this is meant for mobile) to bring up the Advantage/Disadvantage Roller</p>
+                </div>
+                @if (VersionTwo)
+                {
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="compact" @bind="CompactVersion">
+                        <label class="form-check-label" for="compact">Compact Version Two</label>
+                    </div>
+                }
+            }
         </div>
         <div class="card-body">
             <div class="row">
@@ -115,7 +382,9 @@
                         SelectedMasteriesCount="@SelectedMasteriesCount"
                         SaveValue="@Character.CalculateSaves.CalculateMightSave(CurrentCharacter)"
                         IsMobile="@IsMobile"
-                        CanEdit="@CanEdit"/>
+                        CanEdit="@CanEdit"
+                        VersionTwo="@VersionTwo"
+                        CompactVersion="CompactVersion"/>
                 </div>
 
                 <div class="col-lg-3 col-md-6">
@@ -127,7 +396,9 @@
                         SelectedMasteriesCount="@SelectedMasteriesCount"
                         SaveValue="@Character.CalculateSaves.CalculateAgilitySave(CurrentCharacter)"
                         IsMobile="@IsMobile"
-                        CanEdit="@CanEdit"/>
+                        CanEdit="@CanEdit"
+                        VersionTwo="@VersionTwo"
+                        CompactVersion="CompactVersion"/>
                 </div>
 
                 <div class="col-lg-3 col-md-6">
@@ -139,7 +410,9 @@
                         SelectedMasteriesCount="@SelectedMasteriesCount"
                         SaveValue="@Character.CalculateSaves.CalculateCharismaSave(CurrentCharacter)"
                         IsMobile="@IsMobile"
-                        CanEdit="@CanEdit"/>
+                        CanEdit="@CanEdit"
+                        VersionTwo="@VersionTwo"
+                        CompactVersion="CompactVersion"/>
                 </div>
 
                 <div class="col-lg-3 col-md-6">
@@ -151,7 +424,9 @@
                         SelectedMasteriesCount="@SelectedMasteriesCount"
                         SaveValue="@Character.CalculateSaves.CalculateIntelligenceSave(CurrentCharacter)"
                         IsMobile="@IsMobile"
-                        CanEdit="@CanEdit"/>
+                        CanEdit="@CanEdit"
+                        VersionTwo="@VersionTwo"
+                        CompactVersion="CompactVersion"/>
                 </div>
 
             </div>
@@ -175,7 +450,7 @@
 
     <hr/>
 
-    <SkillsContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnChanged="@AutoSaveCharacter"/>
+    <SkillsContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnChanged="@AutoSaveCharacter" VersionTwo="@VersionTwo" CompactVersion="@CompactVersion" DemoMode="@DemoMode"/>
 
     <hr/>
 
@@ -188,7 +463,7 @@
 
     <hr/>
 
-    <CombatContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnCombatChanged="AutoSaveCharacter"/>
+    <CombatContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnCombatChanged="AutoSaveCharacter" VersionTwo="@VersionTwo" CompactVersion="@CompactVersion" DemoMode="@DemoMode"/>
 
     <hr/>
 
@@ -202,24 +477,20 @@
 
     <ResourceContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnResourcesChanged="@AutoSaveCharacter"/>
 
-    <hr/>
-
-    @* <div class="card" aria-roledescription="" aria-description=""> *@
-    @*     <div class="card-header"></div> *@
-    @*     <div class="card-body"></div> *@
-    @*     <div class="card-footer"></div> *@
-    @* </div> *@
-
 
     @if (CanEdit)
     {
+        <hr/>
         <button type="submit" class="btn btn-primary" @onclick="SaveCharacterAndClose">Save Character</button>
+        <hr/>
     }
-
-    @* <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button> *@
+}
 
 
 </EditForm>
+
+<div class="row pt-5 mt-5"></div>
+
 
 @code
 {
@@ -227,18 +498,40 @@
     [Parameter] public bool CanEdit { get; set; } = false;
     private bool IsMobile { get; set; } = false;
     private bool ShowEditSlider { get; set; } = true;
-    
+
+    [Parameter] public bool CompactVersion { get; set; }
+    private bool VersionTwoForm { get; set; } = false;
+    private bool VersionTwo { get; set; } = true;
+    private bool DemoMode { get; set; } = true;
+
+    private void VersionTwoAlignment()
+    {
+        VersionTwo = true;
+        DemoMode = !VersionTwoForm;
+        AlignDemo();
+    }
+
+    private void AlignDemo()
+    {
+        if (!DemoMode)
+        {
+            VersionTwo = true;
+            CompactVersion = false;
+        }
+    }
+
     public Character CurrentCharacter { get; set; } = new()
     {
-        Id = Guid.NewGuid(), 
+        Id = Guid.NewGuid(),
         Version = Character.CurrentVersion
     };
+
     private List<DocumentWrapper<Skill>> availableSkills;
     private List<DocumentWrapper<Weapon>> availableWeapons = [];
     private bool showSaveIndicator = false;
-    
+
     protected override async Task OnInitializedAsync()
-    {        
+    {
         var uri = new Uri(NavigationManager.Uri);
         var query = HttpUtility.ParseQueryString(uri.Query);
 
@@ -247,49 +540,49 @@
         {
             CanEdit = editQuery.Equals("true", StringComparison.InvariantCultureIgnoreCase);
         }
-        
+
         await base.OnInitializedAsync();
         await CheckIfMobileAsync();
         ScreenSizeService.IsMobileChanged += OnIsMobileChanged;
         StateHasChanged();
-        
+
         var characterWrapper = await CharacterService.GetCharacterAsync(Id);
-        
+
         CurrentCharacter = characterWrapper?.Document ?? new Character
-                        {
-                            Id = Id,
-                            Version = Character.CurrentVersion,
-                            Resources = new List<CharacterResource>()
-                        };
+        {
+            Id = Id,
+            Version = Character.CurrentVersion,
+            Resources = new List<CharacterResource>()
+        };
 
         availableSkills = await SkillService.GetSkillsAsync();
 
         if (!availableSkills.Any())
         {
             availableSkills = SkillService.GetDefaultSkills()
-                    .Select(s => new DocumentWrapper<Skill>
-                                {
-                                    ContentId = s.Id,
-                                    Document = s,
-                                    DocumentType = "Skill",
-                                    ContentVersion = s.Version
-                                }
-                    ).ToList();
+                .Select(s => new DocumentWrapper<Skill>
+                    {
+                        ContentId = s.Id,
+                        Document = s,
+                        DocumentType = "Skill",
+                        ContentVersion = s.Version
+                    }
+                ).ToList();
         }
-        
+
         if (!CurrentCharacter.Skills.Any())
         {
             CurrentCharacter.Skills = availableSkills.Select(s => s.Document)
-                    .Select(s => new Skill()
-                                {
-                                    Id = s.Id,
-                                    Name = s.Name,
-                                    AttributeUsed = s.AttributeUsed,
-                                    Tag = s.Tag,
-                                    UseForMartialCheck = s.UseForMartialCheck,
-                                    Version = Skill.CurrentVersion
-                                }
-                    ).ToList();
+                .Select(s => new Skill()
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        AttributeUsed = s.AttributeUsed,
+                        Tag = s.Tag,
+                        UseForMartialCheck = s.UseForMartialCheck,
+                        Version = Skill.CurrentVersion
+                    }
+                ).ToList();
         }
 
 
@@ -300,8 +593,8 @@
 
 
         availableWeapons = await WeaponService.GetWeaponsAsync();
-        
-        
+
+
         if (!CurrentCharacter.IsInitiallySaved)
         {
             ShowEditSlider = false;
@@ -332,11 +625,11 @@
         // Synchronous cleanup
         ScreenSizeService.IsMobileChanged -= OnIsMobileChanged;
     }
-    
+
     public async ValueTask DisposeAsync()
     {
         // Asynchronous cleanup
-        Dispose();  // Call the synchronous cleanup first
+        Dispose(); // Call the synchronous cleanup first
 
         if (ScreenSizeService is IAsyncDisposable disposable)
         {
@@ -345,11 +638,11 @@
     }
 
     #endregion
-    
-    
+
+
     private void UpdateUrl()
     {
-        if(CanEdit)
+        if (CanEdit)
         {
             var uri = NavigationManager.GetUriWithQueryParameter("edit", CanEdit);
             NavigationManager.NavigateTo(uri, false);
@@ -359,7 +652,7 @@
             RemoveQueryParameter("edit");
         }
     }
-    
+
     private void RemoveQueryParameter(string parameterName)
     {
         var uri = new Uri(NavigationManager.Uri);
@@ -382,12 +675,12 @@
         if (CurrentCharacter != null)
         {
             var characterWrapper = new DocumentWrapper<Character>
-                        {
-                            Document = CurrentCharacter,
-                            ContentId = CurrentCharacter.Id,
-                            ContentVersion = CurrentCharacter.Version
-                        };
-            
+            {
+                Document = CurrentCharacter,
+                ContentId = CurrentCharacter.Id,
+                ContentVersion = CurrentCharacter.Version
+            };
+
             await CharacterService.SaveCharacterAsync(characterWrapper);
 
             if (!CurrentCharacter.IsInitiallySaved)
@@ -395,6 +688,7 @@
                 // Skip save if the character hasn't been initially saved
                 return;
             }
+
             showSaveIndicator = true;
             StateHasChanged();
             await Task.Delay(2000);
@@ -407,7 +701,7 @@
     {
         CurrentCharacter.CreatedTimestamp = DateTime.Now;
         CurrentCharacter.IsInitiallySaved = true;
-        
+
         await SaveCharacter();
         NavigationManager.NavigateTo("/characters");
     }
@@ -426,7 +720,8 @@
             // Skip autosave if the character hasn't been initially saved
             return;
         }
-        
+
         await SaveCharacter();
     }
 }
+
