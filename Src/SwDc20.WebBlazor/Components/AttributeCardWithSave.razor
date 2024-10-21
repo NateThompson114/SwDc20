@@ -10,7 +10,14 @@
         </div>
         <div class="card-body">
             <h4 class="text-center">
-                @if(!NoRolls)
+                @if (CanEdit)
+                {
+                    <div class="form-floating">
+                        <InputNumber id="@AttributeName.ToLower()" @bind-Value="AttributeValue" @bind-Value:after="OnAttributeValueChanged" class="form-control" disabled="@(!CanEdit)"/>
+                        <label for="@AttributeName.ToLower()">@AttributeName</label>
+                    </div>
+                }
+                else if (!NoRolls)
                 {
                     <RollComponent Model="new RollRequest { Name = AttributeName, Description = string.Empty, Modifier = AttributeValue }"></RollComponent>
                 }
@@ -22,7 +29,23 @@
             </h4>
         </div>
         <div class="card-footer">
-            @if (!NoRolls)
+            @if (CanEdit)
+            {
+                <div class="card-footer">
+                    <div class="input-group">
+                        <span class="input-group-text">Save</span>
+                        <div class="input-group-text">
+                            <InputCheckbox @bind-Value="SaveMastery"
+                                           @bind-Value:after="OnSaveMasteryChanged"
+                                           disabled="@(!CanEdit)"
+                                           id="@SaveCheckboxId"
+                                           class="form-check-input"/>
+                        </div>
+                        <span class="input-group-text">Value: @SaveValue</span>
+                    </div>
+                </div>
+            }
+            else if (!NoRolls)
             {
                 <h6 class="text-center">
                     <RollComponent Model="new RollRequest { Name = AttributeName, Description = string.Empty, Modifier = SaveValue, IsSave = true }"/>
