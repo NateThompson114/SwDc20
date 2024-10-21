@@ -1,5 +1,4 @@
-﻿@using SwDc20.Core.Domain.Entities
-@using SwDc20.Core.Domain.Entities.Roll
+﻿@using SwDc20.Core.Domain.Entities.Roll
 @using SwDc20.Core.Domain.Enums
 @inject RollCommunicationService RollCommunicationService
 @inject DiceRollerService DiceRollerService
@@ -24,7 +23,7 @@
     <div class="modal" style="display:block; position: fixed; left: @(_left)px; top: @(_top)px;">
         <div class="modal-content" style="width: 300px;">
             <div class="modal-header">
-                <h5 class="modal-title">Roll @Model.Name @(Model.IsSave ? "Save" : "Check")</h5>
+                <h5 class="modal-title">Roll @(Model.Name.Length > 20 ? Model.Name.Substring(0,20) : Model.Name) @(Model.IsSave ? "Save" : "Check")</h5>
                 <button type="button" class="close" @onclick="CloseModal">&times;</button>
             </div>
             <div class="modal-body">
@@ -75,6 +74,7 @@
 
 @code {
     [Parameter] public RollRequest Model { get; set; }
+    [Parameter] public string? NameOverride { get; set; }
 
     private bool showModal = false;
     private RollType selectedRollType = RollType.Normal;
@@ -93,7 +93,7 @@
 
     private string GetDisplayValue()
     {
-        return Model.Modifier.ToString("+#;-#;+0");
+        return NameOverride ?? Model.Modifier.ToString("+#;-#;+0");
     }
 
     private void PerformNormalRoll()
