@@ -38,11 +38,14 @@
     {
         <span class="save-indicator text-sm-center"> ✅Saved</span>
     }
-
-    <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" id="versionToggle" @bind="VersionTwoForm" @bind:after="VersionTwoAlignment">
-        <label class="form-check-label" for="versionToggle">Version Two Form</label>
-    </div>
+    
+    @if (ShowEditSlider)
+    {
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="versionToggle" @bind="VersionTwoForm" @bind:after="VersionTwoAlignment">
+            <label class="form-check-label" for="versionToggle">Version Two Form</label>
+        </div>
+    }
 
     @if (!VersionTwoForm)
     {
