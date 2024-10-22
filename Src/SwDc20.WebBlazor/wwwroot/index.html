@@ -31,7 +31,7 @@
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
     <script>
-        navigator.serviceWorker.register('service-worker.js?v=1.00.007');
+        navigator.serviceWorker.register('service-worker.js');
 
         window.blazorScreenSize = {
             dotNetReference: null,
@@ -65,6 +65,55 @@
                     height: this.getHeight(),
                     pixelRatio: this.getDevicePixelRatio()
                 };
+            }
+        };
+
+        // Check for updates every 5 minutes
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    // Check for updates every 5 minutes
+                    setInterval(() => {
+                        registration.update();
+                    }, 5 * 60 * 1000);
+                });
+        }
+
+        window.checkForUpdate = async () => {
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (registration) {
+                        await registration.update();
+                        return new Promise(resolve => {
+                            const timeoutId = setTimeout(() => resolve({ updateAvailable: false }), 3000);
+                            registration.onupdatefound = () => {
+                                clearTimeout(timeoutId);
+                                const installingWorker = registration.installing;
+                                installingWorker.onstatechange = () => {
+                                    if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        resolve({ updateAvailable: true });
+                                    } else {
+                                        resolve({ updateAvailable: false });
+                                    }
+                                };
+                            };
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error checking for update:', error);
+                }
+            }
+            return { updateAvailable: false };
+        };
+
+        window.applyUpdate = () => {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(registration => {
+                    if (registration && registration.waiting) {
+                        registration.waiting.postMessage('CHECK_FOR_UPDATE');
+                    }
+                });
             }
         };
     </script>
