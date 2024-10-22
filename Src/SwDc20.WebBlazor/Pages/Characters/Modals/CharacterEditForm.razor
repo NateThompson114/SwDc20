@@ -1,4 +1,5 @@
 ﻿@page "/character/{Id:guid}"
+@using System.Collections.ObjectModel
 @using System.Web
 @using SwDc20.Core.Domain.Entities.Weapon.V0._8
 @using SwDc20.Core.Interfaces
@@ -38,7 +39,7 @@
     {
         <span class="save-indicator text-sm-center"> ✅Saved</span>
     }
-    
+
     @if (ShowEditSlider)
     {
         <div class="form-check form-switch">
@@ -85,26 +86,26 @@
     <div class="container-fluid">
         @if (CanEdit)
         {
-        <div class="row mb-2">
-            <div class="col-md-6">
-                <div class="form-floating">
-                    <InputText id="name" @bind-Value="CurrentCharacter.Name" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
-                    <label for="name">Character Name</label>
+            <div class="row mb-2">
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <InputText id="name" @bind-Value="CurrentCharacter.Name" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
+                        <label for="name">Character Name</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <InputText id="player" @bind-Value="CurrentCharacter.PlayerName" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
+                        <label for="player">Player:</label>
+                    </div>
                 </div>
             </div>
 
-            <div class="col-md-6">
-                <div class="form-floating">
-                    <InputText id="player" @bind-Value="CurrentCharacter.PlayerName" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
-                    <label for="player">Player:</label>
-                </div>
+            <div class="form-group mb-2" hidden="@(!CanEdit)">
+                <label for="imageUrl">Image URL</label>
+                <InputText id="imageUrl" class="form-control" @bind-Value="CurrentCharacter.ImageUrl" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
             </div>
-        </div>
-
-        <div class="form-group mb-2" hidden="@(!CanEdit)">
-            <label for="imageUrl">Image URL</label>
-            <InputText id="imageUrl" class="form-control" @bind-Value="CurrentCharacter.ImageUrl" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
-        </div>
         }
 
 
@@ -233,49 +234,69 @@
                         <DefenseContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnDefensesChanged="@AutoSaveCharacter" VersionTwo="true"/>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="container-fluid">
+                        <div class="card border-dark mt-2">
+                            <div class="card-header">
+                                <ul class="nav nav-tabs card-header-tabs">
+                                    @for (int i = 0; i < MenuItems.Count; i++)
+                                    {
+                                        var index = i;
+                                        <li class="nav-item">
+                                            <a class="nav-link @(SelectedIndex == index ? "active" : "")"
+                                               @onclick="() => SelectedIndex = index"
+                                               href="javascript:void(0)">
+                                                @MenuItems[index].Title
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                            <div class="card-body">
+                                @switch (SelectedIndex)
+                                {
+                                    case 0:
+                                        @* <ActionsContent /> *@
+                                        <CombatContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnCombatChanged="AutoSaveCharacter" VersionTwo="@VersionTwo" CompactVersion="@CompactVersion" DemoMode="@DemoMode"/>
+                                        <ResourceContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnResourcesChanged="@AutoSaveCharacter"/>
+                                        break;
+                                    case 1:
+                                        @* <SpellsContent /> *@
+                                        <p>Spells Content</p>
+                                        break;
+                                    case 2:
+                                        @* <InventoryContent /> *@
+                                        <InventoryContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnInventoryChanged="@AutoSaveCharacter"/>
+                                        break;
+                                    case 3:
+                                        @* <FeaturesContent /> *@
+                                        <FeaturesContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnFeaturesChanged="@AutoSaveCharacter"/>
+                                        break;
+                                    case 4:
+                                        @* <BackgroundContent /> *@
+                                        <p>Background Content</p>
+                                        break;
+                                    case 5:
+                                        @* <NotesContent /> *@
+                                        <p>Notes Content</p>
+                                        break;
+                                    case 6:
+                                        @* <ExtrasContent /> *@
+                                        <TradesContainer Character="@CurrentCharacter" OnTradesChanged="@AutoSaveCharacter" CanEdit="@CanEdit"/>
+                                        <LanguageContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnLanguagesChanged="@AutoSaveCharacter"/>
+                                        break;
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
-            
+
         </div>
     </div>
-    
 
     <hr/>
-
-    
-
-    <hr/>
-
-    
-
-    <hr/>
-
-    
-
-    <hr/>
-
-    <TradesContainer Character="@CurrentCharacter" OnTradesChanged="@AutoSaveCharacter" CanEdit="@CanEdit"/>
-
-    <hr/>
-
-    <LanguageContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnLanguagesChanged="@AutoSaveCharacter"/>
-
-
-    <hr/>
-
-    <CombatContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnCombatChanged="AutoSaveCharacter" VersionTwo="@VersionTwo" CompactVersion="@CompactVersion" DemoMode="@DemoMode"/>
-
-    <hr/>
-
-    <InventoryContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnInventoryChanged="@AutoSaveCharacter"/>
-
-    <hr/>
-
-    <FeaturesContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnFeaturesChanged="@AutoSaveCharacter"/>
-
-    <hr/>
-
-    <ResourceContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnResourcesChanged="@AutoSaveCharacter"/>
-
 
     @if (CanEdit)
     {
@@ -504,6 +525,28 @@ else
     private bool VersionTwo { get; set; } = true;
     private bool DemoMode { get; set; } = true;
 
+    private int SelectedIndex { get; set; } = 0;
+
+    private ReadOnlyCollection<MenuItem> MenuItems { get; } = new List<MenuItem>
+    {
+        new("Actions", typeof(string)),
+        new("Spells", typeof(string)),
+        new("Inventory", typeof(InventoryContainer)),
+        new("Features & Traits", typeof(FeaturesContainer)),
+        new("Background", typeof(string)),
+        new("Notes", typeof(string)),
+        new("Extras", typeof(string))
+        // new("Actions", typeof(ActionsContent)),
+        // new("Spells", typeof(SpellsContent)),
+        // new("Inventory", typeof(InventoryContent)),
+        // new("Features & Traits", typeof(FeaturesContent)),
+        // new("Background", typeof(BackgroundContent)),
+        // new("Notes", typeof(NotesContent)),
+        // new("Extras", typeof(ExtrasContent))
+    }.AsReadOnly();
+
+    private record MenuItem(string Title, Type ContentType);
+
     private void VersionTwoAlignment()
     {
         VersionTwo = true;
@@ -724,4 +767,3 @@ else
         await SaveCharacter();
     }
 }
-
