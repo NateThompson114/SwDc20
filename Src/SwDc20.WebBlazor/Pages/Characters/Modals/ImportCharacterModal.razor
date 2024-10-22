@@ -1,0 +1,112 @@
+﻿@using System.Text.Json
+@inject IJSRuntime JSRuntime
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">Import Character</h5>
+        <button type="button" class="btn-close" @onclick="() => ModalService.CancelAsync()"></button>
+    </div>
+    <div class="modal-body">
+        <h6 class="alert-danger">WARNING: This currently overrides your character, later on I will support duplicating characters including during imports.</h6>
+        <div class="mb-3">
+            <InputFile OnChange="LoadFile" class="form-control" accept=".json"/>
+        </div>
+        @* <div class="form-check mb-3"> *@
+        @*     <input class="form-check-input" type="checkbox" @bind="OverrideExisting" id="overrideCheck"> *@
+        @*     <label class="form-check-label" for="overrideCheck"> *@
+        @*         Override existing character if ID matches *@
+        @*     </label> *@
+        @* </div> *@
+        @if (ErrorMessage != null)
+        {
+            <div class="alert alert-danger">@ErrorMessage</div>
+        }
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" @onclick="() => ModalService.CancelAsync()">Cancel</button>
+        <button type="button" class="btn btn-primary" @onclick="ImportCharacter" disabled="@(!HasFile)">Import</button>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance ModalService { get; set; }
+
+    private bool OverrideExisting { get; set; }
+    private string JsonContent { get; set; }
+    private bool HasFile { get; set; }
+    private string ErrorMessage { get; set; }
+
+    private async Task LoadFile(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            var file = e.File;
+            using var streamReader = new StreamReader(file.OpenReadStream());
+            JsonContent = await streamReader.ReadToEndAsync();
+            HasFile = true;
+            ErrorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Error loading file: " + ex.Message;
+            HasFile = false;
+        }
+    }
+
+    private async Task ImportCharacter()
+    {
+        try
+        {
+            var wrapper = JsonSerializer.Deserialize<DocumentWrapper<Character>>(JsonContent);
+            
+            if (!OverrideExisting)
+            {
+                // Generate new GUIDs for all IDs
+                wrapper = RegenerateIds(wrapper);
+            }
+
+            await ModalService.CloseAsync(ModalResult.Ok(wrapper));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Error importing character: " + ex.Message;
+        }
+    }
+
+    private DocumentWrapper<Character> RegenerateIds(DocumentWrapper<Character> wrapper)
+    {
+        // Create new wrapper with new IDs
+        var newWrapper = new DocumentWrapper<Character>
+        {
+            Id = Guid.NewGuid(),
+            Document = wrapper.Document
+        };
+
+        // // Update document ID
+        // newWrapper.Document.Id = Guid.NewGuid();
+
+        // Update IDs in collections
+        // foreach (var skill in newWrapper.Document.Skills)
+        // {
+        //     skill.Id = Guid.NewGuid();
+        // }
+
+        // foreach (var feature in newWrapper.Document.Features)
+        // {
+        //     feature.Id = Guid.NewGuid();
+        // }
+        //
+        // foreach (var item in newWrapper.Document.Inventory)
+        // {
+        //     item.Id = Guid.NewGuid();
+        //     foreach (var subItem in item.Inventory)
+        //     {
+        //         subItem.Id = Guid.NewGuid();
+        //     }
+        // }
+
+        // Add more collections as needed
+
+        return newWrapper;
+    }
+}

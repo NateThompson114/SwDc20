@@ -1,11 +1,11 @@
 ﻿@page "/characters"
+@using System.Text
+@using System.Text.Json
 @using SwDc20.WebBlazor.Pages.Characters.Modals
-@using SwDc20.Core.Domain.Entities.GameInfo.V0._8
 @inject CharacterService CharacterService
-@inject WeaponService WeaponService
 @inject NavigationManager NavigationManager
-@inject GamesService GamesService
 @inject IModalService ModalService
+@inject IJSRuntime JsRuntime
 
 <h3>Characters</h3>
 
@@ -15,8 +15,9 @@
 }
 else
 {
-    <div class="mb-3">
+    <div class="mb-3 d-flex gap-2">
         <button class="btn btn-primary" @onclick="CreateNewCharacter">Create New Character</button>
+        <button class="btn btn-secondary" @onclick="ImportCharacter">Import Character</button>
     </div>
 
     <div class="row row-cols-auto">
@@ -25,6 +26,23 @@ else
             <div class="col-md-4 mb-3">
                 <div class="card">
                     <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <h5 class="card-title">@characterWrapper.Document.Name</h5>
+                            <div class="dropdown">
+                                <button class="btn btn-link" type="button" id="dropdownMenuButton-@characterWrapper.Document.Id"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton-@characterWrapper.Document.Id">
+                                    <li><button class="dropdown-item" @onclick="() => ExportToJson(characterWrapper)">Export to JSON</button></li>
+                                    <li><button class="dropdown-item disabled">Export to AlchemyRPG (coming soon)</button></li>
+                                    <li><button class="dropdown-item disabled">Export to Foundry (coming soon)</button></li>
+                                    <li><button class="dropdown-item disabled">Export to Roll20 (coming soon)</button></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><button class="dropdown-item alert-danger" @onclick="() => DeleteCharacter(characterWrapper.Document.Id)">Delete</button></li>
+                                </ul>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-6">
                                 <h5 class="card-title">@characterWrapper.Document.Name</h5>
@@ -40,10 +58,10 @@ else
                                 }
                             </div>
                         </div>
-                        
+
                         <button class="btn btn-success mr-2" @onclick="() => PlayCharacter(characterWrapper.Document.Id)">Play</button>
                         <button class="btn btn-primary mr-2" @onclick="() => EditCharacter(characterWrapper.Document.Id)">Edit</button>
-                        <button class="btn btn-danger" @onclick="() => DeleteCharacter(characterWrapper.Document.Id)">Delete</button>
+                        
                     </div>
                 </div>
             </div>
@@ -92,5 +110,30 @@ else
     private void PlayCharacter(Guid id)
     {
         NavigationManager.NavigateTo($"/character/{id}");
+    }
+    
+    private async Task ExportToJson(DocumentWrapper<Character> character)
+    {
+        var json = JsonSerializer.Serialize(character, new JsonSerializerOptions 
+        { 
+            WriteIndented = true 
+        });
+        
+        var fileName = $"{character.Document.Name}_export.json";
+        var bytes = Encoding.UTF8.GetBytes(json);
+        await JsRuntime.InvokeVoidAsync("downloadFile", fileName, "application/json", bytes);
+    }
+
+    private async Task ImportCharacter()
+    {
+        var modal = ModalService.Show<ImportCharacterModal>("Import Character");
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            var importedCharacter = (DocumentWrapper<Character>)result.Data;
+            await CharacterService.SaveCharacterAsync(importedCharacter);
+            await RefreshCharacters();
+        }
     }
 }
