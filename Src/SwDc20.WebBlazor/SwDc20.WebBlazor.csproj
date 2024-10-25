@@ -36,10 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\SwDc20.Core\SwDc20.Core.csproj" />
     <ProjectReference Include="..\SwDc20.Infrastructure\SwDc20.Infrastructure.csproj" />
   </ItemGroup>

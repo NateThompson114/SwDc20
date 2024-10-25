@@ -97,7 +97,7 @@
                 <div class="col-md-6">
                     <div class="form-floating">
                         <InputText id="player" @bind-Value="CurrentCharacter.PlayerName" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="@(!CanEdit)"/>
-                        <label for="player">Player:</label>
+                        <label for="player">Player</label>
                     </div>
                 </div>
             </div>
@@ -295,15 +295,6 @@
 
         </div>
     </div>
-
-    <hr/>
-
-    @if (CanEdit)
-    {
-        <hr/>
-        <button type="submit" class="btn btn-primary" @onclick="SaveCharacterAndClose">Save Character</button>
-        <hr/>
-    }
 }
 else
 {
@@ -499,14 +490,15 @@ else
     <ResourceContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnResourcesChanged="@AutoSaveCharacter"/>
 
 
-    @if (CanEdit)
-    {
-        <hr/>
-        <button type="submit" class="btn btn-primary" @onclick="SaveCharacterAndClose">Save Character</button>
-        <hr/>
-    }
+    
 }
 
+    @if (CanEdit)
+    {
+    <hr/>
+    <button type="submit" class="btn btn-primary" @onclick="SaveCharacterAndClose">Save Character</button>
+    <hr/>
+    }
 
 </EditForm>
 

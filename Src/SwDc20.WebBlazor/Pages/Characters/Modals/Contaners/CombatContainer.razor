@@ -156,11 +156,17 @@
                 <tr>
                     <th>Name</th>
                     <th>Damage</th>
-                    <th>Type</th>
+                    @if(!IsMobile)
+                    {
+                        <th>Type</th>
+                    }
                     <th>Quantity</th>
-                    <th>Equipped</th>
-                    <th>Primary</th>
-                    <th>Secondary</th>
+                    @if (!IsMobile)
+                    {
+                        <th>Equipped</th>
+                        <th>Primary</th>
+                        <th>Secondary</th>
+                    }
                     <th>Description</th>
                     @if (CanEdit)
                     {
@@ -175,21 +181,28 @@
                         <td>
                             <RollComponent Model="new RollRequest { Name = weapon.Name, Description = weapon.Description, Modifier = AttackSpellCheckRollValue }" NameOverride="@weapon.Name"/>
                         </td>
-                        <td>@weapon.Damage @weapon.DamageType</td>
+                        @if (!IsMobile)
+                        {
+                            <td>@weapon.Damage @weapon.DamageType</td>
+                        }
+                        
                         <td>@weapon.WeaponType</td>
                         <td>
                             <InputNumber id="@($"weaponQuantity_{weapon.Name}")" class="form-control" @bind-Value="weapon.Quantity" @bind-Value:after="OnChange"/>
                         </td>
-                        <td>
-                            <InputCheckbox id="@($"weaponEquipped_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.Equipped" @bind-Value:after="OnChange"/>
-                        </td>
-                        <td>
-                            <InputCheckbox id="@($"weaponPrimary_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.IsPrimary" @bind-Value:after="OnChange"/>
-                        </td>
-                        <td>
-                            <InputCheckbox id="@($"weaponSecondary_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.IsSecondary" @bind-Value:after="OnChange"/>
-                        </td>
-                        <td>@weapon.Description</td>
+                        @if (!IsMobile)
+                        {
+                            <td>
+                                <InputCheckbox id="@($"weaponEquipped_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.Equipped" @bind-Value:after="OnChange"/>
+                            </td>
+                            <td>
+                                <InputCheckbox id="@($"weaponPrimary_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.IsPrimary" @bind-Value:after="OnChange"/>
+                            </td>
+                            <td>
+                                <InputCheckbox id="@($"weaponSecondary_{weapon.Name}")" class="form-check-input" @bind-Value="weapon.IsSecondary" @bind-Value:after="OnChange"/>
+                            </td>
+                        }
+                        <td>@(IsMobile && weapon.Description.Length >= 20 ? weapon.Description.Substring(0,17)+"..." : weapon.Description)</td>
                         @if (CanEdit)
                         {
                             <td>
