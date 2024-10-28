@@ -1,45 +1,40 @@
-﻿@using SwDc20.Core.Domain.Entities.Roll
+﻿@using SwDc20.Core.Application.Extensions
+@using SwDc20.Core.Domain.Entities.Roll
 @using SwDc20.Core.Domain.Enums
 @using SwDc20.WebBlazor.Pages.Characters.Modals
+@using SwDc20.WebBlazor.Pages.Characters.Component
 @inject SkillService SkillService
 @inject IModalService ModalService
 @inject DiceRollerService DiceRollerService
 @inject RollCommunicationService RollCommunicationService
 
 <div class="card border-info" aria-roledescription="Skills Container" aria-description="Container for your skills, this allows you to handle either your custom skills or default skills, once you do that you can then further customize.">
+
     <div class="card-header">
         <div class="row align-items-center">
             <div class="col">
                 <h4>Skills</h4>
-                @if(DemoMode)
-                {
-                    <row class="d-flex flex-nowrap">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="versionTwo" @bind="VersionTwo" @bind:after="VersionTwoAlignment">
-                            <label class="form-check-label" for="versionTwo">Version Two</label>
-                        </div>
-                        @if (VersionTwo)
-                        {
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="compact" @bind="CompactVersion">
-                            <label class="form-check-label" for="compact">Compact Version Two</label>
-                        </div>
-                        }
-                    </row>
-                    <row>
-                        <p class="small">The goal for version two is to be more compact and have elements side by side, attributes on the right, skills in the middle, Action/Inventory etc on the right</p>
-                        <p class="small">You can right click on the Value, or Long press (this is meant for mobile) to bring up the Advantage/Disadvantage Roller</p>
-                    </row>
-                }
             </div>
-            @if (CanEdit)
-            {
-                <div class="col-auto">
-                    <button type="button" class="btn btn-primary btn-sm" @onclick="AddSkill" title="Add Skill">+ Add New Skill Modal</button>
-                </div>
-            }
+            <div class="col-auto">
+                <SkillsSettingsModal Character="@Character" OnSkillsChanged="@OnChanged"/>
+            </div>
         </div>
     </div>
+
+    @* <div class="card-header"> *@
+    @*     <div class="row align-items-center"> *@
+    @*         <div class="col"> *@
+    @*             <h4>Skills</h4> *@
+    @*         </div> *@
+    @*         @if (CanEdit) *@
+    @*         { *@
+    @*             <div class="col-auto"> *@
+    @*                 <button type="button" class="btn btn-primary btn-sm" @onclick="AddSkill" title="Add Skill">+ Add New Skill Modal</button> *@
+    @*             </div> *@
+    @*         } *@
+    @*     </div> *@
+    @* </div> *@
+
     @* Show Rank, Attribute User (First 3), Skill, and Bonus *@
     <div class="card-body">
         <table class="table table-borderless table-striped table-hover">
@@ -62,7 +57,7 @@
                         <th>Value</th>
                     }
                 }
-                
+
                 @if (CanEdit)
                 {
                     <th>Actions</th>
@@ -70,81 +65,28 @@
                 else
                 {
                     <th>
-                        @(VersionTwo ? "Value" : "Skill Check") 
+                        @(VersionTwo ? "Value" : "Skill Check")
                     </th>
                 }
             </tr>
             </thead>
             <tbody>
-            @foreach (var skill in Character.Skills)
+            @foreach (var skill in Character.Skills.OrderByCustomSkillSort())
             {
-                <tr>
-                    <td>
-                        @if (CompactVersion)
-                        {
-                            <span>@($"({skill.AttributeUsed.Substring(0,3)})")</span>
-                        }
-                        @($"{skill.Name}{(IsMobile ? $" ({skill.CalculateValue(Character)})" : "")}")
-                    </td>
-                    @if (!IsMobile && !CompactVersion)
-                    {
-                        <td>@skill.AttributeUsed</td>
-                    }
-                    @if (CanEdit)
-                    {
-                        <td>@skill.Tag</td>
-                        <InputNumber class="form-control" @bind-Value="skill.Rank"/>
-                    }
-                    @if (!VersionTwo)
-                    {
-                        @if (!IsMobile && !CompactVersion)
-                        {
-                            <td>@skill.CalculateValue(Character)</td>
-                        }
-                    }
-                    @if (CanEdit)
-                    {
-                        <td>
-                            <button type="button" class="btn btn-sm btn-secondary" @onclick="() => EditSkill(skill)">Edit</button>
-                            <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveSkill(skill)">Remove</button>
-                        </td>
-                    }
-                    else
-                    {
-                        @if (VersionTwo)
-                        {
-                            <td>
-                                <RollComponent Model="new RollRequest { Name = skill.Name, Modifier = skill.CalculateValue(Character), Description = skill.Tag, IsSave = false }"/>
-                            </td>    
-                        }
-                        else
-                        {
-                            <td>
-                                <div class="d-flex flex-column">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="text-danger">@(IsMobile ? "-" : "Disadvantage")</span>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <input type="range" class="form-range" min="0" max="2" step="1" @bind-value="RollTypeIndex" @bind-value:event="oninput"/>
-                                        </div>
-                                        <span class="text-success">@(IsMobile ? "+" : "Advantage")</span>
-                                        @if (CurrentRollType != RollType.Normal)
-                                        {
-                                            <InputNumber @bind-Value="Quantity" class="form-control w-25" min="2"/>
-                                        }
-                                        else
-                                        {
-                                            <input type="number" class="form-control w-25" value="1" disabled="disabled"/>
-                                            @* <InputNumber Value="1" class="form-control w-25" min="1" disabled="true"/> *@
-                                        }
-                                        <button type="button" class="btn @GetRollButtonClass()" @onclick="() => Roll(skill)">Check</button>
-                                
-                                    </div>
-                                </div>
-                            </td>
-                        }
-                    }
-
-                </tr>
+                <SkillRowComponent
+                    Skill="@skill"
+                    Character="@Character"
+                    CanEdit="@CanEdit"
+                    IsMobile="@IsMobile"
+                    CompactVersion="@CompactVersion"
+                    VersionTwo="@VersionTwo"
+                    RollTypeIndex="@RollTypeIndex"
+                    RollTypeIndexChanged="@(async (int value) => { RollTypeIndex = value; StateHasChanged(); })"
+                    Quantity="@Quantity"
+                    QuantityChanged="@(async (int value) => { Quantity = value; StateHasChanged(); })"
+                    OnEdit="@EditSkill"
+                    OnRemove="@RemoveSkill"
+                    OnRoll="@Roll"/>
             }
             </tbody>
             @if (CanEdit)
@@ -175,10 +117,10 @@
 @code {
     [Parameter] public Character Character { get; set; }
     [Parameter] public bool CanEdit { get; set; } = true;
-    [Parameter] public EventCallback<Character> OnChanged { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
     [Parameter] public bool IsMobile { get; set; }
-    
-    
+
+
     [Parameter] public bool CompactVersion { get; set; }
     [Parameter] public bool VersionTwo { get; set; }
     [Parameter] public bool DemoMode { get; set; }
@@ -221,7 +163,7 @@
             }).ToList();
         }
     }
-    
+
     private void VersionTwoAlignment()
     {
         if (!VersionTwo)

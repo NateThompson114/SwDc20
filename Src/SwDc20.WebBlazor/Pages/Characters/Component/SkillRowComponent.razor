@@ -1,0 +1,109 @@
+﻿@using SwDc20.Core.Domain.Entities.Roll
+@using SwDc20.Core.Domain.Enums
+
+<tr>
+    <td>
+        @if (CompactVersion)
+        {
+            <span>@($"({Skill.AttributeUsed.Substring(0, 3)})")</span>
+        }
+        @($"{Skill.Name}{(IsMobile ? $" ({Skill.CalculateValue(Character)})" : "")}")
+        @if (!string.IsNullOrWhiteSpace(Skill.Tag))
+        {
+            <span class="badge rounded-pill bg-info text-dark"> @Skill.Tag</span>
+        }
+    </td>
+    @if (!IsMobile && !CompactVersion)
+    {
+        <td>@Skill.AttributeUsed</td>
+    }
+    @if (CanEdit)
+    {
+        <td>@Skill.Tag</td>
+        <td>
+            <InputNumber class="form-control" @bind-Value="Skill.Rank"/>
+        </td>
+    }
+    @if (!VersionTwo)
+    {
+        @if (!IsMobile && !CompactVersion)
+        {
+            <td>@Skill.CalculateValue(Character)</td>
+        }
+    }
+    @if (CanEdit)
+    {
+        <td>
+            <button type="button" class="btn btn-sm btn-secondary" @onclick="@(() => OnEdit.InvokeAsync(Skill))">Edit</button>
+            <button type="button" class="btn btn-sm btn-danger" @onclick="@(() => OnRemove.InvokeAsync(Skill))">Remove</button>
+        </td>
+    }
+    else
+    {
+        @if (VersionTwo)
+        {
+            <td>
+                <RollComponent Model="new RollRequest { Name = Skill.Name, Modifier = Skill.CalculateValue(Character), Description = Skill.Tag, IsSave = false }"/>
+            </td>
+        }
+        else
+        {
+            <td>
+                <div class="d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-danger">@(IsMobile ? "-" : "Disadvantage")</span>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <input type="range" class="form-range" min="0" max="2" step="1" @bind-value="RollTypeIndex" @bind-value:event="oninput"/>
+                        </div>
+                        <span class="text-success">@(IsMobile ? "+" : "Advantage")</span>
+                        @if (CurrentRollType != RollType.Normal)
+                        {
+                            <InputNumber @bind-Value="Quantity" class="form-control w-25" min="2"/>
+                        }
+                        else
+                        {
+                            <input type="number" class="form-control w-25" value="1" disabled="disabled"/>
+                        }
+                        <button type="button" class="btn @GetRollButtonClass()" @onclick="() => OnRoll.InvokeAsync(Skill)">Check</button>
+                    </div>
+                </div>
+            </td>
+        }
+    }
+</tr>
+
+@code {
+    [Parameter] public Skill Skill { get; set; }
+    [Parameter] public Character Character { get; set; }
+    [Parameter] public bool CanEdit { get; set; }
+    [Parameter] public bool IsMobile { get; set; }
+    [Parameter] public bool CompactVersion { get; set; }
+    [Parameter] public bool VersionTwo { get; set; }
+    [Parameter] public int RollTypeIndex { get; set; }
+    [Parameter] public EventCallback<int> RollTypeIndexChanged { get; set; }
+    [Parameter] public int Quantity { get; set; }
+    [Parameter] public EventCallback<int> QuantityChanged { get; set; }
+    [Parameter] public EventCallback<Skill> OnEdit { get; set; }
+    [Parameter] public EventCallback<Skill> OnRemove { get; set; }
+    [Parameter] public EventCallback<Skill> OnRoll { get; set; }
+
+    private RollType CurrentRollType => RollTypeIndex switch
+    {
+        0 => RollType.Low,
+        1 => RollType.Normal,
+        2 => RollType.High,
+        _ => RollType.Normal
+    };
+
+    private string GetRollButtonClass()
+    {
+        return CurrentRollType switch
+        {
+            RollType.Normal => "btn-info",
+            RollType.High => "btn-success",
+            RollType.Low => "btn-danger",
+            _ => "btn-secondary"
+        };
+    }
+
+}
