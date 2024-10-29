@@ -1,23 +1,17 @@
 ﻿@using SwDc20.WebBlazor.Pages.Characters.Modals
+@using SwDc20.WebBlazor.Pages.Characters.Modals.CharacterSheet
 @inject IModalService ModalService
 
 <div class="card border-secondary" aria-roledescription="Trades Container" aria-description="Container for your trades">
-    <div class="card-header">
-        <div class="row align-items-center">
-            <div class="col">
-                <h4>Trades</h4>
-            </div>
-            @if (CanEdit)
-            {
-                <div class="col-auto">
-                    <button type="button" class="btn btn-primary btn-sm" @onclick="AddTrade" title="Add Trade">+ Add Trade Modal</button>
-                </div>
-            }
-        </div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4>Trades</h4>
+        <CharacterSheet_TradesModal
+            CurrentCharacter="@CurrentCharacter"
+            OnAttributesChanged="@OnChanged"/>
     </div>
     <div class="card-body">
         <div class="card-group">
-            @foreach (var trade in Character.Trades)
+            @foreach (var trade in CurrentCharacter.Trades)
             {
                 <div class="card">
                     <div class="card-header">
@@ -53,8 +47,8 @@
 </div>
 
 @code {
-    [Parameter] public Character Character { get; set; }
-    [Parameter] public EventCallback OnTradesChanged { get; set; }
+    [Parameter] public Character CurrentCharacter { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
     [Parameter] public bool CanEdit { get; set; } = true;
 
     private async Task AddTrade()
@@ -76,8 +70,8 @@
         if (!result.Cancelled)
         {
             var newTrade = (Trade)result.Data;
-            Character.Trades.Add(newTrade);
-            await OnTradesChanged.InvokeAsync();
+            CurrentCharacter.Trades.Add(newTrade);
+            await OnChanged.InvokeAsync();
         }
     }
 
@@ -85,7 +79,7 @@
     {
         if (!CanEdit) return;
 
-        Character.Trades.Remove(trade);
-        await OnTradesChanged.InvokeAsync();
+        CurrentCharacter.Trades.Remove(trade);
+        await OnChanged.InvokeAsync();
     }
 }

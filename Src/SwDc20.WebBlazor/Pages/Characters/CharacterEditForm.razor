@@ -224,8 +224,8 @@
                             {
                                 case 0:
                                     @* <ActionsContent /> *@
-                                    <CombatContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnCombatChanged="AutoSaveCharacter" VersionTwo="@VersionTwo" CompactVersion="@CompactVersion" DemoMode="@DemoMode"/>
-                                    <ResourceContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnResourcesChanged="@AutoSaveCharacter"/>
+                                    <CombatContainer CurrentCharacter="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnChanged="AutoSaveCharacter" VersionTwo="@VersionTwo" CompactVersion="@CompactVersion" DemoMode="@DemoMode"/>
+                                    <ResourceContainer CurrentCharacter="@CurrentCharacter" CanEdit="@CanEdit" OnChanged="@AutoSaveCharacter"/>
                                     break;
                                 case 1:
                                     @* <SpellsContent /> *@
@@ -237,7 +237,7 @@
                                     break;
                                 case 3:
                                     @* <FeaturesContent /> *@
-                                    <FeaturesContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnFeaturesChanged="@AutoSaveCharacter"/>
+                                    <FeaturesContainer CurrentCharacter="@CurrentCharacter" CanEdit="@CanEdit" OnChanged="@AutoSaveCharacter"/>
                                     break;
                                 case 4:
                                     @* <BackgroundContent /> *@
@@ -249,8 +249,8 @@
                                     break;
                                 case 6:
                                     @* <ExtrasContent /> *@
-                                    <TradesContainer Character="@CurrentCharacter" OnTradesChanged="@AutoSaveCharacter" CanEdit="@CanEdit"/>
-                                    <LanguageContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnLanguagesChanged="@AutoSaveCharacter"/>
+                                    <TradesContainer CurrentCharacter="@CurrentCharacter" OnChanged="@AutoSaveCharacter" CanEdit="@CanEdit"/>
+                                    <LanguageContainer CurrentCharacter="@CurrentCharacter" CanEdit="@CanEdit" OnChanged="@AutoSaveCharacter"/>
                                     break;
                             }
                         </div>

@@ -1,22 +1,56 @@
 ﻿@using SwDc20.WebBlazor.Pages.Characters.Modals
+@using SwDc20.WebBlazor.Pages.Characters.Modals.CharacterSheet
 @inject IModalService ModalService
 
 <div class="card border-light" aria-roledescription="Features Container" aria-description="Container for Features, this includes ancestry, class and more.">
-    <div class="card-header">
-        <div class="row align-items-center">
-            <div class="col">
-                <h4>Features</h4>
-            </div>
-            @if (CanEdit)
-            {
-                <div class="col-auto">
-                    <button type="button" class="btn btn-primary btn-sm" @onclick="AddFeature" title="Add Feature">+ Add Feature Modal</button>
-                </div>
-            }
-        </div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4>Features</h4>
+        @if (!CanEdit)
+        {
+            <CharacterSheet_FeaturesModal
+                CurrentCharacter="@CurrentCharacter"
+                OnChanged="@OnChanged"/>
+        }
     </div>
     <div class="card-body">
-        @foreach (var featureType in Character.Features.GroupBy(f => f.Tag))
+        @if (CanEdit && isAddingFeature)
+        {
+            <div class="mb-4 p-3 border rounded">
+                <h5>Add New Feature</h5>
+                <EditForm Model="@newFeature" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator/>
+                    <ValidationSummary/>
+
+                    <div class="mb-3">
+                        <label for="featureName" class="form-label">Name</label>
+                        <InputText id="featureName" class="form-control" @bind-Value="newFeature.Name"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="featureTag" class="form-label">Tag</label>
+                        <InputText id="featureTag" class="form-control" @bind-Value="newFeature.Tag"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="featureDescription" class="form-label">Description</label>
+                        <InputTextArea id="featureDescription" class="form-control" @bind-Value="newFeature.Description" rows="3"/>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" @onclick="CancelAdd">Cancel</button>
+                    </div>
+                </EditForm>
+            </div>
+        }
+        else if (CanEdit)
+        {
+            <div class="mb-4">
+                <button type="button" class="btn btn-primary" @onclick="StartAddFeature">Add Feature</button>
+            </div>
+        }
+
+        @foreach (var featureType in CurrentCharacter.Features.GroupBy(f => f.Tag))
         {
             <h5>@featureType.Key</h5>
             <table class="table table-borderless table-striped">
@@ -52,36 +86,49 @@
 </div>
 
 @code {
-    [Parameter] public Character Character { get; set; }
+    [Parameter] public Character CurrentCharacter { get; set; }
     [Parameter] public bool CanEdit { get; set; } = true;
-    [Parameter] public EventCallback OnFeaturesChanged { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
 
-    private async Task AddFeature()
+    private bool isAddingFeature = false;
+    private CharacterFeature newFeature = new()
     {
-        var parameters = new ModalParameters();
-        parameters.Add(nameof(FeatureEditForm.Feature), new CharacterFeature
+        Id = Guid.NewGuid(),
+        Version = CharacterFeature.CurrentVersion
+    };
+
+    private void StartAddFeature()
+    {
+        newFeature = new CharacterFeature
         {
             Id = Guid.NewGuid(),
             Version = CharacterFeature.CurrentVersion
-        });
-
-        var options = new ModalOptions()
-        {
-            Size = ModalSize.Small,
-            Position = ModalPosition.Middle
         };
-
-        var modal = ModalService.Show<FeatureEditForm>("Add Feature", parameters, options);
-        var result = await modal.Result;
-
-        if (!result.Cancelled)
-        {
-            var newFeature = (CharacterFeature)result.Data;
-            Character.Features.Add(newFeature);
-            await OnFeaturesChanged.InvokeAsync();
-        }
+        isAddingFeature = true;
     }
-    
+
+    private void CancelAdd()
+    {
+        isAddingFeature = false;
+        newFeature = new()
+        {
+            Id = Guid.NewGuid(),
+            Version = CharacterFeature.CurrentVersion
+        };
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        CurrentCharacter.Features.Add(newFeature);
+        await OnChanged.InvokeAsync();
+        isAddingFeature = false;
+        newFeature = new()
+        {
+            Id = Guid.NewGuid(),
+            Version = CharacterFeature.CurrentVersion
+        };
+    }
+
     private async Task EditFeature(CharacterFeature feature)
     {
         var parameters = new ModalParameters();
@@ -99,18 +146,19 @@
         if (!result.Cancelled)
         {
             var editedFeature = (CharacterFeature)result.Data;
-            var index = Character.Features.FindIndex(s => s.Id == editedFeature.Id);
+            var index = CurrentCharacter.Features.FindIndex(s => s.Id == editedFeature.Id);
             if (index != -1)
             {
-                Character.Features[index] = editedFeature;
-                await OnFeaturesChanged.InvokeAsync();
+                CurrentCharacter.Features[index] = editedFeature;
+                await OnChanged.InvokeAsync();
             }
         }
     }
-    
+
     private async Task RemoveFeature(CharacterFeature feature)
     {
-        Character.Features.Remove(feature);
-        await OnFeaturesChanged.InvokeAsync();
+        CurrentCharacter.Features.Remove(feature);
+        await OnChanged.InvokeAsync();
     }
+
 }

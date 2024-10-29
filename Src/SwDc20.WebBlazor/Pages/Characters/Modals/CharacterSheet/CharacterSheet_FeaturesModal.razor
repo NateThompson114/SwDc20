@@ -1,0 +1,52 @@
+﻿@using SwDc20.WebBlazor.Pages.Characters.Contaners
+<div>
+    <button type="button" @onclick="OpenModal" class="btn btn-link p-1" aria-label="Attribute Settings">
+        <i class="fa-solid fa-gear"></i>
+    </button>
+
+    @if (IsOpen)
+    {
+        <div class="modal show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Features</h5>
+                        <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <FeaturesContainer CurrentCharacter="@CurrentCharacter" CanEdit="true" OnChanged="@OnChanged" />
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        <SaveButtonComponent OnSave="SaveChanges" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Character CurrentCharacter { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
+
+    private bool IsOpen { get; set; }
+
+    private void OpenModal()
+    {
+        IsOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+    }
+
+    private async Task SaveChanges()
+    {
+        await OnChanged.InvokeAsync();
+        IsOpen = false;
+    }
+}
