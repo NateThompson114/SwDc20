@@ -4,7 +4,7 @@
 @using SwDc20.Core.Domain.Entities.Weapon.V0._8
 @using SwDc20.Core.Interfaces
 @using SwDc20.WebBlazor.Pages.Characters.Contaners
-@using SwDc20.WebBlazor.Pages.Characters.Modals
+@using SwDc20.WebBlazor.Pages.Characters.Modals.CharacterSheet
 @inject CharacterService CharacterService
 @inject SkillService SkillService
 @inject WeaponService WeaponService
@@ -111,7 +111,7 @@
             <div class="card border-danger" aria-roledescription="Attribute and Prime Container" aria-description="Container card for attribute cards and prime modifier, these are the key values for your characters, and contain Might, Agility, Charisma, and Intelligence.">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4>Attributes</h4>
-                    <AttributesSettingsModal
+                    <CharacterSheet_AttributesModal
                         Character="@CurrentCharacter"
                         OnAttributesChanged="@AutoSaveCharacter"/>
                 </div>
@@ -198,7 +198,7 @@
                     <HealthStaminaManaContainer Character="@CurrentCharacter" CanEdit="@CanEdit" IsMobile="@IsMobile" OnChanged="@AutoSaveCharacter"/>
                 </div>
                 <div class="col-md-4">
-                    <DefenseContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnDefensesChanged="@AutoSaveCharacter" VersionTwo="true"/>
+                    <DefenseContainer Character="@CurrentCharacter" CanEdit="@CanEdit" OnChanged="@AutoSaveCharacter" VersionTwo="true"/>
                 </div>
             </div>
             <div class="row">

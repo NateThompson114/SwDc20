@@ -1,8 +1,8 @@
-﻿@using SwDc20.WebBlazor.Pages.Characters.Modals
+﻿@using SwDc20.WebBlazor.Pages.Characters.Modals.CharacterSheet
 <div class="card border-success" aria-roledescription="Health, Stamina, and Mana Container" aria-description="Container for your Max Hit Points, Stamina Point, and Mana Points.">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4>Health, Stamina, and Mana</h4>
-        <HealthStaminaManaModal
+        <CharacterSheet_HealthStaminaManaModal
             Character="@Character"
             OnAttributesChanged="@OnChanged"/>
     </div>

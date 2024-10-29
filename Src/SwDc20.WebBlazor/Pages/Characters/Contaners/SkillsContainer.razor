@@ -1,8 +1,8 @@
 ﻿@using SwDc20.Core.Application.Extensions
-@using SwDc20.Core.Domain.Entities.Roll
 @using SwDc20.Core.Domain.Enums
 @using SwDc20.WebBlazor.Pages.Characters.Modals
 @using SwDc20.WebBlazor.Pages.Characters.Component
+@using SwDc20.WebBlazor.Pages.Characters.Modals.CharacterSheet
 @inject SkillService SkillService
 @inject IModalService ModalService
 @inject DiceRollerService DiceRollerService
@@ -16,7 +16,7 @@
                 <h4>Skills</h4>
             </div>
             <div class="col-auto">
-                <SkillsSettingsModal Character="@Character" OnSkillsChanged="@OnChanged"/>
+                <CharacterSheet_SkillsModal Character="@Character" OnSkillsChanged="@OnChanged"/>
             </div>
         </div>
     </div>

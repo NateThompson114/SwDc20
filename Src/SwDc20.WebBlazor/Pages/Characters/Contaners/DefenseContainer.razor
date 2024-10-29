@@ -1,10 +1,13 @@
-﻿@using SwDc20.Core.Domain.Entities.Character
+﻿@using SwDc20.WebBlazor.Pages.Characters.Modals.CharacterSheet
 
 <div class="card border-secondary" aria-roledescription="Defenses Container" aria-description="Container for your Physical and Mystical defenses. This also contains your Heavy and Brutal Calculations along with the Physical and Mental Damage Reductions.">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-between align-items-center">
         <h4>Defenses</h4>
+        <CharacterSheet_DefensesModal
+            Character="@Character"
+            OnAttributesChanged="@OnChanged"/>
     </div>
-    <div class="card-body ">
+    <div class="card-body">
         <div class="card-group">
             <div class="card col-md-6">
                 <div class="card-header">
@@ -108,6 +111,6 @@
 @code {
     [Parameter] public Character Character { get; set; }
     [Parameter] public bool CanEdit { get; set; } = true;
-    [Parameter] public EventCallback OnDefensesChanged { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
     [Parameter] public bool VersionTwo { get; set; }
 }
