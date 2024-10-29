@@ -174,7 +174,7 @@
 </div>
 
 @code {
-    [Parameter] public Character Character { get; set; }
+    [Parameter] public Character CurrentCharacter { get; set; }
     [Parameter] public EventCallback OnSkillsChanged { get; set; }
 
     private bool IsOpen { get; set; }
@@ -197,17 +197,17 @@
     }
 
     private bool HasNameError => !string.IsNullOrWhiteSpace(newSkill.Name) &&
-                                 Character.Skills.Any(s => s.Name.Equals(newSkill.Name, StringComparison.OrdinalIgnoreCase));
+                                 CurrentCharacter.Skills.Any(s => s.Name.Equals(newSkill.Name, StringComparison.OrdinalIgnoreCase));
 
     private IEnumerable<IGrouping<string, Skill>> GroupedSkills =>
-        Character.Skills
+        CurrentCharacter.Skills
             .OrderBy(s => CharacterAttribute.FromName(s.AttributeUsed).Value)
             .GroupBy(s => s.AttributeUsed);
 
     protected override async Task OnInitializedAsync()
     {
         IsEditing = false;
-        availableSkills = Character.Skills
+        availableSkills = CurrentCharacter.Skills
             .Select(s => new DocumentWrapper<Skill>
             {
                 ContentId = s.Id,
@@ -297,7 +297,7 @@
             Version = Skill.CurrentVersion
         };
 
-        Character.Skills.Add(skillToAdd);
+        CurrentCharacter.Skills.Add(skillToAdd);
 
         availableSkills.Add(new DocumentWrapper<Skill>
         {
@@ -316,7 +316,7 @@
     private async Task AddNewKnowledgeSkill()
     {
         if (string.IsNullOrWhiteSpace(newSkillName) ||
-            Character.Skills.Any(s => s.Name.Equals(newSkillName, StringComparison.OrdinalIgnoreCase)))
+            CurrentCharacter.Skills.Any(s => s.Name.Equals(newSkillName, StringComparison.OrdinalIgnoreCase)))
         {
             return;
         }
@@ -331,7 +331,7 @@
             Version = Skill.CurrentVersion
         };
 
-        Character.Skills.Add(newSkill);
+        CurrentCharacter.Skills.Add(newSkill);
 
         availableSkills.Add(new DocumentWrapper<Skill>
         {
@@ -352,7 +352,7 @@
         IsEditing = false;
         editingSkills.Clear();
         await OnSkillsChanged.InvokeAsync();
-        foreach (var skill in Character.Skills)
+        foreach (var skill in CurrentCharacter.Skills)
         {
             _savedSkillIds.Add(skill.Id);
         }
@@ -362,7 +362,7 @@
 
     private void RemoveSkill(Skill skill)
     {
-        Character.Skills.Remove(skill);
+        CurrentCharacter.Skills.Remove(skill);
     }
 
 }

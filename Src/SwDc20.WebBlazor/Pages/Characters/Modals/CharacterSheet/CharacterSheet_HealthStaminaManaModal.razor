@@ -17,52 +17,52 @@
                         <div class="row row-cols-lg-3 row-cols-md-6 row-cols-sm-auto">
                             <div class="card">
                                 <div class="card-header">
-                                    <h5>Health @($"{Character.GetHitPoints()}/{Character.MaxHitPoints}")</h5>
+                                    <h5>Health @($"{CurrentCharacter.GetHitPoints()}/{CurrentCharacter.MaxHitPoints}")</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="form-group">
                                         <label for="maxHitPoints">Max</label>
-                                        <InputNumber id="maxHitPoints" class="form-control" @bind-Value="Character.MaxHitPoints"/>
+                                        <InputNumber id="maxHitPoints" class="form-control" @bind-Value="CurrentCharacter.MaxHitPoints"/>
                                     </div>
                                     <div class="form-group">
                                         <label for="currentHitPoints">Current</label>
-                                        <InputNumber id="currentHitPoints" class="form-control" @bind-Value="Character.CurrentHp"/>
+                                        <InputNumber id="currentHitPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentHp"/>
                                     </div>
                                     <div class="form-group">
                                         <label for="temporaryHitPoints">Temp</label>
-                                        <InputNumber id="temporaryHitPoints" class="form-control" @bind-Value="Character.TemporaryHp"/>
+                                        <InputNumber id="temporaryHitPoints" class="form-control" @bind-Value="CurrentCharacter.TemporaryHp"/>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="card">
                                 <div class="card-header">
-                                    <h5>Stamina @($"{Character.CurrentStamina}/{Character.MaxStaminaPoints}")</h5>
+                                    <h5>Stamina @($"{CurrentCharacter.CurrentStamina}/{CurrentCharacter.MaxStaminaPoints}")</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="form-group">
                                         <label for="maxStaminaPoints">Max</label>
-                                        <InputNumber id="maxStaminaPoints" class="form-control" @bind-Value="Character.MaxStaminaPoints"/>
+                                        <InputNumber id="maxStaminaPoints" class="form-control" @bind-Value="CurrentCharacter.MaxStaminaPoints"/>
                                     </div>
                                     <div class="form-group">
                                         <label for="currentStaminaPoints">Current</label>
-                                        <InputNumber id="currentStaminaPoints" class="form-control" @bind-Value="Character.CurrentStamina"/>
+                                        <InputNumber id="currentStaminaPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentStamina"/>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="card">
                                 <div class="card-header">
-                                    <h5>Mana @($"{Character.CurrentManaPoints}/{Character.MaxManaPoints}")</h5>
+                                    <h5>Mana @($"{CurrentCharacter.CurrentManaPoints}/{CurrentCharacter.MaxManaPoints}")</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="form-group">
                                         <label for="maxManaPoints">Max</label>
-                                        <InputNumber id="maxManaPoints" class="form-control" @bind-Value="Character.MaxManaPoints"/>
+                                        <InputNumber id="maxManaPoints" class="form-control" @bind-Value="CurrentCharacter.MaxManaPoints"/>
                                     </div>
                                     <div class="form-group">
                                         <label for="currentManaPoints">Current</label>
-                                        <InputNumber id="currentManaPoints" class="form-control" @bind-Value="Character.CurrentManaPoints"/>
+                                        <InputNumber id="currentManaPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentManaPoints"/>
                                     </div>
                                 </div>
                             </div>
@@ -80,7 +80,7 @@
 </div>
 
 @code {
-    [Parameter] public Character Character { get; set; }
+    [Parameter] public Character CurrentCharacter { get; set; }
     [Parameter] public EventCallback OnAttributesChanged { get; set; }
 
     private bool IsOpen { get; set; }
