@@ -13,11 +13,6 @@
 @implements IDisposable
 @implements IAsyncDisposable
 
-@* @if (DemoMode) *@
-@* { *@
-@*     <h1>Mobile: @IsMobile</h1> *@
-@* } *@
-
 <div class="container-fluid">
 <div class="d-flex justify-content-between align-items-center mb-3 @(VersionTwoForm ? "border-1 border-secondary" : "")">
     @if (VersionTwoForm)
@@ -40,40 +35,12 @@
         <span class="save-indicator text-sm-center"> ✅Saved</span>
     }
 
-    @* @if (ShowEditSlider) *@
-    @* { *@
-    @*     <div class="form-check form-switch"> *@
-    @*         <input class="form-check-input" type="checkbox" id="versionToggle" @bind="VersionTwoForm" @bind:after="VersionTwoAlignment"> *@
-    @*         <label class="form-check-label" for="versionToggle">Version Two Form</label> *@
-    @*     </div> *@
-    @* } *@
-    @* *@
-    @* @if (!VersionTwoForm) *@
-    @* { *@
-    @*     <div class="form-check form-switch"> *@
-    @*         <input class="form-check-input" type="checkbox" id="demoToggle" @bind="DemoMode" @bind:after="AlignDemo"> *@
-    @*         <label class="form-check-label" for="demoToggle">Demo Mode</label> *@
-    @*     </div> *@
-    @* } *@
-    @* *@
-    @* @if (ShowEditSlider && !VersionTwoForm) *@
-    @* { *@
-    @*     <div class="form-check form-switch"> *@
-    @*         <input class="form-check-input" type="checkbox" id="editToggle" @bind="CanEdit" @bind:after="UpdateUrl"> *@
-    @*         <label class="form-check-label" for="editToggle">Edit Mode</label> *@
-    @*     </div> *@
-    @* } *@
-
     @if (!string.IsNullOrEmpty(CurrentCharacter.ImageUrl))
     {
         <img src="@CurrentCharacter.ImageUrl" alt="Character Image" style="max-width: 100px; max-height: 100px;"/>
     }
 
 </div>
-
-
-@* <button type="button" @onclick="() => SendRollToToolbox()">Send to Toolbox</button> *@
-
 
 <EditForm Model="@CurrentCharacter" OnValidSubmit="SaveCharacter">
     <DataAnnotationsValidator/>

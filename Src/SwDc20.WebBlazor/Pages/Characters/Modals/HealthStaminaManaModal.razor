@@ -1,0 +1,103 @@
+﻿<div>
+    <button @onclick="OpenModal" class="btn btn-link p-1" aria-label="Attribute Settings">
+        <i class="fa-solid fa-gear"></i>
+    </button>
+
+    @if (IsOpen)
+    {
+        <div class="modal show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Attributes</h5>
+                        <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        
+                        <div class="row row-cols-lg-3 row-cols-md-6 row-cols-sm-auto">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Health @($"{Character.GetHitPoints()}/{Character.MaxHitPoints}")</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="maxHitPoints">Max</label>
+                                        <InputNumber id="maxHitPoints" class="form-control" @bind-Value="Character.MaxHitPoints"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="currentHitPoints">Current</label>
+                                        <InputNumber id="currentHitPoints" class="form-control" @bind-Value="Character.CurrentHp"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="temporaryHitPoints">Temp</label>
+                                        <InputNumber id="temporaryHitPoints" class="form-control" @bind-Value="Character.TemporaryHp"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Stamina @($"{Character.CurrentStamina}/{Character.MaxStaminaPoints}")</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="maxStaminaPoints">Max</label>
+                                        <InputNumber id="maxStaminaPoints" class="form-control" @bind-Value="Character.MaxStaminaPoints"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="currentStaminaPoints">Current</label>
+                                        <InputNumber id="currentStaminaPoints" class="form-control" @bind-Value="Character.CurrentStamina"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Mana @($"{Character.CurrentManaPoints}/{Character.MaxManaPoints}")</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="maxManaPoints">Max</label>
+                                        <InputNumber id="maxManaPoints" class="form-control" @bind-Value="Character.MaxManaPoints"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="currentManaPoints">Current</label>
+                                        <InputNumber id="currentManaPoints" class="form-control" @bind-Value="Character.CurrentManaPoints"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        <SaveButtonComponent OnSave="SaveChanges" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Character Character { get; set; }
+    [Parameter] public EventCallback OnAttributesChanged { get; set; }
+
+    private bool IsOpen { get; set; }
+
+    private void OpenModal()
+    {
+        IsOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+    }
+
+    private async Task SaveChanges()
+    {
+        await OnAttributesChanged.InvokeAsync();
+        IsOpen = false;
+    }
+}

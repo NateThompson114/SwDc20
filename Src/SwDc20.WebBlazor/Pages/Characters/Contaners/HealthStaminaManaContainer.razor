@@ -1,8 +1,10 @@
-﻿@using SwDc20.Core.Domain.Entities.Character
-
+﻿@using SwDc20.WebBlazor.Pages.Characters.Modals
 <div class="card border-success" aria-roledescription="Health, Stamina, and Mana Container" aria-description="Container for your Max Hit Points, Stamina Point, and Mana Points.">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-between align-items-center">
         <h4>Health, Stamina, and Mana</h4>
+        <HealthStaminaManaModal
+            Character="@Character"
+            OnAttributesChanged="@OnChanged"/>
     </div>
     <div class="card-body">
         <div class="row row-cols-lg-3 row-cols-md-6 row-cols-sm-auto">
@@ -10,12 +12,6 @@
                 <div class="card-header">
                     <h5>Health @($"{Character.GetHitPoints()}/{Character.MaxHitPoints}")</h5>
                 </div>
-                @* <div class="input-group input-group-sm"> *@
-                @*     <label class="input-group-text" for="maxHitPoints">Max Hit Points</label> *@
-                @*     <InputNumber id="maxHitPoints" class="form-control" @bind-Value="Character.MaxHitPoints" disabled="@(!CanEdit)" @bind-Value:after="OnResourceChanged"/> *@
-                @*     <label class="input-group-text" for="currentHitPoints">Current Hit Points</label> *@
-                @*     <InputNumber id="currentHitPoints" class="form-control" @bind-Value="Character.CurrentHp" @bind-Value:after="OnResourceChanged"/> *@
-                @* </div> *@
                 <div class="card-body">
                     <div class="form-group">
                         <label for="maxHitPoints">Max</label>
@@ -30,9 +26,6 @@
                         <InputNumber id="temporaryHitPoints" class="form-control" @bind-Value="Character.TemporaryHp" @bind-Value:after="OnResourceChanged"/>
                     </div>
                 </div>
-                @* <div class="card-footer"> *@
-                @*     <h5>@Character.GetHitPoints()</h5> *@
-                @* </div> *@
             </div>
             
             <div class="card">
@@ -49,9 +42,6 @@
                         <InputNumber id="currentStaminaPoints" class="form-control" @bind-Value="Character.CurrentStamina"@bind-Value:after="OnResourceChanged"/>
                     </div>
                 </div>
-                @* <div class="card-footer"> *@
-                @*     <h5>@Character.CurrentStamina</h5> *@
-                @* </div> *@
             </div>
             
             <div class="card">
@@ -68,9 +58,6 @@
                         <InputNumber id="currentManaPoints" class="form-control" @bind-Value="Character.CurrentManaPoints"@bind-Value:after="OnResourceChanged"/>
                     </div>
                 </div>
-                @* <div class="card-footer"> *@
-                @*     <h5>@Character.CurrentManaPoints</h5> *@
-                @* </div> *@
             </div>
         </div>
     </div>
@@ -80,7 +67,7 @@
     [Parameter] public Character Character { get; set; }    
     [Parameter] public bool CanEdit { get; set; }
     [Parameter] public bool IsMobile { get; set; }
-    [Parameter] public EventCallback<Character> OnChanged  { get; set; }
+    [Parameter] public EventCallback OnChanged  { get; set; }
 
     private async Task OnResourceChanged()
     {
