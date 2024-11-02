@@ -249,16 +249,11 @@
 
                     <div class="col-12">
                         <div class="form-floating">
-                            <InputTextArea id="weaponDescription" class="form-control" @bind-Value="weapon.Description" style="height: 100px"/>
+                            <InputTextArea id="weaponDescription" class="form-control" @bind-Value="weapon.Description" style="height: 200px"/>
                             <label for="weaponDescription">Description</label>
                         </div>
                     </div>
-
-                    @* <div class="card-footer"> *@
-                    @*     <SaveButtonComponent OnSave="HandleWeaponSubmit"></SaveButtonComponent> *@
-                    @*     $1$ <button type="button" class="btn btn-primary" @onclick="HandleWeaponSubmit">Save Weapon</button> #1# *@
-                    @*     <button type="button" class="btn btn-secondary" @onclick="CancelAddWeapon">Cancel</button> *@
-                    @* </div> *@
+                    
                 </div>
             </div>
         </div>

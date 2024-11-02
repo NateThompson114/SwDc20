@@ -13,18 +13,119 @@
                         <button type="button" class="btn-close" @onclick="CloseModal"></button>
                     </div>
                     <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="form-floating col-md-6">
+                                <InputNumber id="maxActionPoints" class="form-control" @bind-Value="CurrentCharacter.ActionPoints"/>
+                                <label for="maxActionPoints">Max Action Points</label>
+                            </div>
 
-                        @* <div class="mb-3"> *@
-                        @*     <div class="d-flex justify-content-between align-items-center"> *@
-                        @*         <label for="charisma" class="form-label mb-0">Charisma</label> *@
-                        @*         <div class="form-check"> *@
-                        @*             <InputCheckbox @bind-Value="Character.CharismaSaveMastery" id="charismaSave" class="form-check-input" /> *@
-                        @*             <label class="form-check-label" for="charismaSave">Save Mastery</label> *@
-                        @*         </div> *@
-                        @*     </div> *@
-                        @*     <InputNumber id="charisma" class="form-control" @bind-Value="Character.Charisma" /> *@
-                        @* </div> *@
-                        
+                            <div class="form-floating col-md-6">
+                                <InputNumber id="currentActionPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentActionPoints"/>
+                                <label for="currentActionPoints">Current Action Points</label>
+                            </div>
+                            
+                            <hr/>
+                            
+                            <div class="form-floating col-md-12">
+                                <InputSelect class="form-control" @bind-Value="CurrentCharacter.SelectedDeathThresholdAttribute">
+                                    @foreach (var attr in AttributeList)
+                                    {
+                                        <option value="@attr">@attr @(attr == "Prime" ? "(Default)" : "")</option>
+                                    }
+                                </InputSelect>
+                                <label>
+                                    Override Death Threshold
+                                    <span class="small">(Current: @CalculateDeathThreshold())</span>
+                                </label>
+                            </div>
+
+                            <div class="form-floating col-md-12">
+                                
+                                <InputSelect class="form-control" @bind-Value="CurrentCharacter.SelectedRestPointsAttribute">
+                                    @foreach (var attr in AttributeList)
+                                    {
+                                        <option value="@attr">@attr @(attr == nameof(CurrentCharacter.Might) ? "(Default)" : "")</option>
+                                    }
+                                </InputSelect>
+                                <label>
+                                    Rest Points
+                                    <span class="small">(Current: @CalculateRestPoints()@(CalculateRestPoints()==0 ? " [Minimum]" : ""))</span>
+                                </label>
+                            </div>
+
+                            <div class="form-floating col-md-12">
+                                <InputSelect class="form-control" @bind-Value="CurrentCharacter.SelectedGritPointsAttribute" >
+                                    @foreach (var attr in AttributeList)
+                                    {
+                                        <option value="@attr">@attr @(attr == nameof(CurrentCharacter.Charisma) ? "(Default)" : "")</option>
+                                    }
+                                </InputSelect>
+                                <label>
+                                    Grit Points
+                                    <span class="small">(Current: @CalculateGritPoints())</span>
+                                </label>
+                            </div>
+
+                            <div class="form-floating col-md-6">
+                                <InputNumber class="form-control" @bind-Value="CurrentCharacter.MoveSpeed" />
+                                <label >
+                                    Move Speed
+                                    <span class="small">(Default: 5)</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-floating col-md-6">
+                                <InputNumber class="form-control" min="1" @bind-Value="CurrentCharacter.JumpDistance" />
+                                <label>
+                                    Jump Distance
+                                    <span class="small">(Calculated @(Math.Max(CurrentCharacter.Agility,1)))</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-floating col-md-12">
+                                <InputNumber class="form-control" @bind-Value="CurrentCharacter.Currency" />
+                                <label >Currency</label>
+                            </div>
+                            
+                            <hr/>
+
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <h5>Additional Resources</h5>
+                                    <table class="table table-sm">
+                                        <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Max Value</th>
+                                            <th>Current Value</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @foreach (var resource in CurrentCharacter.Resources)
+                                        {
+                                        <tr>
+                                            <td>
+                                                <InputText class="form-control" @bind-Value="resource.Name" />
+                                            </td>
+                                            <td>
+                                                <InputNumber class="form-control" @bind-Value="resource.MaxValue" />
+                                            </td>
+                                            <td>
+                                                <InputNumber class="form-control" @bind-Value="resource.CurrentValue" min="0" max="@resource.MaxValue" />
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm" @onclick="() => RemoveResource(resource)">Remove</button>
+                                            </td>
+                                        </tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                    <button type="button" class="btn btn-primary btn-sm" @onclick="AddResource">Add Resource</button>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
@@ -39,6 +140,7 @@
 @code {
     [Parameter] public Character CurrentCharacter { get; set; }
     [Parameter] public EventCallback OnAttributesChanged { get; set; }
+    private List<string> AttributeList = new List<string> { "Prime", nameof(CurrentCharacter.Might), nameof(CurrentCharacter.Agility), nameof(CurrentCharacter.Charisma), nameof(CurrentCharacter.Intelligence) };
 
     private bool IsOpen { get; set; }
 
@@ -56,5 +158,51 @@
     {
         await OnAttributesChanged.InvokeAsync();
         IsOpen = false;
+    }
+    
+    private int CalculateDeathThreshold()
+    {
+        int attributeValue = GetAttributeValue(CurrentCharacter.SelectedDeathThresholdAttribute);
+        return 0 - attributeValue;
+    }
+
+    private int CalculateRestPoints()
+    {
+        int attributeValue = Math.Max(GetAttributeValue(CurrentCharacter.SelectedRestPointsAttribute),0);
+        return CurrentCharacter.Level + attributeValue;
+    }
+
+    private int CalculateGritPoints()
+    {
+        int attributeValue = GetAttributeValue(CurrentCharacter.SelectedGritPointsAttribute);
+        return attributeValue + 2;
+    }
+
+    private int GetAttributeValue(string attributeName)
+    {
+        return attributeName switch
+        {
+            "Prime" => CurrentCharacter.PrimeModifier,
+            nameof(CurrentCharacter.Might) => CurrentCharacter.Might,
+            nameof(CurrentCharacter.Agility) => CurrentCharacter.Agility,
+            nameof(CurrentCharacter.Charisma) => CurrentCharacter.Charisma,
+            nameof(CurrentCharacter.Intelligence) => CurrentCharacter.Intelligence,
+            _ => 0
+        };
+    }
+
+    private void AddResource()
+    {
+        CurrentCharacter.Resources.Add(new CharacterResource { Name = "New Resource", MaxValue = 0 });
+    }
+
+    private void RemoveResource(CharacterResource resource)
+    {
+        CurrentCharacter.Resources.Remove(resource);
+    }
+    
+    private void HandleActionPointsChanged(int newValue)
+    {
+        CurrentCharacter.CurrentActionPoints = newValue;
     }
 }
