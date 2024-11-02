@@ -14,60 +14,43 @@
                     </div>
                     <div class="modal-body">
                         
-                        <div class="row row-cols-lg-3 row-cols-md-6 row-cols-sm-auto">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Health @($"{CurrentCharacter.GetHitPoints()}/{CurrentCharacter.MaxHitPoints}")</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="form-group">
-                                        <label for="maxHitPoints">Max</label>
-                                        <InputNumber id="maxHitPoints" class="form-control" @bind-Value="CurrentCharacter.MaxHitPoints"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="currentHitPoints">Current</label>
-                                        <InputNumber id="currentHitPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentHp"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="temporaryHitPoints">Temp</label>
-                                        <InputNumber id="temporaryHitPoints" class="form-control" @bind-Value="CurrentCharacter.TemporaryHp"/>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Stamina @($"{CurrentCharacter.CurrentStamina}/{CurrentCharacter.MaxStaminaPoints}")</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="form-group">
-                                        <label for="maxStaminaPoints">Max</label>
-                                        <InputNumber id="maxStaminaPoints" class="form-control" @bind-Value="CurrentCharacter.MaxStaminaPoints"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="currentStaminaPoints">Current</label>
-                                        <InputNumber id="currentStaminaPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentStamina"/>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Mana @($"{CurrentCharacter.CurrentManaPoints}/{CurrentCharacter.MaxManaPoints}")</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="form-group">
-                                        <label for="maxManaPoints">Max</label>
-                                        <InputNumber id="maxManaPoints" class="form-control" @bind-Value="CurrentCharacter.MaxManaPoints"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="currentManaPoints">Current</label>
-                                        <InputNumber id="currentManaPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentManaPoints"/>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="form-floating">
+                            <InputNumber id="maxHitPoints" class="form-control" @bind-Value="CurrentCharacter.MaxHitPoints"/>
+                            <label for="maxHitPoints">Max Hit Points</label>
+                        </div>
+                        
+                        <div class="form-floating">
+                            <InputNumber id="currentHitPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentHp"/>
+                            <label for="currentHitPoints">Current Hit Points</label>
                         </div>
 
+                        <div class="form-floating">
+                            <InputNumber id="temporaryHitPoints" class="form-control" @bind-Value="CurrentCharacter.TemporaryHp"/>
+                            <label for="temporaryHitPoints">Temp Hit Points</label>
+                        </div>
+                        
+                        <hr/>
+
+                        <div class="form-floating">
+                            <InputNumber id="maxStaminaPoints" class="form-control" @bind-Value="CurrentCharacter.MaxStaminaPoints"/>
+                            <label for="maxStaminaPoints">Max Stamina</label>
+                        </div>
+                        <div class="form-floating">
+                            <InputNumber id="currentStaminaPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentStamina"/>
+                            <label for="currentStaminaPoints">Current Stamin</label>
+                        </div>
+                        
+                        <hr/>
+
+                        <div class="form-floating">
+                            <InputNumber id="maxManaPoints" class="form-control" @bind-Value="CurrentCharacter.MaxManaPoints"/>
+                            <label for="maxManaPoints">Max Mana</label>
+                        </div>
+                        <div class="form-floating">
+                            <InputNumber id="currentManaPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentManaPoints"/>
+                            <label for="currentManaPoints">Current Mana</label>
+                        </div>
+                        
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
