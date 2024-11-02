@@ -1,7 +1,5 @@
 ﻿@page "/character/{Id:guid}"
 @using System.Collections.ObjectModel
-@using System.Web
-@using SwDc20.Core.Domain.Entities.Weapon.V0._8
 @using SwDc20.Core.Interfaces
 @using SwDc20.WebBlazor.Pages.Characters.Contaners
 @using SwDc20.WebBlazor.Pages.Characters.Modals.CharacterSheet
@@ -266,19 +264,12 @@
     };
 
     private List<DocumentWrapper<Skill>> availableSkills;
-    private List<DocumentWrapper<Weapon>> availableWeapons = [];
     private bool showSaveIndicator = false;
 
     protected override async Task OnInitializedAsync()
     {
         var uri = new Uri(NavigationManager.Uri);
-        var query = HttpUtility.ParseQueryString(uri.Query);
-
-        // var editQuery = query["edit"];
-        // if (!string.IsNullOrWhiteSpace(editQuery))
-        // {
-        //     CanEdit = editQuery.Equals("true", StringComparison.InvariantCultureIgnoreCase);
-        // }
+        // HttpUtility.ParseQueryString(uri.Query);
 
         await base.OnInitializedAsync();
         await CheckIfMobileAsync();
@@ -331,7 +322,7 @@
         }
 
 
-        availableWeapons = await WeaponService.GetWeaponsAsync();
+        await WeaponService.GetWeaponsAsync();
     }
 
     #region Mobile Phone Check
@@ -366,37 +357,6 @@
     }
 
     #endregion
-
-
-    // private void UpdateUrl()
-    // {
-    //     if (CanEdit)
-    //     {
-    //         var uri = NavigationManager.GetUriWithQueryParameter("edit", CanEdit);
-    //         NavigationManager.NavigateTo(uri, false);
-    //     }
-    //     else
-    //     {
-    //         RemoveQueryParameter("edit");
-    //     }
-    // }
-
-    private void RemoveQueryParameter(string parameterName)
-    {
-        var uri = new Uri(NavigationManager.Uri);
-        var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
-
-        if (queryParams[parameterName] != null)
-        {
-            queryParams.Remove(parameterName);
-
-            var uriBuilder = new UriBuilder(uri);
-            uriBuilder.Query = queryParams.ToString();
-
-            NavigationManager.NavigateTo(uriBuilder.Uri.ToString(), forceLoad: false);
-        }
-    }
-
 
     private async Task SaveCharacter()
     {
