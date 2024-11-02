@@ -7,7 +7,7 @@
         <h4>Languages</h4>
         <CharacterSheet_LanguagesModal
             CurrentCharacter="@CurrentCharacter"
-            OnAttributesChanged="@OnChanged"/>
+            OnChanged="@OnChanged"/>
     </div>
     <div class="card-body">
         <div class="card-group">
@@ -30,6 +30,13 @@
                                 <input type="text" id="@($"languageProficiency_{language.Name}")" class="form-control" value="@language.Proficiency" disabled />
                             }
                         </div>
+                        
+                        @if (!string.IsNullOrWhiteSpace(language.Description))
+                        {
+                            <hr/>
+                            <p>@language.Description</p>
+                        }
+                        
                     </div>
                     @if (CanEdit)
                     {
@@ -65,7 +72,7 @@
 
     private string newLanguageName = string.Empty;
     private string newLanguageProficiency = "Limited";
-
+    
     private async Task AddLanguage()
     {
         var parameters = new ModalParameters();

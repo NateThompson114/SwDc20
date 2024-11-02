@@ -41,7 +41,7 @@
                                         </div>
 
                                         <div class="d-flex gap-2">
-                                            <button type="submit" class="btn btn-primary">Save</button>
+                                            <button type="submit" class="btn btn-primary" @onclick="() => AddFeature(newFeature)">Save</button>
                                             <button type="button" class="btn btn-secondary" @onclick="CancelAdd">Cancel</button>
                                         </div>
                                     </EditForm>
@@ -119,7 +119,7 @@
             Id = Guid.NewGuid(),
             Version = CharacterFeature.CurrentVersion
         };
-        isAddingFeature = false;
+        isAddingFeature = true;
     }
 
     private void CancelAdd()
@@ -132,10 +132,21 @@
         };
     }
 
-    private async Task HandleValidSubmit()
+    private void HandleValidSubmit()
     {
         CurrentCharacter.Features.Add(newFeature);
-        await OnChanged.InvokeAsync();
+        // await OnChanged.InvokeAsync();
+        isAddingFeature = false;
+        newFeature = new()
+        {
+            Id = Guid.NewGuid(),
+            Version = CharacterFeature.CurrentVersion
+        };
+    }
+    
+    private void AddFeature(CharacterFeature feature)
+    {
+        CurrentCharacter.Features.Add(feature);
         isAddingFeature = false;
         newFeature = new()
         {
