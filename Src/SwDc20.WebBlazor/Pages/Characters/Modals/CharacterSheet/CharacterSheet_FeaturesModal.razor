@@ -7,7 +7,7 @@
     @if (IsOpen)
     {
         <div class="modal show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Edit Features</h5>
@@ -15,12 +15,84 @@
                     </div>
                     <div class="modal-body">
 
-                        <FeaturesContainer CurrentCharacter="@CurrentCharacter" CanEdit="true" OnChanged="@OnChanged" />
-                        
+                        <div class="card-body">
+
+                            @if (isAddingFeature)
+                            {
+                                <div class="mb-4 p-3 border rounded">
+                                    <h5>Add New Feature</h5>
+                                    <EditForm Model="@newFeature" OnValidSubmit="@HandleValidSubmit">
+                                        <DataAnnotationsValidator/>
+                                        <ValidationSummary/>
+
+                                        <div class="mb-3">
+                                            <label for="featureName" class="form-label">Name</label>
+                                            <InputText id="featureName" class="form-control" @bind-Value="newFeature.Name"/>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="featureTag" class="form-label">Tag</label>
+                                            <InputText id="featureTag" class="form-control" @bind-Value="newFeature.Tag"/>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="featureDescription" class="form-label">Description</label>
+                                            <InputTextArea id="featureDescription" class="form-control" @bind-Value="newFeature.Description" style="height: 200px"/>
+                                        </div>
+
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" class="btn btn-primary">Save</button>
+                                            <button type="button" class="btn btn-secondary" @onclick="CancelAdd">Cancel</button>
+                                        </div>
+                                    </EditForm>
+                                </div>
+                            }
+
+                            <div class="mb-4">
+                                <SaveButtonComponent OnSave="StartAddFeature">Add Feature</SaveButtonComponent>
+                                @* <button type="button" class="btn btn-primary" @onclick="StartAddFeature">Add Feature</button> *@
+                            </div>
+
+                            <hr/>
+
+                            @foreach (var featureType in CurrentCharacter.Features.GroupBy(f => f.Tag))
+                            {
+                                <h4>@featureType.Key</h4>
+                                <hr/>
+
+                                <div class="row g-3">
+                                    @foreach (var feature in featureType)
+                                    {
+                                        <div class="card border-success mb-12">
+                                            <div class="card-header">
+                                                <div class="form-floating">
+                                                    <InputText @bind-Value="feature.Name" class="form-control"/>
+                                                    <label>Name</label>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="form-floating">
+                                                    <InputTextArea @bind-Value="feature.Description" class="form-control" style="height: 200px"/>
+                                                    <label>Description</label>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer d-flex justify-content-between align-items-center">
+                                                <div class="form-floating">
+                                                    <InputText @bind-Value="feature.Tag" class="form-control"/>
+                                                    <label>Tag</label>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-danger" @onclick="() => RemoveFeature(feature)">Remove</button>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
-                        <SaveButtonComponent OnSave="SaveChanges" />
+                        <SaveButtonComponent OnSave="SaveChanges"/>
                     </div>
                 </div>
             </div>
@@ -31,6 +103,51 @@
 @code {
     [Parameter] public Character CurrentCharacter { get; set; }
     [Parameter] public EventCallback OnChanged { get; set; }
+
+    private bool isAddingFeature = false;
+
+    private CharacterFeature newFeature = new()
+    {
+        Id = Guid.NewGuid(),
+        Version = CharacterFeature.CurrentVersion
+    };
+
+    private void StartAddFeature()
+    {
+        newFeature = new CharacterFeature
+        {
+            Id = Guid.NewGuid(),
+            Version = CharacterFeature.CurrentVersion
+        };
+        isAddingFeature = false;
+    }
+
+    private void CancelAdd()
+    {
+        isAddingFeature = false;
+        newFeature = new()
+        {
+            Id = Guid.NewGuid(),
+            Version = CharacterFeature.CurrentVersion
+        };
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        CurrentCharacter.Features.Add(newFeature);
+        await OnChanged.InvokeAsync();
+        isAddingFeature = false;
+        newFeature = new()
+        {
+            Id = Guid.NewGuid(),
+            Version = CharacterFeature.CurrentVersion
+        };
+    }
+    
+    private void RemoveFeature(CharacterFeature feature)
+    {
+        CurrentCharacter.Features.Remove(feature);
+    }
 
     private bool IsOpen { get; set; }
 
