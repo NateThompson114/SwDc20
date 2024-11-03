@@ -1,0 +1,506 @@
+﻿@using SwDc20.Core.Domain.Entities.Roll
+@using SwDc20.Core.Domain.Enums
+@inject IJSRuntime JSRuntime
+@inject DiceRollerService DiceRollerService
+@inject RollCommunicationService RollCommunicationService
+
+<div class="charm-bar">
+    @if (IsCustomPanelOpen)
+    {
+    <div class="custom-panel">
+        <div class="input-group">
+            <label class="input-group-text" for="diceSize">d</label>
+            <input id="diceSize" type="number" @bind="CustomDiceSize" min="2" max="100" class="form-control form-control-sm" placeholder="Size"/>
+            <label class="input-group-text" for="quantity">×</label>
+            <input id="quantity" type="number" @bind="CustomQuantity" min="1" max="500" class="form-control form-control-sm" placeholder="Qty"/>
+            <select @bind="CustomRollType" class="form-select form-select-sm">
+                <option value="@RollType.Normal">Normal</option>
+                <option value="@RollType.High">High</option>
+                <option value="@RollType.Low">Low</option>
+            </select>
+            <button @onclick="RollCustomDice" class="btn btn-primary btn-sm">Roll</button>
+        </div>
+    </div>
+    }
+
+    <div class="dice-grid">
+        @foreach (var dice in DiceTypes)
+        {
+        var count = DiceCounts.GetValueOrDefault(dice.Size);
+        <div class="dice-column">
+            <div class="dice"
+                 @onmousedown="@(e => HandleDiceClick(e, dice.Size))"
+                 @oncontextmenu:preventDefault
+                 @ontouchstart="@(() => StartLongPress(dice.Size))"
+                 @ontouchend="EndLongPress">
+                <i class="@dice.Icon"></i>
+                <div class="dice-label">@(count > 0 ? $"{count}d{dice.Size}" : $"d{dice.Size}")</div>
+            </div>
+        </div>
+        }
+        <div class="coin-flip action-button" @onclick="FlipCoin">
+            <i class="fa-thin fa-coin"></i>
+            <span class="action-label">Flip</span>
+        </div>
+        <div class="roll-button action-button" @onclick="RollSelectedDice">
+            <i class="fa-solid fa-dice"></i>
+            <span class="action-label">Roll</span>
+        </div>
+        <div class="custom-roll-button action-button" @onclick="ToggleCustomPanel">
+            <i class="fa-solid fa-gear"></i>
+            <span class="action-label">Custom</span>
+        </div>
+        
+    </div>
+
+    @if (IsMobile && HasRecentRolls)
+    {
+    <div class="roll-history">
+        <div class="roll-history-header">
+            <h5>Recent Rolls</h5>
+            <button class="clear-button" @onclick="ClearRolls">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+        @foreach (var rollGroup in RollGroups)
+        {
+        <div class="roll-entry">
+            @if (!string.IsNullOrEmpty(rollGroup.Key))
+            {
+            <h6>@rollGroup.Key</h6>
+            }
+            @foreach (var roll in rollGroup.Rolls)
+            {
+            <div class="roll-details">
+                <span class="dice-type">@roll.IndividualRolls.Count'd'@roll.DiceSize:</span>
+                <span class="roll-results">[@string.Join(", ", roll.IndividualRolls)]</span>
+                @if (roll.Modifier != 0)
+                {
+                <span class="modifier">@(roll.Modifier > 0 ? "+" : "")@roll.Modifier</span>
+                }
+                <span class="final-result">=@roll.FinalResult</span>
+            </div>
+            }
+            @if (rollGroup.TotalResult.HasValue)
+            {
+            <div class="total-result">Total: @rollGroup.TotalResult</div>
+            }
+        </div>
+        }
+    </div>
+    }
+</div>
+
+<style>
+    .charm-bar {
+        position: fixed;
+        bottom: 20px; /* Give some space from bottom */
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(to bottom, #2c3e50, #34495e);
+        padding: 10px 20px;
+        border-radius: 20px;
+        border: 2px solid #ffcd39;
+        z-index: 1000;
+        width: auto; /* Let content determine width */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    
+
+    .action-button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .action-label {
+        color: white;
+        font-size: 0.7em;
+        opacity: 0.8;
+    }
+
+    
+
+    .custom-panel {
+        background: #34495e;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        border: 1px solid #ffcd39;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .dice-grid {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        padding: 10px;
+        position: relative;
+    }
+
+    .dice {
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        transition: transform 0.2s;
+        position: relative;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dice i {
+        font-size: 2em;
+        color: #ffcd39;
+    }
+
+    .dice:hover {
+        transform: scale(1.1);
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .dice-label {
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        font-size: 0.8em;
+        white-space: nowrap;
+    }
+
+    .roll-button, .coin-flip, .custom-roll-button {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        transition: transform 0.2s;
+    }
+
+    .roll-button i, .coin-flip i, .custom-roll-button i {
+        font-size: 2em;
+        color: #ffcd39;
+    }
+
+    .roll-button:hover, .coin-flip:hover, .custom-roll-button:hover {
+        transform: scale(1.1);
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .roll-history {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .roll-history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .roll-history-header h5 {
+        color: #ffcd39;
+        margin: 0;
+    }
+
+    .clear-button {
+        background: none;
+        border: none;
+        color: #e74c3c;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 5px;
+    }
+
+    .clear-button:hover {
+        background: rgba(231, 76, 60, 0.2);
+    }
+
+    .roll-entry {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .roll-entry h6 {
+        color: #ffcd39;
+        margin: 0 0 5px 0;
+    }
+
+    .roll-details {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 5px;
+        color: white;
+    }
+
+    .dice-type {
+        color: #3498db;
+        font-weight: bold;
+    }
+
+    .roll-results {
+        color: #2ecc71;
+    }
+
+    .modifier {
+        color: #e74c3c;
+    }
+
+    .final-result {
+        color: #f1c40f;
+        font-weight: bold;
+    }
+
+    .total-result {
+        color: #ffcd39;
+        font-weight: bold;
+        text-align: right;
+        margin-top: 5px;
+        padding-top: 5px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+</style>
+
+@code {
+    [Parameter] public bool IsMobile { get; set; }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsMobile)
+        {
+            await JSRuntime.InvokeVoidAsync("eval", 
+                "document.documentElement.style.setProperty('--charm-width', '100%')");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("eval", 
+                "document.documentElement.style.setProperty('--charm-width', 'auto')");
+        }
+    }
+    
+    protected override void OnInitialized()
+    {
+        RollCommunicationService.OnRollRequested += HandleRollRequest;
+    }
+    
+    private record DiceType(int Size, string Icon);
+    private record RollGroup(string Title, List<RollResult> Rolls, int? TotalResult)
+    {
+        public string? Key { get; set; }
+    }
+
+    private readonly List<DiceType> DiceTypes = new()
+    {
+        new DiceType(20, "fa-sharp fa-light fa-dice-d20"),
+        new DiceType(12, "fa-sharp fa-light fa-dice-d12"),
+        new DiceType(10, "fa-sharp fa-light fa-dice-d10"),
+        new DiceType(8, "fa-sharp fa-light fa-dice-d8"),
+        new DiceType(6, "fa-sharp fa-light fa-dice-d6"),
+        new DiceType(4, "fa-sharp fa-light fa-dice-d4")
+    };
+
+    private Dictionary<int, int> DiceCounts { get; set; } = new();
+    private List<RollResult> Rolls { get; set; } = new();
+    private bool IsCustomPanelOpen { get; set; }
+    private Timer? LongPressTimer { get; set; }
+    private int? LongPressTarget { get; set; }
+
+    private bool HasRecentRolls => Rolls.Any();
+    
+    private List<RollGroup> RollGroups => GroupRolls(Rolls.Take(5).ToList());
+
+    private List<RollGroup> GroupRolls(List<RollResult> rolls)
+    {
+        var groups = new List<RollGroup>();
+        DateTime? lastRollTime = null;
+        var currentGroup = new List<RollResult>();
+    
+        foreach (var roll in rolls)
+        {
+            // Group by time (using the roll's timestamp) or title
+            if (lastRollTime.HasValue && 
+                (DateTime.Now - lastRollTime.Value).TotalSeconds > 2 || 
+                currentGroup.Any() && roll.Title != currentGroup[0].Title)
+            {
+                if (currentGroup.Any())
+                {
+                    groups.Add(CreateRollGroup(currentGroup));
+                    currentGroup = new List<RollResult>();
+                }
+            }
+        
+            currentGroup.Add(roll);
+            lastRollTime = DateTime.Now;
+        }
+    
+        if (currentGroup.Any())
+        {
+            groups.Add(CreateRollGroup(currentGroup));
+        }
+    
+        return groups.Take(2).ToList(); // Only show latest 2 groups
+    }
+
+    private RollGroup CreateRollGroup(List<RollResult> rolls)
+    {
+        var title = rolls[0].Title ?? $"Roll at {DateTime.Now:HH:mm:ss}";
+        var totalResult = rolls.Count > 1 ? rolls.Sum(r => r.FinalResult) : 0;
+        return new RollGroup(title, rolls, totalResult) { Key = title };
+    }
+
+    private void RollSelectedDice()
+    {
+        if (DiceCounts.Count == 0) return;
+
+        var results = new List<RollResult>();
+        foreach (var (diceSize, quantity) in DiceCounts)
+        {
+            var result = DiceRollerService.RollDice(
+                diceSize,
+                quantity,
+                0,
+                RollType.Normal,
+                null,
+                null,
+                !IsMobile);
+                
+            if (IsMobile)
+            {
+                results.Add(result);
+            }
+        }
+
+        if (IsMobile && results.Any())
+        {
+            Rolls.InsertRange(0, results);
+            if (Rolls.Count > 5)
+                Rolls.RemoveRange(5, Rolls.Count - 5);
+        }
+
+        DiceCounts.Clear();
+        StateHasChanged();
+    }
+
+    private void ClearRolls()
+    {
+        Rolls.Clear();
+        StateHasChanged();
+    }
+    
+    private int CustomDiceSize { get; set; } = 20;
+    private int CustomQuantity { get; set; } = 1;
+    private RollType CustomRollType { get; set; } = RollType.Normal;
+    
+    
+
+    private void ToggleCustomPanel()
+    {
+        IsCustomPanelOpen = !IsCustomPanelOpen;
+        StateHasChanged();
+    }
+    
+    private void RollCustomDice()
+    {
+        RollCommunicationService.RequestRoll(
+            CustomDiceSize,
+            CustomQuantity,
+            0,
+            CustomRollType,
+            null,
+            null);
+        
+        IsCustomPanelOpen = false;
+    }
+
+    
+
+    private void HandleDiceClick(MouseEventArgs e, int diceType)
+    {
+        if (e.Button == 0) // Left click
+        {
+            IncrementDice(diceType);
+        }
+        else if (e.Button == 2) // Right click
+        {
+            DecrementDice(diceType);
+        }
+    }
+
+    private void StartLongPress(int diceType)
+    {
+        LongPressTarget = diceType;
+        LongPressTimer = new Timer(_ =>
+        {
+            InvokeAsync(() =>
+            {
+                if (LongPressTarget.HasValue)
+                {
+                    DecrementDice(LongPressTarget.Value);
+                    StateHasChanged();
+                }
+            });
+        }, null, 500, Timeout.Infinite);
+    }
+
+    private void EndLongPress()
+    {
+        LongPressTimer?.Dispose();
+        LongPressTimer = null;
+        LongPressTarget = null;
+    }
+
+    private void IncrementDice(int diceType)
+    {
+        if (!DiceCounts.ContainsKey(diceType))
+            DiceCounts[diceType] = 0;
+        DiceCounts[diceType]++;
+        StateHasChanged();
+    }
+
+    private void DecrementDice(int diceType)
+    {
+        if (DiceCounts.ContainsKey(diceType) && DiceCounts[diceType] > 0)
+        {
+            DiceCounts[diceType]--;
+            if (DiceCounts[diceType] == 0)
+                DiceCounts.Remove(diceType);
+            StateHasChanged();
+        }
+    }
+
+    private void FlipCoin()
+    {
+        RollCommunicationService.RequestRoll(2, 1, 0, RollType.Normal, "Coin Flip", null);
+    }
+
+    private void HandleRollRequest(int diceSize, int quantity, int modifier, RollType rollType, string title, string description)
+    {
+        var result = DiceRollerService.RollDice(diceSize, quantity, modifier, rollType, title, description);
+        Rolls.Insert(0, result);
+        if (Rolls.Count > 5)
+            Rolls.RemoveAt(5);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        RollCommunicationService.OnRollRequested -= HandleRollRequest;
+        LongPressTimer?.Dispose();
+    }
+}
