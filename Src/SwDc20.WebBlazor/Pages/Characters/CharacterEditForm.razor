@@ -204,7 +204,9 @@
                                     break;
                                 case 1:
                                     @* <SpellsContent /> *@
-                                    <p>Spells Content</p>
+                                    <h5>Spell Content</h5>
+                                    <p>For now use the features container, a magic building system is coming soon™.</p>
+                                    <p>For the features, add the name description and use the tag to separate them.</p>
                                     break;
                                 case 2:
                                     @* <InventoryContent /> *@
@@ -216,11 +218,18 @@
                                     break;
                                 case 4:
                                     @* <BackgroundContent /> *@
-                                    <p>Background Content</p>
+                                    <h5>Background Content</h5>
+                                    <p>Once we get a better idea for backgrounds I will update this.</p>
                                     break;
                                 case 5:
                                     @* <NotesContent /> *@
-                                    <p>Notes Content</p>
+                                    <h5>Notes Content</h5>
+                                    <p>
+                                        The plan is to have a separate service that will keep track of the notes. I will put in a vote, but notes feel like something that should be stored in a database not locally.
+                                        This is because with a database I can do something like virtual loading, you would see your notes, and when you scroll down you see your notes, but what I am actually doing is loading them as you scroll.
+                                        This also unloads them when you scroll back up. This would lower the system requirements, but we'll cross that bridge when we get there.
+                                    </p>
+                                    
                                     break;
                                 case 6:
                                     @* <ExtrasContent /> *@
