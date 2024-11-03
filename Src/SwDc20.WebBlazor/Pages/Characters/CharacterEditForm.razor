@@ -23,6 +23,14 @@
         <span class="save-indicator text-sm-center"> ✅Saved</span>
     }
 
+    <div class="form-check form-switch" data-bs-toggle="tooltip" data-bs-html="true" title="These features should not cause issues with your data.">
+        <input class="form-check-input" type="checkbox" id="demoToggle" @bind="DemoMode" >
+        <label class="form-check-label" for="demoToggle">Demo Mode</label>
+        <span class="small alert-danger" >
+            <i class="fa-sharp fa-solid fa-circle-exclamation"></i>Features Unlocked in Demo mode are not finalized!
+        </span>
+    </div>
+
     @if (!string.IsNullOrEmpty(CurrentCharacter.ImageUrl))
     {
         <img src="@CurrentCharacter.ImageUrl" alt="Character Image" style="max-width: 100px; max-height: 100px;"/>
@@ -33,8 +41,16 @@
 <EditForm Model="@CurrentCharacter" OnValidSubmit="SaveCharacter">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
-    <Toolbar IsMobile="@IsMobile"/>
-    @* <CharmBar IsMobile="@IsMobile" /> *@
+    @if (!DemoMode)
+    {
+        <Toolbar IsMobile="@IsMobile"/>       
+    }
+    else
+    {
+        <CharmBar IsMobile="@IsMobile" />
+    }
+    
+    
 
 
     <div class="row mb-2">
@@ -233,6 +249,7 @@
 {
     [Parameter] public Guid Id { get; set; } = Guid.NewGuid();
     private bool IsMobile { get; set; } = false;
+    private bool DemoMode { get; set; } = false;
 
     [Parameter] public bool CompactVersion { get; set; }
 
