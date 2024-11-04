@@ -1,4 +1,6 @@
-﻿@page "/character/create"
+﻿@page "/characters/create"
+@page "/character/create"
+@page "/characters/edit/{Id:guid}"
 @page "/character/edit/{Id:guid}"
 @using SwDc20.WebBlazor.Pages.Characters.Steps
 @inject CharacterService CharacterService
@@ -21,8 +23,8 @@ else
     else
     {
         <EditForm Model="@_character" OnValidSubmit="HandleValidSubmit">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
 
             <div class="row">
                 <div class="col-md-6">
@@ -66,28 +68,29 @@ else
             </div>
 
             <hr/>
+            <div class="container">
+                @switch (currentStep)
+                {
+                    case 1:
+                        <CharacterCreationStep1 Character="@_character"/>
+                        break;
+                    case 2:
+                        <CharacterCreationStep2 Character="@_character"/>
+                        break;
+                    case 3:
+                        <CharacterCreationStep3 Character="@_character"/>
+                        break;
+                    case 4:
+                        <CharacterCreationStep4 Character="@_character"/>
+                        break;
+                    default:
+                        <p>Invalid step: @currentStep</p>
+                        break;
+                }
+            </div>
 
-            @switch (currentStep)
-            {
-                case 1:
-                    <CharacterCreationStep1 Character="@_character" />
-                    break;
-                case 2:
-                    <CharacterCreationStep2 Character="@_character" />
-                    break;
-                case 3:
-                    <CharacterCreationStep3 Character="@_character" />
-                    break;
-                case 4:
-                    <CharacterCreationStep4 Character="@_character" />
-                    break;
-                default:
-                    <p>Invalid step: @currentStep</p>
-                    break;
-            }
-            
             <hr/>
-            
+
             <div class="mt-3">
                 @if (currentStep > 1)
                 {
@@ -102,14 +105,13 @@ else
                     <button type="submit" class="btn btn-success">Save Character</button>
                 }
             </div>
-            
+
         </EditForm>
     }
 }
 
 @code {
-    [Parameter]
-    public Guid? Id { get; set; }
+    [Parameter] public Guid? Id { get; set; }
 
     private DocumentWrapper<Character>? _characterWrapper;
     private Character _character;
@@ -183,7 +185,7 @@ else
                 _characterWrapper.DateUpdated = DateTime.UtcNow;
                 _characterWrapper.Document = _character;
                 await CharacterService.SaveCharacterAsync(_characterWrapper);
-                NavigationManager.NavigateTo("/characters");
+                NavigationManager.NavigateTo($"/characters/{_character.Id}");
             }
             else
             {
@@ -196,4 +198,5 @@ else
             //todo: Add error handling and Toast message
         }
     }
+
 }

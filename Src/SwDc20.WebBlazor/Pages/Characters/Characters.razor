@@ -80,12 +80,12 @@ else
     private void CreateNewCharacter()
     {
         var newCharacterId = Guid.NewGuid();
-        NavigationManager.NavigateTo($"/character/{newCharacterId}");
+        NavigationManager.NavigateTo($"/characters/create");
     }
 
     private void EditCharacter(Guid id)
     {
-        NavigationManager.NavigateTo($"/character/{id}?edit=True");
+        NavigationManager.NavigateTo($"/characters/edit/{id}");
     }
 
     private async Task DeleteCharacter(Guid id)
@@ -109,7 +109,7 @@ else
 
     private void PlayCharacter(Guid id)
     {
-        NavigationManager.NavigateTo($"/character/{id}");
+        NavigationManager.NavigateTo($"/characters/{id}");
     }
     
     private async Task ExportToJson(DocumentWrapper<Character> character)

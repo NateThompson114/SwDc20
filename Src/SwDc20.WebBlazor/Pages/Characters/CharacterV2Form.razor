@@ -1,4 +1,5 @@
-﻿@page "/character/{Id:guid}"
+﻿@page "/characters/{Id:guid}"
+@page "/character/{Id:guid}"
 @using System.Collections.ObjectModel
 @using SwDc20.Core.Interfaces
 @using SwDc20.WebBlazor.Pages.Characters.Contaners
@@ -14,7 +15,15 @@
 <div class="container-fluid">
 <div class="d-flex justify-content-between align-items-center mb-3 border-1 border-secondary">
     <div class="row">
-        <h1>@(CurrentCharacter?.Name ?? "New Character")</h1>
+        <div class="row d-flex justify-content-between align-items-center">
+            <h1>
+                @(CurrentCharacter.Name)
+                <button class="btn btn-link p-1" @onclick="() => EditCharacter(CurrentCharacter.Id)">
+                    <i class="fa-duotone fa-solid fa-file-pen"></i>
+                </button>
+            </h1>
+            
+        </div>
         <h5>Player: @(CurrentCharacter?.PlayerName ?? "Unknown")</h5>
     </div>
 
@@ -385,6 +394,11 @@
 
     #endregion
 
+    private void EditCharacter(Guid id)
+    {
+        NavigationManager.NavigateTo($"/characters/edit/{id}");
+    }
+    
     private async Task SaveCharacter()
     {
         if (CurrentCharacter != null)
@@ -398,11 +412,11 @@
 
             await CharacterService.SaveCharacterAsync(characterWrapper);
 
-            if (!CurrentCharacter.IsInitiallySaved)
-            {
-                // Skip save if the character hasn't been initially saved
-                return;
-            }
+            // if (!CurrentCharacter.IsInitiallySaved)
+            // {
+            //     // Skip save if the character hasn't been initially saved
+            //     return;
+            // }
 
             showSaveIndicator = true;
             StateHasChanged();
@@ -430,11 +444,11 @@
 
     private async Task AutoSaveCharacter()
     {
-        if (!CurrentCharacter.IsInitiallySaved)
-        {
-            // Skip autosave if the character hasn't been initially saved
-            return;
-        }
+        // if (!CurrentCharacter.IsInitiallySaved)
+        // {
+        //     // Skip autosave if the character hasn't been initially saved
+        //     return;
+        // }
 
         await SaveCharacter();
     }
