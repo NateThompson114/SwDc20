@@ -1,5 +1,5 @@
 // Version your cache
-const CACHE_VERSION = '1.08.001';
+const CACHE_VERSION = '1.08.002';
 const CACHE_NAME = `offline-cache-${CACHE_VERSION}`;
 
 // Caution! Be sure you understand the caveats before publishing an application with

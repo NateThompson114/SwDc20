@@ -2,6 +2,6 @@
 
 public class BaseEntity
 {
-    public required Guid Id { get; init; } = Guid.NewGuid();
-    public required string Version { get; init; }
+    public required Guid Id { get; set; } = Guid.NewGuid();
+    public required string Version { get; set; }
 }
