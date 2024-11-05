@@ -2,11 +2,14 @@
 @page "/character/create"
 @page "/characters/edit/{Id:guid}"
 @page "/character/edit/{Id:guid}"
+@using SwDc20.Core.Interfaces
 @using SwDc20.WebBlazor.Pages.Characters.Steps
 @inject CharacterService CharacterService
 @inject NavigationManager NavigationManager
+@inject IScreenSizeService ScreenSizeService
 
 <h3>@(Id == null ? "Create" : "Edit") Character</h3>
+<Toolbar IsMobile="@IsMobile"/>
 
 @if (_characterWrapper == null)
 {
@@ -53,10 +56,6 @@ else
             </div>
             <hr/>
             <div class="mt-3">
-                @if (currentStep > 1)
-                {
-                    <button type="button" class="btn btn-secondary" @onclick="PreviousStep">Previous</button>
-                }
                 @if (currentStep < totalSteps)
                 {
                     <button type="button" class="btn btn-primary" @onclick="NextStep">Next</button>
@@ -65,6 +64,10 @@ else
                 {
                     <button type="submit" class="btn btn-success">Save Character</button>
                 }
+                @if (currentStep > 1)
+                {
+                    <button type="button" class="btn btn-secondary" @onclick="PreviousStep">Previous</button>
+                }
             </div>
 
             <hr/>
@@ -72,10 +75,10 @@ else
                 @switch (currentStep)
                 {
                     case 1:
-                        <CharacterCreationStep1 Character="@_character"/>
+                        <CharacterCreationStep1 Character="@_character" IsMobile="@IsMobile" />
                         break;
                     case 2:
-                        <CharacterCreationStep2 Character="@_character"/>
+                        <CharacterCreationStep2 Character="@_character" IsMobile="@IsMobile" />
                         break;
                     case 3:
                         <CharacterCreationStep3 Character="@_character"/>
@@ -92,10 +95,6 @@ else
             <hr/>
 
             <div class="mt-3">
-                @if (currentStep > 1)
-                {
-                    <button type="button" class="btn btn-secondary" @onclick="PreviousStep">Previous</button>
-                }
                 @if (currentStep < totalSteps)
                 {
                     <button type="button" class="btn btn-primary" @onclick="NextStep">Next</button>
@@ -104,14 +103,22 @@ else
                 {
                     <button type="submit" class="btn btn-success">Save Character</button>
                 }
+                @if (currentStep > 1)
+                {
+                    <button type="button" class="btn btn-secondary" @onclick="PreviousStep">Previous</button>
+                }
             </div>
 
         </EditForm>
     }
 }
 
+<div class="row pt-5 mt-5"></div>
+<div class="row pt-5 mt-5"></div>
+
 @code {
     [Parameter] public Guid? Id { get; set; }
+    private bool IsMobile { get; set; } = false;
 
     private DocumentWrapper<Character>? _characterWrapper;
     private Character _character;
@@ -158,7 +165,41 @@ else
             Console.WriteLine($"Error in OnInitializedAsync: {ex.Message}");
 // You might want to display this error to the user or handle it in some way
         }
+        ScreenSizeService.IsMobileChanged += OnIsMobileChanged;
     }
+    
+    #region Mobile Phone Check
+
+    private async Task CheckIfMobileAsync()
+    {
+        IsMobile = await ScreenSizeService.IsMobileAsync();
+        StateHasChanged();
+    }
+
+    private void OnIsMobileChanged(object sender, bool isMobile)
+    {
+        IsMobile = isMobile;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Synchronous cleanup
+        ScreenSizeService.IsMobileChanged -= OnIsMobileChanged;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // Asynchronous cleanup
+        Dispose(); // Call the synchronous cleanup first
+
+        if (ScreenSizeService is IAsyncDisposable disposable)
+        {
+            await disposable.DisposeAsync();
+        }
+    }
+
+    #endregion
 
     private void NextStep()
     {

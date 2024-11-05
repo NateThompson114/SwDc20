@@ -45,7 +45,7 @@
 
     <div class="col-md-2">
         <div class="form-group">
-            <label>Prime Modifier: @Character.PrimeModifier</label>
+            <h4>Prime Modifier: @Character.PrimeModifier</h4>
         </div>
     </div>
 </div>
@@ -113,8 +113,8 @@
 
 
 @code {
-    [Parameter]
-    public required Character Character { get; set; }
+    [Parameter] public required Character Character { get; set; }
+    [Parameter] public bool IsMobile { get; set; }
     
     private int SelectedMasteriesCount =>
         (Character.MightSaveMastery ? 1 : 0) +

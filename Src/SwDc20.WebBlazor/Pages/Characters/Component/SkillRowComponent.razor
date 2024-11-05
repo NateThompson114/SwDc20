@@ -8,7 +8,7 @@
             <span>@($"({Skill.AttributeUsed.Substring(0, 3)})")</span>
         }
         @($"{Skill.Name}{(IsMobile ? $" ({Skill.CalculateValue(Character)})" : "")}")
-        @if (!string.IsNullOrWhiteSpace(Skill.Tag))
+        @if (!string.IsNullOrWhiteSpace(Skill.Tag) && !CanEdit)
         {
             <span class="badge rounded-pill bg-info text-dark"> @Skill.Tag</span>
         }
@@ -19,7 +19,10 @@
     }
     @if (CanEdit)
     {
-        <td>@Skill.Tag</td>
+        <td>
+            <InputText class="form-control" @bind-Value="Skill.Tag" />
+            
+        </td>
         <td>
             <InputNumber class="form-control" @bind-Value="Skill.Rank"/>
         </td>
@@ -35,7 +38,10 @@
     {
         <td>
             <button type="button" class="btn btn-sm btn-secondary" @onclick="@(() => OnEdit.InvokeAsync(Skill))">Edit</button>
-            <button type="button" class="btn btn-sm btn-danger" @onclick="@(() => OnRemove.InvokeAsync(Skill))">Remove</button>
+            @if (IncludeRemove)
+            {
+                <button type="button" class="btn btn-sm btn-danger" @onclick="@(() => OnRemove.InvokeAsync(Skill))">Remove</button>
+            }
         </td>
     }
     else
@@ -86,6 +92,7 @@
     [Parameter] public EventCallback<Skill> OnEdit { get; set; }
     [Parameter] public EventCallback<Skill> OnRemove { get; set; }
     [Parameter] public EventCallback<Skill> OnRoll { get; set; }
+    [Parameter] public bool IncludeRemove { get; set; }
 
     private RollType CurrentRollType => RollTypeIndex switch
     {

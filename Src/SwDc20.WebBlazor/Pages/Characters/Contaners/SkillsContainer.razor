@@ -15,9 +15,23 @@
             <div class="col">
                 <h4>Skills</h4>
             </div>
-            <div class="col-auto">
-                <CharacterSheet_SkillsModal CurrentCharacter="@Character" OnSkillsChanged="@OnChanged"/>
-            </div>
+            @if (!CanEdit)
+            {
+                <div class="col-auto">
+                    <CharacterSheet_SkillsModal CurrentCharacter="@Character" OnSkillsChanged="@OnChanged"/>
+                </div>
+            }
+            else
+            {
+                <div class="col-auto">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="editSkills" @bind="allowSkillChanges">
+                        <label class="form-check-label" for="editSkills">
+                            Edit Available Skills
+                        </label>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 
@@ -37,6 +51,61 @@
 
     @* Show Rank, Attribute User (First 3), Skill, and Bonus *@
     <div class="card-body">
+
+        @if (allowSkillChanges)
+        {
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Add New Skill</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Name</label>
+                            <div class="form-group @(HasNameError ? "has-validation" : "")">
+                                <InputText @bind-Value="newSkill.Name"
+                                           @bind-Value:after="ValidateSkillName"
+                                           class="@GetNameInputClass()"
+                                           placeholder="Skill Name"/>
+                                @if (HasNameError)
+                                {
+                                    <div class="invalid-feedback">
+                                        A skill with this name already exists.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Attribute</label>
+                            <InputSelect @bind-Value="newSkill.AttributeUsed" class="form-select">
+                                @foreach (var attr in CharacterAttribute.GetAttributes())
+                                {
+                                    <option value="@attr.Name">@attr.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Tag</label>
+                            <InputText @bind-Value="newSkill.Tag" class="form-control" placeholder="Tag"/>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Rank</label>
+                            <InputNumber @bind-Value="newSkill.Rank" class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <SaveButtonComponent OnSave="@(async () => await HandleNewSkillSave())"
+                                             ButtonClass="btn btn-success"
+                                             Disabled="@HasNameError">
+                            Save Skill
+                        </SaveButtonComponent>
+                    </div>
+                </div>
+            </div>
+            
+            <hr/>
+        }
+        
         <table class="table table-borderless table-striped table-hover">
             <thead>
             <tr>
@@ -57,6 +126,7 @@
                         <th>Value</th>
                     }
                 }
+
 
                 @if (CanEdit)
                 {
@@ -86,7 +156,8 @@
                     QuantityChanged="@(async (int value) => { Quantity = value; StateHasChanged(); })"
                     OnEdit="@EditSkill"
                     OnRemove="@RemoveSkill"
-                    OnRoll="@Roll"/>
+                    OnRoll="@Roll"
+                    IncludeRemove="@allowSkillChanges"/>
             }
             </tbody>
             @if (CanEdit)
@@ -119,6 +190,15 @@
     [Parameter] public bool CanEdit { get; set; } = true;
     [Parameter] public EventCallback OnChanged { get; set; }
     [Parameter] public bool IsMobile { get; set; }
+    private bool allowSkillChanges = false;
+
+    private HashSet<Guid> _savedSkillIds = new();
+
+    private Skill newSkill = new()
+    {
+        Id = Guid.NewGuid(),
+        Version = Skill.CurrentVersion
+    };
 
 
     [Parameter] public bool CompactVersion { get; set; }
@@ -162,6 +242,66 @@
                 Version = Skill.CurrentVersion
             }).ToList();
         }
+
+        _savedSkillIds = new HashSet<Guid>(availableSkills.Select(s => s.ContentId));
+        ResetNewSkill();
+    }
+
+    private bool HasNameError => !string.IsNullOrWhiteSpace(newSkill.Name) &&
+                                 Character.Skills.Any(s => s.Name.Equals(newSkill.Name, StringComparison.OrdinalIgnoreCase));
+
+    private void ValidateSkillName()
+    {
+        StateHasChanged();
+    }
+
+    private string GetNameInputClass()
+    {
+        return $"form-control {(HasNameError ? "is-invalid" : "")}";
+    }
+
+    private async Task HandleNewSkillSave()
+    {
+        if (HasNameError || string.IsNullOrWhiteSpace(newSkill.Name))
+        {
+            return;
+        }
+
+        var skillToAdd = new Skill
+        {
+            Id = Guid.NewGuid(),
+            Name = newSkill.Name,
+            AttributeUsed = newSkill.AttributeUsed,
+            Tag = newSkill.Tag,
+            Rank = newSkill.Rank,
+            Version = Skill.CurrentVersion
+        };
+
+        Character.Skills.Add(skillToAdd);
+
+        availableSkills.Add(new DocumentWrapper<Skill>
+        {
+            ContentId = skillToAdd.Id,
+            Document = skillToAdd,
+            DocumentType = "Skill",
+            ContentVersion = skillToAdd.Version
+        });
+
+        await SkillService.SaveSkillAsync(skillToAdd);
+        _savedSkillIds.Add(skillToAdd.Id);
+        ResetNewSkill();
+        StateHasChanged();
+    }
+
+    private void ResetNewSkill()
+    {
+        newSkill = new Skill
+        {
+            Id = Guid.NewGuid(),
+            Version = Skill.CurrentVersion,
+            AttributeUsed = "Prime",
+            Rank = 0
+        };
     }
 
     private void VersionTwoAlignment()
