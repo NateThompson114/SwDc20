@@ -137,25 +137,25 @@ else
             {
                 _characterWrapper = await CharacterService.GetCharacterAsync(Id.Value);
 
-                var needsSaved = false;
-                
-                if(_characterWrapper.ContentId == default)
-                {
-                    _characterWrapper.ContentId = _characterWrapper.Id;
-                    needsSaved = true;
-                }
-                
-                if(_characterWrapper.DocumentType != "Character")
-                {
-                    _characterWrapper.DocumentType = "Character";
-                    needsSaved = true;
-                }
-
-                if (needsSaved)
-                {
-                    await CharacterService.SaveCharacterAsync(_characterWrapper);
-                    NavigationManager.NavigateTo($"/characters/edit/{_characterWrapper.ContentId}");
-                }
+                // var needsSaved = false;
+                //
+                // if(_characterWrapper.ContentId == default)
+                // {
+                //     _characterWrapper.ContentId = _characterWrapper.Id;
+                //     needsSaved = true;
+                // }
+                //
+                // if(_characterWrapper.DocumentType != "Character")
+                // {
+                //     _characterWrapper.DocumentType = "Character";
+                //     needsSaved = true;
+                // }
+                //
+                // if (needsSaved)
+                // {
+                //     await CharacterService.SaveCharacterAsync(_characterWrapper);
+                //     NavigationManager.NavigateTo($"/characters/edit/{_characterWrapper.ContentId}");
+                // }
                 
                 if (_characterWrapper == null)
                 {
