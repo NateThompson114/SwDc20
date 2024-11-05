@@ -45,11 +45,18 @@ else
                         </div>
                         <div class="row">
                             <div class="col-6">
-                                <h5 class="card-title">@characterWrapper.Document.Name</h5>
+                                @* <h5 class="card-title">@characterWrapper.Document.Name</h5> *@
                                 <p class="card-text">Level: @characterWrapper.Document.Level</p>
                                 <p class="card-text">Class: @characterWrapper.Document.Class</p>
                                 <p class="card-text">Sub Class: @characterWrapper.Document.Subclass</p>
                                 <p class="card-text">Ancestry: @characterWrapper.Document.Ancestry</p>
+                                @if (!string.IsNullOrEmpty(characterWrapper.Document.Background))
+                                {
+                                    <h6>Description</h6>
+                                    <p class="card-text">
+                                        @characterWrapper.Document.Background
+                                    </p>
+                                }
                             </div>
                             <div class="col-6">
                                 @if (!string.IsNullOrEmpty(characterWrapper.Document.ImageUrl))
@@ -75,6 +82,30 @@ else
     protected override async Task OnInitializedAsync()
     {
         characters = await CharacterService.GetCharactersAsync();
+        
+        var repairNeeded = false;
+        foreach (var character in characters)
+        {
+            if (character.Id != default && character.ContentId != default && character.Document.Id != default)
+            {
+                continue;
+            }
+            
+            var newCharacterId = Guid.NewGuid();
+                
+            character.Id = newCharacterId;
+            character.ContentId = newCharacterId;
+            character.Document.Id = newCharacterId;
+                
+            await CharacterService.SaveCharacterAsync(character);
+                
+            repairNeeded = true;
+        }
+
+        if (repairNeeded)
+        {
+            NavigationManager.NavigateTo($"/characters/");
+        }
     }
 
     private void CreateNewCharacter()
