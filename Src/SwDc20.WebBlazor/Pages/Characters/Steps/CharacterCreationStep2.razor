@@ -1,6 +1,5 @@
 ﻿@using System.Linq;
-@using SwDc20.Core.Application.Constants
-@using SwDc20.Core.Application.Constants.Dc20
+@using SwDc20.WebBlazor.Pages.Characters.Contaners
 @inject SkillService SkillService
 
 
@@ -15,67 +14,7 @@
 
 <h5>Skills</h5>
 
-<div class="form-check mb-3">
-    <InputCheckbox @bind-Value="allowSkillChanges" id="allowSkillChanges" class="form-check-input" />
-    <label class="form-check-label" for="allowSkillChanges">Allow Skill Changes</label>
-</div>
-
-<button class="btn btn-secondary mb-3" @onclick="AlignSkills">Align Skills with Current List</button>
-
-@if (allowSkillChanges)
-{
-<div class="mb-3">
-    <h6>Add New Skill</h6>
-    <div class="input-group">
-        <label class="input-group-text" for="newSkillName">Skill Name</label>
-        <InputText id="newSkillName" @bind-Value="newSkillName" class="form-control" />
-        <label class="input-group-text" for="newSkillAttribute">Attribute</label>
-        <InputSelect id="newSkillAttribute" @bind-Value="newSkillAttribute" class="form-control">
-            @foreach (var attr in Dc20StandardSkills.AttributeOptions)
-            {
-            <option value="@attr">@attr</option>
-            }
-        </InputSelect>
-        <label class="input-group-text" for="newTag">Tag</label>
-        <InputText id="newTag" @bind-Value="newTagAttribute" class="form-control" />
-        <button type="button" class="btn btn-primary" @onclick="AddNewSkill">Add Skill</button>
-    </div>
-</div>
-}
-
-@foreach (var skillGroup in Character.Skills.GroupBy(sk => sk.AttributeUsed))
-{
-    <h6>@skillGroup.Key</h6>
-    foreach (var skillTagGroup in skillGroup.GroupBy(sg => sg.Tag).OrderBy(sg => sg.Key))
-    {
-        if(skillTagGroup.Key != null)
-        {
-            <br/>
-            <p><i>@skillTagGroup.Key (@skillGroup.Key)</i></p>
-        }
-        foreach (var skill in skillTagGroup)
-        {
-            <div class="input-group">
-                <label class="input-group-text" for="@skill.Name">@skill.Name</label>
-                <InputNumber id="@skill.Name" @bind-Value="skill.Rank" class="form-control" min="0" max="5" />
-                <span class="input-group-text">Value: @skill.CalculateValue(Character)</span>
-                @if (allowSkillChanges)
-                {
-                    <button type="button" class="btn btn-danger btn-sm ml-2" @onclick="() => RemoveSkill(skill)">Remove</button>
-                }
-            </div>
-        }
-        
-    }
-    <hr/>
-}
-
-<h6>Add Knowledge Skill</h6>
-<div class="input-group">
-    <label class="input-group-text" for="newSkillName">Skill Name</label>
-    <InputText id="newSkillName" @bind-Value="newSkillName" class="form-control" />
-    <button type="button" class="btn btn-primary" @onclick="AddNewSkill">Add Skill</button>
-</div>
+<SkillsContainer Character="@Character" CanEdit="true" IsMobile="@IsMobile" VersionTwo="false" />
 
 <hr/>
 
@@ -85,7 +24,7 @@
     <InputText id="tradeName" @bind-Value="newTradeName" class="form-control" />
     <label class="input-group-text" for="tradeBonus">Bonus</label>
     <InputNumber id="tradeBonus" @bind-Value="newTradeBonus" class="form-control" />
-    <button type="button" class="btn btn-secondary mt-2" @onclick="AddTrade">Add Trade</button>
+    <button type="button" class="btn btn-secondary" @onclick="AddTrade">Add Trade</button>
 </div>
 
 <ul class="list-group mt-2">
@@ -109,7 +48,7 @@
         <option value="Fluent">Fluent</option>
         <option value="Limited">Limited</option>
     </InputSelect>
-    <button type="button" class="btn btn-secondary mt-2" @onclick="AddLanguage">Add Language</button>
+    <button type="button" class="btn btn-secondary" @onclick="AddLanguage">Add Language</button>
 </div>
 
 <ul class="list-group mt-2">
@@ -122,9 +61,65 @@
     }
 </ul>
 
+<hr/>
+
+<div class="card border-success">
+    <h4 class="card-header bg-success">
+        Background (Skills, Trades, & Languages)
+    </h4>
+    
+    <div class="card-body">
+        <p>This represents how your were raised and brought up, what type of culture you were around, and what you have done since birth. You gain “Traits” from your Background at 1st level that grant you some flavorful or mechanical benefits. You can not go over the Mastery Limit of Novice unless you have a Feature that allows you to do so.</p>
+
+        <p>Each Background gives 5 Skill Points, 3 Trade Points, and 2 Language Points.</p>
+
+        <p class="alert-warning">Beta Note: The only piece “missing” from Background is a “Background Trait”. This will be something 100% FLAVOR based and only enhance Roleplay.</p>    
+    </div>
+    
+    <div class="card-body">
+        <h5 class="card-header">
+            Skills
+        </h5>
+
+        <p >Your Background gives you 5 Skill Points, but you also increase or decrease your Skill Points based on your Intelligence Attribute.</p>
+
+        <p class="alert-info">Starting Skill Points = 5 + Intelligence (yes, you do subtract if your Intelligence is negative).</p>
+
+        <strong >Knowledge Skills</strong>: Remember, if you put 1 Skill Point into a Knowledge Skill, you get a free “bonus point” to put into any other Knowledge Skill. You still have to follow the Mastery Cap of Novice though.
+
+        <span class="alert-info">DC Tip: Bards get 2 more Skill Points at level 1 in their Class Table.</span>
+        
+    </div>
+    
+
+    <div class="card-body">
+        <h5 class="card-header">
+            Trades
+        </h5>
+
+        <p>Your Background gives you 3 Trade Points. You can convert 1 Skill Point into 1 Trade point, but not the other way around.</p>
+    </div>
+
+    <div class="card-body">
+        <h5 class="card-header">
+            Languages
+        </h5>
+
+        <p>Your Background gives you Fluency in the Common Language and 2 Language Points that you can spend on any Language of your choice. Additionally, you can convert 1 Trade Point into 2 Language Points.</p>
+    </div>
+
+    <div class="card-body">
+        <h5 class="card-header">
+            Background Starting Equipment
+        </h5>
+
+        <p>Coming Soon. You get a list of starting equipment based on your Background. You could instead choose to receive a flat amount of gold or even roll for your gold.</p>
+    </div>
+</div>
+
 @code {
-    [Parameter]
-    public Character Character { get; set; }
+    [Parameter] public Character Character { get; set; }
+    [Parameter] public bool IsMobile { get; set; }
 
     private List<Skill> availableSkills = new List<Skill>();
     private bool allowSkillChanges = false;

@@ -2,46 +2,54 @@
 
 <h4>Step 1: Attributes & Prime Modifier</h4>
 
-<div class="row">
-
+<div class="row g-3">
     <SwDc20.WebBlazor.Components.AttributeCardWithSave
         AttributeName="@nameof(Character.Might)"
         @bind-AttributeValue="Character.Might"
         @bind-SaveMastery="Character.MightSaveMastery"
         UpdateSaveMasteries="@UpdateSaveMasteries"
         SelectedMasteriesCount="@SelectedMasteriesCount"
-        SaveValue="@Character.CalculateSaves.CalculateMightSave(Character)" />
-    
+        SaveValue="@Character.CalculateSaves.CalculateMightSave(Character)"
+        VersionTwo="false"
+        CanEdit="true"/>
+
     <SwDc20.WebBlazor.Components.AttributeCardWithSave
         AttributeName="@nameof(Character.Agility)"
         @bind-AttributeValue="Character.Agility"
         @bind-SaveMastery="Character.AgilitySaveMastery"
         UpdateSaveMasteries="@UpdateSaveMasteries"
         SelectedMasteriesCount="@SelectedMasteriesCount"
-        SaveValue="@Character.CalculateSaves.CalculateAgilitySave(Character)" />
-    
+        SaveValue="@Character.CalculateSaves.CalculateAgilitySave(Character)"
+        VersionTwo="false"
+        CanEdit="true"/>
+
     <SwDc20.WebBlazor.Components.AttributeCardWithSave
         AttributeName="@nameof(Character.Charisma)"
         @bind-AttributeValue="Character.Charisma"
         @bind-SaveMastery="Character.CharismaSaveMastery"
         UpdateSaveMasteries="@UpdateSaveMasteries"
         SelectedMasteriesCount="@SelectedMasteriesCount"
-        SaveValue="@Character.CalculateSaves.CalculateCharismaSave(Character)" />
-    
+        SaveValue="@Character.CalculateSaves.CalculateCharismaSave(Character)"
+        VersionTwo="false"
+        CanEdit="true"/>
+
     <SwDc20.WebBlazor.Components.AttributeCardWithSave
         AttributeName="@nameof(Character.Intelligence)"
         @bind-AttributeValue="Character.Intelligence"
         @bind-SaveMastery="Character.IntelligenceSaveMastery"
         UpdateSaveMasteries="@UpdateSaveMasteries"
         SelectedMasteriesCount="@SelectedMasteriesCount"
-        SaveValue="@Character.CalculateSaves.CalculateIntelligenceSave(Character)" />
+        SaveValue="@Character.CalculateSaves.CalculateIntelligenceSave(Character)"
+        VersionTwo="false"
+        CanEdit="true"/>
 
     <div class="col-md-2">
         <div class="form-group">
-            <label>Prime Modifier: @Character.PrimeModifier</label>
+            <h4>Prime Modifier: @Character.PrimeModifier</h4>
         </div>
     </div>
 </div>
+
 
 <hr/>
 
@@ -105,8 +113,8 @@
 
 
 @code {
-    [Parameter]
-    public required Character Character { get; set; }
+    [Parameter] public required Character Character { get; set; }
+    [Parameter] public bool IsMobile { get; set; }
     
     private int SelectedMasteriesCount =>
         (Character.MightSaveMastery ? 1 : 0) +

@@ -1,0 +1,86 @@
+﻿<div>
+    <button type="button" @onclick="OpenModal" class="btn btn-link p-1" aria-label="Attribute Settings">
+        <i class="fa-solid fa-gear"></i>
+    </button>
+
+    @if (IsOpen)
+    {
+        <div class="modal show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Health Stamina and Mana</h5>
+                        <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        
+                        <div class="form-floating">
+                            <InputNumber id="maxHitPoints" class="form-control" @bind-Value="CurrentCharacter.MaxHitPoints"/>
+                            <label for="maxHitPoints">Max Hit Points</label>
+                        </div>
+                        
+                        <div class="form-floating">
+                            <InputNumber id="currentHitPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentHp"/>
+                            <label for="currentHitPoints">Current Hit Points</label>
+                        </div>
+
+                        <div class="form-floating">
+                            <InputNumber id="temporaryHitPoints" class="form-control" @bind-Value="CurrentCharacter.TemporaryHp"/>
+                            <label for="temporaryHitPoints">Temp Hit Points</label>
+                        </div>
+                        
+                        <hr/>
+
+                        <div class="form-floating">
+                            <InputNumber id="maxStaminaPoints" class="form-control" @bind-Value="CurrentCharacter.MaxStaminaPoints"/>
+                            <label for="maxStaminaPoints">Max Stamina</label>
+                        </div>
+                        <div class="form-floating">
+                            <InputNumber id="currentStaminaPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentStamina"/>
+                            <label for="currentStaminaPoints">Current Stamin</label>
+                        </div>
+                        
+                        <hr/>
+
+                        <div class="form-floating">
+                            <InputNumber id="maxManaPoints" class="form-control" @bind-Value="CurrentCharacter.MaxManaPoints"/>
+                            <label for="maxManaPoints">Max Mana</label>
+                        </div>
+                        <div class="form-floating">
+                            <InputNumber id="currentManaPoints" class="form-control" @bind-Value="CurrentCharacter.CurrentManaPoints"/>
+                            <label for="currentManaPoints">Current Mana</label>
+                        </div>
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        <SaveButtonComponent OnSave="SaveChanges" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Character CurrentCharacter { get; set; }
+    [Parameter] public EventCallback OnAttributesChanged { get; set; }
+
+    private bool IsOpen { get; set; }
+
+    private void OpenModal()
+    {
+        IsOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+    }
+
+    private async Task SaveChanges()
+    {
+        await OnAttributesChanged.InvokeAsync();
+        IsOpen = false;
+    }
+}

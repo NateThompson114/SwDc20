@@ -1,27 +1,33 @@
-﻿@using SwDc20.Core.Domain.Entities.Character
+﻿@using SwDc20.WebBlazor.Pages.Characters.Modals.CharacterSheet
 
 <div class="card border-success" aria-roledescription="Resource Container" aria-description="">
-    <div class="card-header">
-        Resources
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4>Resources</h4>
+        @if(!CanEdit)
+        {
+            <CharacterSheet_ResourcesModal
+                CurrentCharacter="@CurrentCharacter"
+                OnAttributesChanged="@OnChanged"/>
+        }
     </div>
     <div class="card-body">
 
         <div class="row">
             @if (CanEdit)
             {
-                <div class="col-md-4">
+                <div class="col-md-12">
                     <div class="input-group">
                         <label class="input-group-text">Max Action Points:</label>
-                        <InputNumber class="form-control" @bind-Value="Character.ActionPoints" min="0" max="5" @bind-Value:after="OnChange" disabled="@(!CanEdit)"/>
+                        <InputNumber class="form-control" @bind-Value="CurrentCharacter.ActionPoints" min="0" max="5" @bind-Value:after="OnChange" disabled="@(!CanEdit)"/>
                         <label class="input-group-text">Current Action Points:</label>
-                        <InputNumber class="form-control" @bind-Value="Character.CurrentActionPoints" min="0" max="@Character.ActionPoints" @bind-Value:after="OnChange" disabled="@(!CanEdit)"/>
+                        <InputNumber class="form-control" @bind-Value="CurrentCharacter.CurrentActionPoints" min="0" max="@CurrentCharacter.ActionPoints" @bind-Value:after="OnChange" disabled="@(!CanEdit)"/>
                     </div>
                 </div>
             }
             else
             {
                 <div class="col-md-8">
-                    <ActionPointsComponent Character="@Character" OnActionPointsChanged="@HandleActionPointsChanged"/>
+                    <ActionPointsComponent Character="@CurrentCharacter" OnActionPointsChanged="@HandleActionPointsChanged"/>
                 </div>
             }
         </div>
@@ -32,7 +38,7 @@
             <div class="col-md-4">
                 <div class="input-group">
                     <label class="input-group-text">Death Threshold:</label>
-                    <InputSelect class="form-control" @bind-Value="Character.SelectedDeathThresholdAttribute" @bind-Value:after="OnChange" disabled="@(!CanEdit)">
+                    <InputSelect class="form-control" @bind-Value="CurrentCharacter.SelectedDeathThresholdAttribute" @bind-Value:after="OnChange" disabled="@(!CanEdit)">
                         @foreach (var attr in AttributeList)
                         {
                             <option value="@attr">@attr @(attr == "Prime" ? "(Default)" : "")</option>
@@ -50,10 +56,10 @@
             <div class="col-md-4">
                 <div class="input-group">
                     <label class="input-group-text">Rest Points:</label>
-                    <InputSelect class="form-control" @bind-Value="Character.SelectedRestPointsAttribute" @bind-Value:after="OnChange" disabled="@(!CanEdit)">
+                    <InputSelect class="form-control" @bind-Value="CurrentCharacter.SelectedRestPointsAttribute" @bind-Value:after="OnChange" disabled="@(!CanEdit)">
                         @foreach (var attr in AttributeList)
                         {
-                            <option value="@attr">@attr @(attr == nameof(Character.Might) ? "(Default)" : "")</option>
+                            <option value="@attr">@attr @(attr == nameof(CurrentCharacter.Might) ? "(Default)" : "")</option>
                         }
                     </InputSelect>
                     <label class="input-group-text">@CalculateRestPoints()</label>
@@ -62,10 +68,10 @@
             <div class="col-md-4">
                 <div class="input-group">
                     <label class="input-group-text">Grit Points:</label>
-                    <InputSelect class="form-control" @bind-Value="Character.SelectedGritPointsAttribute" @bind-Value:after="OnChange" disabled="@(!CanEdit)">
+                    <InputSelect class="form-control" @bind-Value="CurrentCharacter.SelectedGritPointsAttribute" @bind-Value:after="OnChange" disabled="@(!CanEdit)">
                         @foreach (var attr in AttributeList)
                         {
-                            <option value="@attr">@attr @(attr == nameof(Character.Charisma) ? "(Default)" : "")</option>
+                            <option value="@attr">@attr @(attr == nameof(CurrentCharacter.Charisma) ? "(Default)" : "")</option>
                         }
                     </InputSelect>
                     <label class="input-group-text">@CalculateGritPoints()</label>
@@ -76,13 +82,13 @@
             <div class="col-md-4">
                 <div class="input-group">
                     <label class="input-group-text">Jump Distance:</label>
-                    <InputNumber class="form-control" @bind-Value="Character.JumpDistance" @bind-Value:after="OnChange" disabled="@(!CanEdit)"/>
+                    <InputNumber class="form-control" @bind-Value="CurrentCharacter.JumpDistance" @bind-Value:after="OnChange" disabled="@(!CanEdit)"/>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="input-group">
                     <label class="input-group-text">Move Speed:</label>
-                    <InputNumber class="form-control" @bind-Value="Character.MoveSpeed" @bind-Value:after="OnChange" disabled="@(!CanEdit)"/>
+                    <InputNumber class="form-control" @bind-Value="CurrentCharacter.MoveSpeed" @bind-Value:after="OnChange" disabled="@(!CanEdit)"/>
                 </div>
             </div>
         </div>
@@ -91,7 +97,7 @@
             <div class="col-md-6">
                 <div class="input-group">
                     <label class="input-group-text">Currency:</label>
-                    <InputNumber class="form-control" @bind-Value="Character.Currency" @bind-Value:after="OnChange"/>
+                    <InputNumber class="form-control" @bind-Value="CurrentCharacter.Currency" @bind-Value:after="OnChange"/>
                 </div>
             </div>
         </div>
@@ -113,7 +119,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach (var resource in Character.Resources)
+                    @foreach (var resource in CurrentCharacter.Resources)
                     {
                         <tr>
                             <td>
@@ -145,47 +151,47 @@
 </div>
 
 @code {
-    [Parameter] public Character Character { get; set; }
+    [Parameter] public Character CurrentCharacter { get; set; }
     [Parameter] public bool CanEdit { get; set; } = true;
-    [Parameter] public EventCallback OnResourcesChanged { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
     
-    private List<string> AttributeList = new List<string> { "Prime", nameof(Character.Might), nameof(Character.Agility), nameof(Character.Charisma), nameof(Character.Intelligence) };
+    private List<string> AttributeList = new List<string> { "Prime", nameof(CurrentCharacter.Might), nameof(CurrentCharacter.Agility), nameof(CurrentCharacter.Charisma), nameof(CurrentCharacter.Intelligence) };
     
     private string SelectedDeathThresholdAttribute { get; set; } = "Prime";
-    private string SelectedRestPointsAttribute { get; set; } = nameof(Character.Might);
-    private string SelectedGritPointsAttribute { get; set; } = nameof(Character.Charisma);
+    private string SelectedRestPointsAttribute { get; set; } = nameof(CurrentCharacter.Might);
+    private string SelectedGritPointsAttribute { get; set; } = nameof(CurrentCharacter.Charisma);
     
     protected override void OnInitialized()
     {
-        if (string.IsNullOrEmpty(Character.SelectedDeathThresholdAttribute))
-            Character.SelectedDeathThresholdAttribute = "Prime";
-        if (string.IsNullOrEmpty(Character.SelectedRestPointsAttribute))
-            Character.SelectedRestPointsAttribute = nameof(Character.Might);
-        if (string.IsNullOrEmpty(Character.SelectedGritPointsAttribute))
-            Character.SelectedGritPointsAttribute = nameof(Character.Charisma);
+        if (string.IsNullOrEmpty(CurrentCharacter.SelectedDeathThresholdAttribute))
+            CurrentCharacter.SelectedDeathThresholdAttribute = "Prime";
+        if (string.IsNullOrEmpty(CurrentCharacter.SelectedRestPointsAttribute))
+            CurrentCharacter.SelectedRestPointsAttribute = nameof(CurrentCharacter.Might);
+        if (string.IsNullOrEmpty(CurrentCharacter.SelectedGritPointsAttribute))
+            CurrentCharacter.SelectedGritPointsAttribute = nameof(CurrentCharacter.Charisma);
     }
     
     private async Task OnChange()
     {
-        await OnResourcesChanged.InvokeAsync();
+        await OnChanged.InvokeAsync();
         
     }
     
     private int CalculateDeathThreshold()
     {
-        int attributeValue = GetAttributeValue(Character.SelectedDeathThresholdAttribute);
+        int attributeValue = GetAttributeValue(CurrentCharacter.SelectedDeathThresholdAttribute);
         return 0 - attributeValue;
     }
 
     private int CalculateRestPoints()
     {
-        int attributeValue = GetAttributeValue(Character.SelectedRestPointsAttribute);
-        return Character.Level + attributeValue;
+        int attributeValue = GetAttributeValue(CurrentCharacter.SelectedRestPointsAttribute);
+        return CurrentCharacter.Level + attributeValue;
     }
 
     private int CalculateGritPoints()
     {
-        int attributeValue = GetAttributeValue(Character.SelectedGritPointsAttribute);
+        int attributeValue = GetAttributeValue(CurrentCharacter.SelectedGritPointsAttribute);
         return attributeValue + 2;
     }
 
@@ -193,11 +199,11 @@
     {
         return attributeName switch
         {
-            "Prime" => Character.PrimeModifier,
-            nameof(Character.Might) => Character.Might,
-            nameof(Character.Agility) => Character.Agility,
-            nameof(Character.Charisma) => Character.Charisma,
-            nameof(Character.Intelligence) => Character.Intelligence,
+            "Prime" => CurrentCharacter.PrimeModifier,
+            nameof(CurrentCharacter.Might) => CurrentCharacter.Might,
+            nameof(CurrentCharacter.Agility) => CurrentCharacter.Agility,
+            nameof(CurrentCharacter.Charisma) => CurrentCharacter.Charisma,
+            nameof(CurrentCharacter.Intelligence) => CurrentCharacter.Intelligence,
             _ => 0
         };
     }
@@ -206,8 +212,8 @@
     {
         if (CanEdit)
         {
-            Character.Resources.Add(new CharacterResource { Name = "New Resource", MaxValue = 0 });
-            await OnResourcesChanged.InvokeAsync();
+            CurrentCharacter.Resources.Add(new CharacterResource { Name = "New Resource", MaxValue = 0 });
+            await OnChanged.InvokeAsync();
         }
     }
 
@@ -215,14 +221,14 @@
     {
         if (CanEdit)
         {
-            Character.Resources.Remove(resource);
-            await OnResourcesChanged.InvokeAsync();
+            CurrentCharacter.Resources.Remove(resource);
+            await OnChanged.InvokeAsync();
         }
     }
     
     private async Task HandleActionPointsChanged(int newValue)
     {
-        Character.CurrentActionPoints = newValue;
+        CurrentCharacter.CurrentActionPoints = newValue;
         await OnChange();
     }
 

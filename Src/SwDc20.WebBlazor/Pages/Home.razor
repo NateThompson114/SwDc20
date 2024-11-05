@@ -7,16 +7,21 @@
 <h1>Welcome to SwDc20</h1>
 
 
-<div class="row align-items-center alert alert-info overflow-hidden">
-    <div class="col">
-        <h2 class="">THIS IS ALPHA</h2>
+<div class="container">
+    <div class="row align-items-center alert alert-info overflow-hidden">
+        <div class="col">
+            <h2 class="">BETA</h2>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-danger" @onclick="PurgeLocalStorage">Purge Local Storage</button>
+        </div>
     </div>
-    <div class="col-auto">
-        <button class="btn btn-danger" @onclick="PurgeLocalStorage">Purge Local Storage</button>
-    </div>
-</div>
 
-<p>Use this at your own risk as your online storage, the character sheet is 80% done, and the data is structure is 99% done, once 0.8 character sheet is ready I will remove the alpha banner and let everyone know. I have included a Purge Local Storage option if you find yourself unable to open your characters.</p>
+    <p>
+        Use this at your own risk as your online storage, the character sheet is 99% done, and the data is structure is 99% done.
+        I have included a Purge Local Storage option if you find yourself unable to open your characters.
+    </p>
+</div>
 
 
 @if (!string.IsNullOrEmpty(message))
@@ -29,44 +34,12 @@
 <hr/>
 @foreach (var link in links.Where(l => l.Type == "External"))
 {
-<h3>
-    <a href="@link.Url" target="_blank" rel="noreferrer noopener">@link.Name</a>
-</h3>
-@* <div class="col"> *@
-@*     <div class="card h-100"> *@
-@*         <div class="card-body"> *@
-@*             <h5 class="card-title">@link.Name</h5> *@
-@*             $1$ <p class="card-text">Type: @link.Type</p> #1# *@
-@*             <a href="@link.Url" target="_blank" rel="noreferrer noopener" class="btn btn-primary">Link</a> *@
-@*             @if (!string.IsNullOrEmpty(link.Description)) *@
-@*             { *@
-@*             <p class="card-text mt-2">@link.Description</p> *@
-@*             } *@
-@*         </div> *@
-@*     </div> *@
-@* </div> *@
+    <h3>
+        <a href="@link.Url" target="_blank" rel="noreferrer noopener">@link.Name</a>
+    </h3>
 }
-@* <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-4"> *@
-@*     @foreach (var link in links.Where(l => l.Type == "External")) *@
-@*     { *@
-@*         <h3> *@
-@*             <a href="@link.Url" target="_blank" rel="noreferrer noopener">@link.Name</a> *@
-@*         </h3> *@
-@*     $1$ <div class="col"> #1# *@
-@*     $1$     <div class="card h-100"> #1# *@
-@*     $1$         <div class="card-body"> #1# *@
-@*     $1$             <h5 class="card-title">@link.Name</h5> #1# *@
-@*     $1$             $2$ <p class="card-text">Type: @link.Type</p> #2# #1# *@
-@*     $1$             <a href="@link.Url" target="_blank" rel="noreferrer noopener" class="btn btn-primary">Link</a> #1# *@
-@*     $1$             @if (!string.IsNullOrEmpty(link.Description)) #1# *@
-@*     $1$             { #1# *@
-@*     $1$             <p class="card-text mt-2">@link.Description</p> #1# *@
-@*     $1$             } #1# *@
-@*     $1$         </div> #1# *@
-@*     $1$     </div> #1# *@
-@*     $1$ </div> #1# *@
-@*     } *@
-@* </div> *@
+
+
 <hr/>
 
 <table class="table table-sm table-borderless table-striped">
@@ -183,7 +156,7 @@
         new Link("🟡SpecOps (Rogue)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66971210ea94a942643a072e", "Class"),
         new Link("🟡Gunslinger (Ranger)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/6697134773fe3fc25d091012", "Class"),
         new Link("🟡Teräs Käsis (Monk)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/669713e1ea94a942643ce2d6", "Class", "In testing"),
-        new Link("🔴Jedi Snetinel (Psion'ish)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/6697144eccc96ac6d54ee468", "Class"),
+        new Link("🔴Jedi Sentinel (Psion'ish)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/6697144eccc96ac6d54ee468", "Class"),
         new Link("🔴Engineer (Artificer/Custom Class)", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66e4b6a350f796d3e835af15", "Class", "In testing"),
         new Link("🟡🔴Ancestry Options", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66e4514a196b0c026aaa9eff", "Ancestry", "In testing"),
         new Link("🔴NPCs", "https://app.alchemyrpg.com/universe/66897c8792ae184a95eb0ced/article/66e45d9211316e55e4e08f94", "NPC", "In testing"),
@@ -196,3 +169,4 @@
     };
 
 }
+

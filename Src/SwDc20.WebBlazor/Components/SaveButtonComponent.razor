@@ -1,0 +1,78 @@
+﻿@if (IsSaving)
+{
+    <div class="modal show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center py-4">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Saving...</span>
+                    </div>
+                    <h5>Saving Changes...</h5>
+                    <p class="text-muted mb-0">Please wait while your changes are being saved.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<button type="button"
+        class="@ButtonClass"
+        @onclick="HandleSaveClick"
+        disabled="@(IsSaving || Disabled)">
+    @if (IsSaving)
+    {
+    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+    <span>Saving...</span>
+    }
+    else
+    {
+    @if (ChildContent != null)
+    {
+    @ChildContent
+    }
+    else
+    {
+    <span>Save Changes</span>
+    }
+    }
+</button>
+
+@* <!-- Basic usage --> *@
+@* <SaveButtonComponent OnSave="@SaveMethod" /> *@
+@* *@
+@* <!-- Custom button class --> *@
+@* <SaveButtonComponent OnSave="@SaveMethod" ButtonClass="btn btn-success" /> *@
+@* *@
+@* <!-- Custom content --> *@
+@* <SaveButtonComponent OnSave="@SaveMethod"> *@
+@*     <i class="fa-solid fa-floppy-disk me-1"></i> *@
+@*     Save Document *@
+@* </SaveButtonComponent> *@
+
+
+@code {
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public string ButtonClass { get; set; } = "btn btn-primary";
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    
+    private bool IsSaving { get; set; }
+
+    private async Task HandleSaveClick()
+    {
+        if (IsSaving) return;
+
+        IsSaving = true;
+        StateHasChanged();
+
+        try
+        {
+            await OnSave.InvokeAsync();
+        }
+        finally
+        {
+            IsSaving = false;
+            StateHasChanged();
+        }
+    }
+}

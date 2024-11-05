@@ -1,23 +1,17 @@
-﻿@using SwDc20.Core.Domain.Entities.Character
+﻿@using SwDc20.WebBlazor.Pages.Characters.Modals
+@using SwDc20.WebBlazor.Pages.Characters.Modals.CharacterSheet
 @inject IModalService ModalService
 
 <div class="card border-success" aria-roledescription="Language Container" aria-description="Container for your languages and the skill amount.">
-    <div class="card-header">
-        <div class="row align-items-center">
-            <div class="col">
-                <h4>Languages</h4>
-            </div>
-            @if (CanEdit)
-            {
-                <div class="col-auto">
-                    <button type="button" class="btn btn-primary btn-sm" @onclick="AddLanguage" title="Add Language">+ Add Language Modal</button>
-                </div>
-            }
-        </div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4>Languages</h4>
+        <CharacterSheet_LanguagesModal
+            CurrentCharacter="@CurrentCharacter"
+            OnChanged="@OnChanged"/>
     </div>
     <div class="card-body">
         <div class="card-group">
-            @foreach (var language in Character.Languages)
+            @foreach (var language in CurrentCharacter.Languages)
             {
                 <div class="card">
                     <div class="card-body">
@@ -36,6 +30,13 @@
                                 <input type="text" id="@($"languageProficiency_{language.Name}")" class="form-control" value="@language.Proficiency" disabled />
                             }
                         </div>
+                        
+                        @if (!string.IsNullOrWhiteSpace(language.Description))
+                        {
+                            <hr/>
+                            <p>@language.Description</p>
+                        }
+                        
                     </div>
                     @if (CanEdit)
                     {
@@ -65,13 +66,13 @@
 </div>
 
 @code {
-    [Parameter] public Character Character { get; set; }
+    [Parameter] public Character CurrentCharacter { get; set; }
     [Parameter] public bool CanEdit { get; set; } = true;
-    [Parameter] public EventCallback OnLanguagesChanged { get; set; }
+    [Parameter] public EventCallback OnChanged { get; set; }
 
     private string newLanguageName = string.Empty;
     private string newLanguageProficiency = "Limited";
-
+    
     private async Task AddLanguage()
     {
         var parameters = new ModalParameters();
@@ -89,8 +90,8 @@
         if (!result.Cancelled)
         {
             var newLanguage = (Language)result.Data;
-            Character.Languages.Add(newLanguage);
-            await OnLanguagesChanged.InvokeAsync();
+            CurrentCharacter.Languages.Add(newLanguage);
+            await OnChanged.InvokeAsync();
         }
     }
     
@@ -98,16 +99,16 @@
     {
         if (!string.IsNullOrWhiteSpace(newLanguageName))
         {
-            Character.Languages.Add(new Language { Name = newLanguageName, Proficiency = newLanguageProficiency });
+            CurrentCharacter.Languages.Add(new Language { Name = newLanguageName, Proficiency = newLanguageProficiency });
             newLanguageName = string.Empty;
             newLanguageProficiency = "Limited";
-            await OnLanguagesChanged.InvokeAsync();
+            await OnChanged.InvokeAsync();
         }
     }
 
     private async Task RemoveLanguage(Language language)
     {
-        Character.Languages.Remove(language);
-        await OnLanguagesChanged.InvokeAsync();
+        CurrentCharacter.Languages.Remove(language);
+        await OnChanged.InvokeAsync();
     }
 }

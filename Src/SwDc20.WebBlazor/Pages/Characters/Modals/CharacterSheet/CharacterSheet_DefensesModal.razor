@@ -1,0 +1,76 @@
+﻿<div>
+    <button type="button" @onclick="OpenModal" class="btn btn-link p-1" aria-label="Attribute Settings">
+        <i class="fa-solid fa-gear"></i>
+    </button>
+
+    @if (IsOpen)
+    {
+        <div class="modal show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Defenses</h5>
+                        <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-floating">
+                            <InputNumber id="physicalDefense" @bind-Value="CurrentCharacter.PhysicalDefense" class="form-control"/>
+                            <label for="physicalDefense">Physical Defense</label>
+                            <span class="small">Heavy: @(CurrentCharacter.PhysicalDefense + 5)</span>
+                            <span> - </span>
+                            <span class="small">Brutal: @(CurrentCharacter.PhysicalDefense + 10)</span>
+                        </div>
+                        
+                        <div class="form-floating">
+                            <InputNumber id="physicalDefenseReduction" @bind-Value="CurrentCharacter.PhysicalDamageReduction" class="form-control"/>
+                            <label for="physicalDefenseReduction">Physical Defense Reduction</label>
+                        </div>
+                        
+                        <hr/>
+
+                        <div class="form-floating">
+                            <InputNumber id="mysticalDefense" @bind-Value="CurrentCharacter.MysticalDefense" class="form-control"/>
+                            <label for="mysticalDefense">Mystical Defense</label>
+                            <span class="small">Heavy: @(CurrentCharacter.MysticalDefense + 5)</span>
+                            <span> - </span>
+                            <span class="small">Brutal: @(CurrentCharacter.MysticalDefense + 10)</span>
+                        </div>
+
+                        <div class="form-floating">
+                            <InputNumber id="mysticalDefenseReduction" @bind-Value="CurrentCharacter.MysticalDamageReduction" class="form-control"/>
+                            <label for="mysticalDefenseReduction">Mystical Defense Reduction</label>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                        <SaveButtonComponent OnSave="SaveChanges" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Character CurrentCharacter { get; set; }
+    [Parameter] public EventCallback OnAttributesChanged { get; set; }
+
+    private bool IsOpen { get; set; }
+
+    private void OpenModal()
+    {
+        IsOpen = true;
+    }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+    }
+
+    private async Task SaveChanges()
+    {
+        await OnAttributesChanged.InvokeAsync();
+        IsOpen = false;
+    }
+}

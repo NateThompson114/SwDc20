@@ -23,6 +23,16 @@
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="wwwroot\sample-data\weather.json" />
+    <_ContentIncludedByDefault Remove="Pages\Characters\Modals\Contaners\AttributeContainer.razor" />
+    <_ContentIncludedByDefault Remove="Pages\Characters\Modals\Contaners\CombatContainer.razor" />
+    <_ContentIncludedByDefault Remove="Pages\Characters\Modals\Contaners\DefenseContainer.razor" />
+    <_ContentIncludedByDefault Remove="Pages\Characters\Modals\Contaners\FeaturesContainer.razor" />
+    <_ContentIncludedByDefault Remove="Pages\Characters\Modals\Contaners\HealthStaminaManaContainer.razor" />
+    <_ContentIncludedByDefault Remove="Pages\Characters\Modals\Contaners\InventoryContainer.razor" />
+    <_ContentIncludedByDefault Remove="Pages\Characters\Modals\Contaners\LanguageContainer.razor" />
+    <_ContentIncludedByDefault Remove="Pages\Characters\Modals\Contaners\ResourceContainer.razor" />
+    <_ContentIncludedByDefault Remove="Pages\Characters\Modals\Contaners\SkillsContainer.razor" />
+    <_ContentIncludedByDefault Remove="Pages\Characters\Modals\Contaners\TradesContainer.razor" />
   </ItemGroup>
   
   <ItemGroup>
@@ -44,6 +54,19 @@
     <Reference Include="Microsoft.AspNetCore.Http.Extensions">
       <HintPath>..\..\..\..\Program Files\dotnet\shared\Microsoft.AspNetCore.App\8.0.8\Microsoft.AspNetCore.Http.Extensions.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="Pages\Characters\Contaners\AttributeContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Contaners\CombatContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Contaners\DefenseContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Contaners\FeaturesContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Contaners\HealthStaminaManaContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Contaners\InventoryContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Contaners\LanguageContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Contaners\ResourceContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Contaners\SkillsContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Contaners\TradesContainer.razor" />
   </ItemGroup>
 
 </Project>
