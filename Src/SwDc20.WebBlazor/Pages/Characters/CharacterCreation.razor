@@ -144,15 +144,16 @@ else
             }
             else
             {
+                var guid = Guid.NewGuid();
                 _characterWrapper = new DocumentWrapper<Character>
                 {
-                    ContentId = Guid.NewGuid(),
+                    ContentId = guid,
                     DocumentType = "Character",
                     ContentVersion = Character.CurrentVersion,
                     Document = new Character
                     {
-                        Id = default,
-                        Version = null
+                        Id = guid,
+                        Version = Character.CurrentVersion
                     }
                 };
             }
