@@ -1,51 +1,85 @@
-﻿<h4>Step 4-7: Health, Stamina, Mana, and Combat Stats</h4>
+﻿@using SwDc20.WebBlazor.Pages.Characters.Contaners
 
-<div class="form-group">
-    <label for="maxHP">Max HP:</label>
-    <InputNumber id="maxHP" @bind-Value="Character.MaxHitPoints" class="form-control" />
+<h4>Step 4-7: Health, Stamina, Mana, and Combat Stats</h4>
+
+<HealthStaminaManaContainer Character="@Character" IsMobile="@IsMobile" CanEdit="true" />
+<DefenseContainer Character="Character" CanEdit="true" VersionTwo="false" />
+<ResourceContainer CurrentCharacter="Character" CanEdit="true" />
+<FeaturesContainer CurrentCharacter="@Character" CanEdit="true" />
+
+<hr/>
+
+<div class="card border-success">
+    <h4 class="card-header bg-success">Information</h4>
+    
+    <div class="card">
+        <h5 class="card-header">
+            Health Points
+        </h5>
+        <p >Fill in your Characters HP. You may potentially add more if you choose an Ancestry or Class that grants bonus HP at Level 1</p>
+        <p >Starting HP Formula: 6 + Character Level + Might</p>
+        <p class="alert-info">DC Tip: To simplify this I always tell Players that their Starting HP is 7 + Might, and yes, you do subtract if Might is negative. Also how Class Bonus HP works is that all Martials (and Warlocks) get +1 HP and all Spellcasters get +0 HP (this makes it very easy to remember). Then we add in possible Ancestry HP once they choose it later.</p>
+    </div>
+    
+
+    <div class="card">
+        <h5 class="card-header">
+            Stamina & Mana Points
+        </h5>
+        <p >Fill in your Characters SP and MP. Martial Characters have 1 Stamina Points (SP), Spellcasters have 6 Mana Points (MP), and Hybrid Characters (such as a Spellblade) have 3 Mana Points (MP).</p>
+    </div>
+    
+
+    <div class="card">
+        <h5 class="card-header">
+            Defense
+        </h5>
+
+        <p >Fill in your Character’s Physical and Mystical Defense.</p>
+
+        <h6>
+            Physical Defense
+        </h6>
+        <p >Unarmored, Light Armor, and Heavy Armor all use the following Formula:</p>
+        <p >Physical Defense = 8 + CM + Agility + Armor Bonus</p>
+        <span class="alert-info">**DC Tip:** Armor Bonus for both Light Armor and Heavy Armor is +1.</span>
+        <p >Barbarians and Monks have unique Formulas for their PD if they choose not to wear Armor:</p>
+        <p >Barbarians = 8 + CM + (Agility or Might) + 2</p>
+        <p >Monk = 8 + CM + Agility + 2</p>
+
+        <h6>
+            Mystical Defense
+        </h6>
+        <p >All Characters Mystical Defense uses the same Formula:</p>
+        <p >Mystical Defense = 8 + CM + Charisma + Intelligence</p>
+        <p >Monks have a unique Formula for their MD:</p>
+        <p >Monk = 8 + CM + Charisma + Intelligence + 2</p>
+
+        <h6>
+            Damage Reduction
+        </h6>
+        <p >Fill in each sections Damage Reduction</p>
+        <p ><strong >Physical Damage Reduction:</strong> This only applies if you are wearing Heavy Armor (or have some other feature that grants PDR).</p>
+        <p ><strong >Mystical Damage Reduction:</strong> This is most likely 0 for everyone (unless you have a feature that grants it).</p>
+    </div>
+    
+
+    <div class="card">
+        <h5 class="card-header">
+            Resources
+        </h5>
+        <p >Fill out the rest of the blanks on your Character Sheet.</p>
+        <p><strong>Death Threshold:</strong> -3</p>
+        <p><strong>Move Speed:</strong> 5</p>
+        <p><strong>Jump Distance:</strong> Equals your Agility (minimum of 1)</p>
+        <p><strong>Rest Points:</strong> 1 + Might (minimum of 0)</p>
+        <p><strong>Grit Points:</strong> 2 + Charisma</p>
+    </div>
+    
 </div>
 
-<div class="form-group">
-    <label for="maxSP">Max SP:</label>
-    <InputNumber id="maxSP" @bind-Value="Character.MaxStaminaPoints" class="form-control" />
-</div>
-
-<div class="form-group">
-    <label for="maxMP">Max MP:</label>
-    <InputNumber id="maxMP" @bind-Value="Character.MaxManaPoints" class="form-control" />
-</div>
-
-<div class="form-group">
-    <label for="physicalDefense">Physical Defense:</label>
-    <InputNumber id="physicalDefense" @bind-Value="Character.PhysicalDefense" class="form-control" />
-</div>
-
-<div class="form-group">
-    <label for="mysticalDefense">Mystical Defense:</label>
-    <InputNumber id="mysticalDefense" @bind-Value="Character.MysticalDefense" class="form-control" />
-</div>
-
-<div class="form-group">
-    <label for="attackSpellCheck">Attack/Spell Check:</label>
-    <InputNumber id="attackSpellCheck" @bind-Value="Character.AttackSpellCheck" class="form-control" />
-</div>
-
-<div class="form-group">
-    <label for="saveDC">Save DC:</label>
-    <InputNumber id="saveDC" @bind-Value="Character.SaveDifficultyCheck" class="form-control" />
-</div>
-
-<div class="form-group">
-    <label for="martialCheck">Martial Check:</label>
-    <InputNumber id="martialCheck" @bind-Value="Character.MartialCheck" class="form-control" />
-</div>
-
-<div class="form-group">
-    <label for="moveSpeed">Move Speed:</label>
-    <InputNumber id="moveSpeed" @bind-Value="Character.MoveSpeed" class="form-control" />
-</div>
 
 @code {
-[Parameter]
-public Character Character { get; set; }
+    [Parameter] public Character Character { get; set; }
+    [Parameter] public bool IsMobile { get; set; }
 }

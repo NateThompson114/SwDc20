@@ -10,10 +10,13 @@
 <div class="card border-danger" aria-roledescription="Combat Container" aria-description="Container for your weapons and feed into the actions, this handles custom and prebuilt weapons.">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4>Combat</h4>
-        <CharacterSheet_CombatModal
-            CurrentCharacter="@CurrentCharacter"
-            OnAttributesChanged="@OnChanged"
-            IsMobile="@IsMobile"/>
+        @if(!CanEdit)
+        {
+            <CharacterSheet_CombatModal
+                CurrentCharacter="@CurrentCharacter"
+                OnAttributesChanged="@OnChanged"
+                IsMobile="@IsMobile"/>
+        }
     </div>
 
     <div class="card-body">
