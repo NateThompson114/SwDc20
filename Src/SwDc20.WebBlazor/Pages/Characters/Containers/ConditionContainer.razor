@@ -1,0 +1,280 @@
+﻿@inject ConditionService ConditionService
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Conditions</h5>
+        <button type="button" @onclick="OpenModal" class="btn btn-link p-1">
+            <i class="fa-solid fa-gear"></i>
+        </button>
+    </div>
+    <div class="card-body p-2">
+        <div class="conditions-scroll">
+            @if (_conditions?.Any() == true)
+            {
+                @foreach (var (condition, instance) in GetOrderedConditions())
+                {
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div class="d-flex align-items-center">
+                            @if (instance.Rank > 0)
+                            {
+                                <button class="btn btn-sm btn-outline-secondary me-1"
+                                        @onclick="() => DecreaseRank(condition, instance)"
+                                        title="Decrease Level">
+                                    <i class="fa-solid fa-minus"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <div style="width: 31px"></div>
+                            }
+                        </div>
+                        <div class="flex-grow-1 text-center">
+                            <span class="@(instance.Rank == 0 ? "text-muted" : "")"
+                                  title="@GetConditionTooltip(condition, instance)">
+                                @GetDisplayName(condition, instance)
+                            </span>
+                        </div>
+                        <div>
+                            @if (instance.Rank < condition.StackMax)
+                            {
+                                <button class="btn btn-sm btn-outline-secondary"
+                                        @onclick="() => IncreaseRank(condition, instance)"
+                                        title="Increase Level">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <div style="width: 31px"></div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@if (IsModalOpen)
+{
+    <div class="modal show" style="display: block; background-color: rgba(0,0,0,0.5);" tabindex="-2">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Condition Details</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Level</th>
+                                <th>Max</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var (condition, instance) in GetOrderedConditions())
+                            {
+                                <tr class="@(instance.Rank > 0 ? "table-active" : "")">
+                                    <td>@condition.Name</td>
+                                    <td>@instance.Rank</td>
+                                    <td>@condition.StackMax</td>
+                                    <td>
+                                        <small>@condition.Description</small>
+                                        @if (!string.IsNullOrEmpty(condition.HelperDescription))
+                                        {
+                                            <br/>
+                                            <small class="text-muted">@condition.HelperDescription</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            @if (instance.Rank > 0)
+                                            {
+                                                <button class="btn btn-sm btn-outline-secondary"
+                                                        @onclick="() => DecreaseRank(condition, instance)">
+                                                    <i class="fa-solid fa-minus"></i>
+                                                </button>
+                                            }
+                                            @if (instance.Rank < condition.StackMax)
+                                            {
+                                                <button class="btn btn-sm btn-outline-secondary"
+                                                        @onclick="() => IncreaseRank(condition, instance)">
+                                                    <i class="fa-solid fa-plus"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .conditions-scroll {
+        height: 150px;
+        overflow-y: auto;
+    }
+</style>
+
+@code {
+    [Parameter] public Character Character { get; set; }
+    [Parameter] public EventCallback OnConditionsChanged { get; set; }
+
+    private List<CharacterCondition> _conditions = new();
+    private bool IsModalOpen;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _conditions = await ConditionService.GetConditionsAsync();
+        
+        if(_conditions.Any(c => c.Name == "Doomed"))
+        {
+            _conditions.First(c => c.Name == "Doomed").StackMax = Math.Abs(CalculateDeathThreshold());
+        }
+        
+        InitializeCharacterConditions();
+    }
+
+    private void InitializeCharacterConditions()
+    {
+        if (Character.Conditions == null)
+        {
+            Character.Conditions = new List<CharacterConditionInstance>();
+        }
+
+        // Ensure all conditions exist in character's condition list
+        foreach (var condition in _conditions)
+        {
+            if (!Character.Conditions.Any(c => c.ConditionName == condition.Name))
+            {
+                Character.Conditions.Add(new CharacterConditionInstance(condition.Name));
+            }
+        }
+
+        // Remove any conditions that no longer exist
+        Character.Conditions.RemoveAll(ci =>
+            !_conditions.Any(c => c.Name == ci.ConditionName));
+    }
+    
+    private IEnumerable<(CharacterCondition Condition, CharacterConditionInstance Instance)> GetOrderedConditions()
+    {
+        return _conditions
+            .Select(c => {
+                var instance = Character.Conditions.First(ci => ci.ConditionName == c.Name);
+                return (c, instance);
+            })
+            .OrderByDescending(x => x.instance.Rank)
+            .ThenBy(x => x.c.Name);
+    }
+
+    private string GetDisplayName(CharacterCondition condition, CharacterConditionInstance instance)
+    {
+        var name = instance.Rank > 0 && condition.StackMax > 1
+            ? $"{condition.Name} {instance.Rank}"
+            : condition.Name;
+        
+        return name;
+    }
+
+    private string GetConditionTooltip(CharacterCondition condition, CharacterConditionInstance instance)
+    {
+        var tooltip = condition.Description;
+        if (!string.IsNullOrEmpty(condition.HelperDescription))
+        {
+            tooltip += $"\n\n{condition.HelperDescription}";
+        }
+
+        if (condition.StackMax > 1)
+        {
+            tooltip += $"\n\nCurrent Level: {instance.Rank}/{condition.StackMax}";
+        }
+        
+        if(condition.StackMax == instance.Rank && condition.MaxStackHealConditions.Any())
+        {
+            
+            foreach (var healCondition in condition.MaxStackHealConditions)
+            {
+                tooltip += $"\n\n{healCondition.Name}: {healCondition.Description}";
+            }
+            
+        }
+
+        return tooltip;
+    }
+    
+    private string GetHealConditionTooltip(CharacterCondition condition, CharacterConditionInstance instance)
+    {
+        var tooltip = condition.Description;
+        if (!string.IsNullOrEmpty(condition.HelperDescription))
+        {
+            tooltip += $"\n\n{condition.HelperDescription}";
+        }
+
+        if (condition.StackMax > 1)
+        {
+            tooltip += $"\n\nCurrent Level: {instance.Rank}/{condition.StackMax}";
+        }
+
+        return tooltip;
+    }
+    
+    private async Task IncreaseRank(CharacterCondition condition, CharacterConditionInstance instance)
+    {
+        if (instance.Rank < condition.StackMax)
+        {
+            instance.Rank++;
+            // Just add one stack instead of resetting and rebuilding
+            condition.AddStackCount();
+            await OnConditionsChanged.InvokeAsync();
+            StateHasChanged(); // Force immediate UI update
+        }
+    }
+    
+    private async Task DecreaseRank(CharacterCondition condition, CharacterConditionInstance instance)
+    {
+        if (instance.Rank > 0)
+        {
+            instance.Rank--;
+            // Just remove one stack instead of resetting and rebuilding
+            condition.RemoveStackCount();
+            await OnConditionsChanged.InvokeAsync();
+            StateHasChanged(); // Force immediate UI update
+        }
+    }
+    
+    private int CalculateDeathThreshold()
+    {
+        int attributeValue = GetAttributeValue(Character.SelectedDeathThresholdAttribute);
+        return 0 - attributeValue;
+    }
+
+    private int GetAttributeValue(string attributeName)
+    {
+        return attributeName switch
+        {
+            "Prime" => Character.PrimeModifier,
+            nameof(Character.Might) => Character.Might,
+            nameof(Character.Agility) => Character.Agility,
+            nameof(Character.Charisma) => Character.Charisma,
+            nameof(Character.Intelligence) => Character.Intelligence,
+            _ => 0
+        };
+    }
+
+    private void OpenModal() => IsModalOpen = true;
+    private void CloseModal() => IsModalOpen = false;
+}

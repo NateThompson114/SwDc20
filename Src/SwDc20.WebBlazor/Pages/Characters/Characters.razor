@@ -83,29 +83,28 @@ else
     {
         characters = await CharacterService.GetCharactersAsync();
         
-        // var repairNeeded = false;
-        // foreach (var character in characters)
-        // {
-        //     if (character.Id != default && character.ContentId != default && character.Document.Id != default)
-        //     {
-        //         continue;
-        //     }
-        //     
-        //     var newCharacterId = Guid.NewGuid();
-        //         
-        //     character.Id = newCharacterId;
-        //     character.ContentId = newCharacterId;
-        //     character.Document.Id = newCharacterId;
-        //         
-        //     await CharacterService.SaveCharacterAsync(character);
-        //         
-        //     repairNeeded = true;
-        // }
-        //
-        // if (repairNeeded)
-        // {
-        //     NavigationManager.NavigateTo($"/characters/");
-        // }
+        var repairNeeded = false;
+        foreach (var character in characters)
+        {
+            if (character.Id != default && character.ContentId != default && character.Document.Id != default)
+            {
+                continue;
+            }
+
+            var newCharacterId = Guid.NewGuid();
+                
+            character.Id = newCharacterId;
+            character.ContentId = newCharacterId;
+            character.Document.Id = newCharacterId;
+                
+            await CharacterService.SaveCharacterAsync(character);
+            repairNeeded = true;
+        }
+        
+        if (repairNeeded)
+        {
+            NavigationManager.NavigateTo($"/characters/");
+        }
     }
 
     private void CreateNewCharacter()
