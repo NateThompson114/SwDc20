@@ -57,16 +57,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="Pages\Characters\Contaners\AttributeContainer.razor" />
-    <AdditionalFiles Include="Pages\Characters\Contaners\CombatContainer.razor" />
-    <AdditionalFiles Include="Pages\Characters\Contaners\DefenseContainer.razor" />
-    <AdditionalFiles Include="Pages\Characters\Contaners\FeaturesContainer.razor" />
-    <AdditionalFiles Include="Pages\Characters\Contaners\HealthStaminaManaContainer.razor" />
-    <AdditionalFiles Include="Pages\Characters\Contaners\InventoryContainer.razor" />
-    <AdditionalFiles Include="Pages\Characters\Contaners\LanguageContainer.razor" />
-    <AdditionalFiles Include="Pages\Characters\Contaners\ResourceContainer.razor" />
-    <AdditionalFiles Include="Pages\Characters\Contaners\SkillsContainer.razor" />
-    <AdditionalFiles Include="Pages\Characters\Contaners\TradesContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Containers\AttributeContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Containers\CombatContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Containers\DefenseContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Containers\FeaturesContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Containers\HealthStaminaManaContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Containers\InventoryContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Containers\LanguageContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Containers\ResourceContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Containers\SkillsContainer.razor" />
+    <AdditionalFiles Include="Pages\Characters\Containers\TradesContainer.razor" />
   </ItemGroup>
 
 </Project>

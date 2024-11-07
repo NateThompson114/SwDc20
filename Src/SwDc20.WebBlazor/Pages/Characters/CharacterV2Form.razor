@@ -2,7 +2,7 @@
 @page "/character/{Id:guid}"
 @using System.Collections.ObjectModel
 @using SwDc20.Core.Interfaces
-@using SwDc20.WebBlazor.Pages.Characters.Contaners
+@using SwDc20.WebBlazor.Pages.Characters.Containers
 @using SwDc20.WebBlazor.Pages.Characters.Modals.CharacterSheet
 @inject CharacterService CharacterService
 @inject SkillService SkillService
@@ -12,250 +12,262 @@
 @implements IDisposable
 @implements IAsyncDisposable
 
-<div class="container-fluid">
-<div class="d-flex justify-content-between align-items-center mb-3 border-1 border-secondary">
-    <div class="row">
-        <div class="row d-flex justify-content-between align-items-center">
-            <h1>
-                @(CurrentCharacter.Name)
-                <button class="btn btn-link p-1" @onclick="() => EditCharacter(CurrentCharacter.Id)">
-                    <i class="fa-duotone fa-solid fa-file-pen"></i>
-                </button>
-            </h1>
+<div class="container-fluid mt-3">
+
+
+    <EditForm Model="@CurrentCharacter" OnValidSubmit="SaveCharacter">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+        @if (!DemoMode)
+        {
+            <Toolbar IsMobile="@IsMobile"/>
+        }
+        else
+        {
+            <CharmBar IsMobile="@IsMobile"/>
+        }
+        
+        <div class="row mb-2">
+            
+            <div class="col-md-10">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-1 border-secondary">
+                    <div class="row">
+                        <div class="row d-flex justify-content-between align-items-center">
+                            <h1>
+                                @(CurrentCharacter.Name)
+                                <button class="btn btn-link p-1" @onclick="() => EditCharacter(CurrentCharacter.Id)">
+                                    <i class="fa-duotone fa-solid fa-file-pen"></i>
+                                </button>
+                            </h1>
+
+                        </div>
+                        <h5>Player: @(CurrentCharacter?.PlayerName ?? "Unknown")</h5>
+                    </div>
+
+                    @if (showSaveIndicator)
+                    {
+                    <span class="save-indicator text-sm-center"> ✅Saved</span>
+                    }
+
+                    <div class="form-check form-switch" data-bs-toggle="tooltip" data-bs-html="true" title="These features should not cause issues with your data.">
+                        <input class="form-check-input" type="checkbox" id="demoToggle" @bind="DemoMode">
+                        <label class="form-check-label" for="demoToggle">Demo Mode</label>
+                        <span class="small alert-danger">
+                            <i class="fa-sharp fa-solid fa-circle-exclamation"></i>Features Unlocked in Demo mode are not finalized!
+                        </span>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(CurrentCharacter.ImageUrl))
+                    {
+                    <img src="@CurrentCharacter.ImageUrl" alt="Character Image" style="max-width: 100px; max-height: 100px;"/>
+                    }
+
+                </div>
+
+                <div class="row mb-2">
+                    <div class="form-floating">
+                        <div class="input-group">
+                            <span class="input-group-text">Level:</span>
+                            <InputNumber id="level" @bind-Value="CurrentCharacter.Level" class="form-control" min="0" max="20" @bind-Value:after="AutoSaveCharacter" disabled="true"/>
+                            <span class="input-group-text">Combat Mastery: @CurrentCharacter.CombatMastery</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <InputText id="class" @bind-Value="CurrentCharacter.Class" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="true"/>
+                            <label for="class">Class</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <InputText id="subclass" @bind-Value="CurrentCharacter.Subclass" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="true"/>
+                            <label for="subclass">SubClass</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <InputText id="ancestry" class="form-control" @bind-Value="CurrentCharacter.Ancestry" @bind-Value:after="AutoSaveCharacter" disabled="true"/>
+                            <label for="ancestry">Ancestry</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <ConditionContainer
+                    Character="@CurrentCharacter"
+                    OnConditionsChanged="AutoSaveCharacter" />
+            </div>
             
         </div>
-        <h5>Player: @(CurrentCharacter?.PlayerName ?? "Unknown")</h5>
-    </div>
+        
+        
 
-    @if (showSaveIndicator)
-    {
-        <span class="save-indicator text-sm-center"> ✅Saved</span>
-    }
+        <div class="row">
+            <div class="col-md-2">
+                <div class="card border-danger" aria-roledescription="Attribute and Prime Container" aria-description="Container card for attribute cards and prime modifier, these are the key values for your characters, and contain Might, Agility, Charisma, and Intelligence.">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4>Attributes</h4>
+                        <CharacterSheet_AttributesModal
+                            CurrentCharacter="@CurrentCharacter"
+                            OnAttributesChanged="@AutoSaveCharacter"/>
+                    </div>
+                    <div class="card-body">
+                        <div class="col-lg-auto col-md-6 m-2">
+                            <div class="col-lg-auto col-md-6">
+                                <SwDc20.WebBlazor.Components.AttributeCardWithSave
+                                    AttributeName="Prime"
+                                    AttributeValue="CurrentCharacter.PrimeModifier"
+                                    IsMobile="@IsMobile"
+                                    VersionTwo="true"
+                                    CompactVersion="true"
+                                    NoRolls="true"/>
+                            </div>
+                        </div>
 
-    <div class="form-check form-switch" data-bs-toggle="tooltip" data-bs-html="true" title="These features should not cause issues with your data.">
-        <input class="form-check-input" type="checkbox" id="demoToggle" @bind="DemoMode" >
-        <label class="form-check-label" for="demoToggle">Demo Mode</label>
-        <span class="small alert-danger" >
-            <i class="fa-sharp fa-solid fa-circle-exclamation"></i>Features Unlocked in Demo mode are not finalized!
-        </span>
-    </div>
-
-    @if (!string.IsNullOrEmpty(CurrentCharacter.ImageUrl))
-    {
-        <img src="@CurrentCharacter.ImageUrl" alt="Character Image" style="max-width: 100px; max-height: 100px;"/>
-    }
-
-</div>
-
-<EditForm Model="@CurrentCharacter" OnValidSubmit="SaveCharacter">
-    <DataAnnotationsValidator/>
-    <ValidationSummary/>
-    @if (!DemoMode)
-    {
-        <Toolbar IsMobile="@IsMobile"/>       
-    }
-    else
-    {
-        <CharmBar IsMobile="@IsMobile" />
-    }
-    
-    
-
-
-    <div class="row mb-2">
-        <div class="form-floating">
-            <div class="input-group">
-                <span class="input-group-text">Level:</span>
-                <InputNumber id="level" @bind-Value="CurrentCharacter.Level" class="form-control" min="0" max="20" @bind-Value:after="AutoSaveCharacter" disabled="true"/>
-                <span class="input-group-text">Combat Mastery: @CurrentCharacter.CombatMastery</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mb-2">
-        <div class="col-md-4">
-            <div class="form-floating">
-                <InputText id="class" @bind-Value="CurrentCharacter.Class" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="true"/>
-                <label for="class">Class</label>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="form-floating">
-                <InputText id="subclass" @bind-Value="CurrentCharacter.Subclass" class="form-control" @bind-Value:after="AutoSaveCharacter" disabled="true"/>
-                <label for="subclass">SubClass</label>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="form-floating">
-                <InputText id="ancestry" class="form-control" @bind-Value="CurrentCharacter.Ancestry" @bind-Value:after="AutoSaveCharacter" disabled="true"/>
-                <label for="ancestry">Ancestry</label>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-2">
-            <div class="card border-danger" aria-roledescription="Attribute and Prime Container" aria-description="Container card for attribute cards and prime modifier, these are the key values for your characters, and contain Might, Agility, Charisma, and Intelligence.">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4>Attributes</h4>
-                    <CharacterSheet_AttributesModal
-                        CurrentCharacter="@CurrentCharacter"
-                        OnAttributesChanged="@AutoSaveCharacter"/>
-                </div>
-                <div class="card-body">
-                    <div class="col-lg-auto col-md-6 m-2">
-                        <div class="col-lg-auto col-md-6">
+                        <div class="col-lg-auto col-md-6 m-2">
                             <SwDc20.WebBlazor.Components.AttributeCardWithSave
-                                AttributeName="Prime"
-                                AttributeValue="CurrentCharacter.PrimeModifier"
+                                AttributeName="@nameof(CurrentCharacter.Might)"
+                                @bind-AttributeValue="CurrentCharacter.Might"
+                                @bind-SaveMastery="CurrentCharacter.MightSaveMastery"
+                                UpdateSaveMasteries="@UpdateSaveMasteries"
+                                SelectedMasteriesCount="@SelectedMasteriesCount"
+                                SaveValue="@Character.CalculateSaves.CalculateMightSave(CurrentCharacter)"
                                 IsMobile="@IsMobile"
                                 VersionTwo="true"
-                                CompactVersion="true"
-                                NoRolls="true"/>
+                                CompactVersion="true"/>
                         </div>
-                    </div>
 
-                    <div class="col-lg-auto col-md-6 m-2">
-                        <SwDc20.WebBlazor.Components.AttributeCardWithSave
-                            AttributeName="@nameof(CurrentCharacter.Might)"
-                            @bind-AttributeValue="CurrentCharacter.Might"
-                            @bind-SaveMastery="CurrentCharacter.MightSaveMastery"
-                            UpdateSaveMasteries="@UpdateSaveMasteries"
-                            SelectedMasteriesCount="@SelectedMasteriesCount"
-                            SaveValue="@Character.CalculateSaves.CalculateMightSave(CurrentCharacter)"
-                            IsMobile="@IsMobile"
-                            VersionTwo="true"
-                            CompactVersion="true"/>
-                    </div>
+                        <div class="col-lg-auto col-md-6 m-2">
+                            <SwDc20.WebBlazor.Components.AttributeCardWithSave
+                                AttributeName="@nameof(CurrentCharacter.Agility)"
+                                @bind-AttributeValue="CurrentCharacter.Agility"
+                                @bind-SaveMastery="CurrentCharacter.AgilitySaveMastery"
+                                UpdateSaveMasteries="@UpdateSaveMasteries"
+                                SelectedMasteriesCount="@SelectedMasteriesCount"
+                                SaveValue="@Character.CalculateSaves.CalculateAgilitySave(CurrentCharacter)"
+                                IsMobile="@IsMobile"
+                                VersionTwo="true"
+                                CompactVersion="true"/>
+                        </div>
 
-                    <div class="col-lg-auto col-md-6 m-2">
-                        <SwDc20.WebBlazor.Components.AttributeCardWithSave
-                            AttributeName="@nameof(CurrentCharacter.Agility)"
-                            @bind-AttributeValue="CurrentCharacter.Agility"
-                            @bind-SaveMastery="CurrentCharacter.AgilitySaveMastery"
-                            UpdateSaveMasteries="@UpdateSaveMasteries"
-                            SelectedMasteriesCount="@SelectedMasteriesCount"
-                            SaveValue="@Character.CalculateSaves.CalculateAgilitySave(CurrentCharacter)"
-                            IsMobile="@IsMobile"
-                            VersionTwo="true"
-                            CompactVersion="true"/>
-                    </div>
+                        <div class="col-lg-auto col-md-6 m-2">
+                            <SwDc20.WebBlazor.Components.AttributeCardWithSave
+                                AttributeName="@nameof(CurrentCharacter.Charisma)"
+                                @bind-AttributeValue="CurrentCharacter.Charisma"
+                                @bind-SaveMastery="CurrentCharacter.CharismaSaveMastery"
+                                UpdateSaveMasteries="@UpdateSaveMasteries"
+                                SelectedMasteriesCount="@SelectedMasteriesCount"
+                                SaveValue="@Character.CalculateSaves.CalculateCharismaSave(CurrentCharacter)"
+                                IsMobile="@IsMobile"
+                                VersionTwo="true"
+                                CompactVersion="true"/>
+                        </div>
 
-                    <div class="col-lg-auto col-md-6 m-2">
-                        <SwDc20.WebBlazor.Components.AttributeCardWithSave
-                            AttributeName="@nameof(CurrentCharacter.Charisma)"
-                            @bind-AttributeValue="CurrentCharacter.Charisma"
-                            @bind-SaveMastery="CurrentCharacter.CharismaSaveMastery"
-                            UpdateSaveMasteries="@UpdateSaveMasteries"
-                            SelectedMasteriesCount="@SelectedMasteriesCount"
-                            SaveValue="@Character.CalculateSaves.CalculateCharismaSave(CurrentCharacter)"
-                            IsMobile="@IsMobile"
-                            VersionTwo="true"
-                            CompactVersion="true"/>
-                    </div>
+                        <div class="col-lg-auto col-md-6 m-2">
+                            <SwDc20.WebBlazor.Components.AttributeCardWithSave
+                                AttributeName="@nameof(CurrentCharacter.Intelligence)"
+                                @bind-AttributeValue="CurrentCharacter.Intelligence"
+                                @bind-SaveMastery="CurrentCharacter.IntelligenceSaveMastery"
+                                UpdateSaveMasteries="@UpdateSaveMasteries"
+                                SelectedMasteriesCount="@SelectedMasteriesCount"
+                                SaveValue="@Character.CalculateSaves.CalculateIntelligenceSave(CurrentCharacter)"
+                                IsMobile="@IsMobile"
+                                VersionTwo="true"
+                                CompactVersion="true"/>
+                        </div>
 
-                    <div class="col-lg-auto col-md-6 m-2">
-                        <SwDc20.WebBlazor.Components.AttributeCardWithSave
-                            AttributeName="@nameof(CurrentCharacter.Intelligence)"
-                            @bind-AttributeValue="CurrentCharacter.Intelligence"
-                            @bind-SaveMastery="CurrentCharacter.IntelligenceSaveMastery"
-                            UpdateSaveMasteries="@UpdateSaveMasteries"
-                            SelectedMasteriesCount="@SelectedMasteriesCount"
-                            SaveValue="@Character.CalculateSaves.CalculateIntelligenceSave(CurrentCharacter)"
-                            IsMobile="@IsMobile"
-                            VersionTwo="true"
-                            CompactVersion="true"/>
+                        <div class="row"></div>
                     </div>
-
-                    <div class="row"></div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <SkillsContainer Character="@CurrentCharacter" IsMobile="@IsMobile" OnChanged="@AutoSaveCharacter" VersionTwo="true" CompactVersion="true" DemoMode="false" CanEdit="false"/>
-        </div>
-        <div class="col-md-7">
-            <div class="row">
-                <div class="col-md-8">
-                    <HealthStaminaManaContainer Character="@CurrentCharacter" IsMobile="@IsMobile" OnChanged="@AutoSaveCharacter"/>
-                </div>
-                <div class="col-md-4">
-                    <DefenseContainer Character="@CurrentCharacter" OnChanged="@AutoSaveCharacter" VersionTwo="true"/>
-                </div>
+            <div class="col-md-3">
+                <SkillsContainer Character="@CurrentCharacter" IsMobile="@IsMobile" OnChanged="@AutoSaveCharacter" VersionTwo="true" CompactVersion="true" DemoMode="false" CanEdit="false"/>
             </div>
-            <div class="row">
-                <div class="container-fluid">
-                    <div class="card border-dark mt-2">
-                        <div class="card-header">
-                            <ul class="nav nav-tabs card-header-tabs">
-                                @for (int i = 0; i < MenuItems.Count; i++)
+            <div class="col-md-7">
+                <div class="row">
+                    <div class="col-md-8">
+                        <HealthStaminaManaContainer Character="@CurrentCharacter" IsMobile="@IsMobile" OnChanged="@AutoSaveCharacter"/>
+                    </div>
+                    <div class="col-md-4">
+                        <DefenseContainer Character="@CurrentCharacter" OnChanged="@AutoSaveCharacter" VersionTwo="true"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="container-fluid">
+                        <div class="card border-dark mt-2">
+                            <div class="card-header">
+                                <ul class="nav nav-tabs card-header-tabs">
+                                    @for (int i = 0; i < MenuItems.Count; i++)
+                                    {
+                                        var index = i;
+                                        <li class="nav-item">
+                                            <a class="nav-link @(SelectedIndex == index ? "active" : "")"
+                                               @onclick="() => SelectedIndex = index"
+                                               href="javascript:void(0)">
+                                                @MenuItems[index].Title
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                            <div class="card-body">
+                                @switch (SelectedIndex)
                                 {
-                                    var index = i;
-                                    <li class="nav-item">
-                                        <a class="nav-link @(SelectedIndex == index ? "active" : "")"
-                                           @onclick="() => SelectedIndex = index"
-                                           href="javascript:void(0)">
-                                            @MenuItems[index].Title
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                        </div>
-                        <div class="card-body">
-                            @switch (SelectedIndex)
-                            {
-                                case 0:
-                                    @* <ActionsContent /> *@
-                                    <CombatContainer CurrentCharacter="@CurrentCharacter" IsMobile="@IsMobile" OnChanged="AutoSaveCharacter" VersionTwo="true" CompactVersion="@CompactVersion" CanEdit="false"/>
-                                    <ResourceContainer CurrentCharacter="@CurrentCharacter" OnChanged="@AutoSaveCharacter" CanEdit="false"/>
-                                    break;
-                                case 1:
-                                    @* <SpellsContent /> *@
-                                    <h5>Spell Content</h5>
-                                    <p>For now use the features container, a magic building system is coming soon™.</p>
-                                    <p>For the features, add the name description and use the tag to separate them.</p>
-                                    break;
-                                case 2:
-                                    @* <InventoryContent /> *@
-                                    <InventoryContainer Character="@CurrentCharacter" IsMobile="@IsMobile" OnInventoryChanged="@AutoSaveCharacter" CanEdit="false"/>
-                                    break;
-                                case 3:
-                                    @* <FeaturesContent /> *@
-                                    <FeaturesContainer CurrentCharacter="@CurrentCharacter" OnChanged="@AutoSaveCharacter" CanEdit="false"/>
-                                    break;
-                                case 4:
-                                    @* <BackgroundContent /> *@
-                                    <h5>Background Content</h5>
-                                    <p>Once we get a better idea for backgrounds I will update this.</p>
-                                    break;
-                                case 5:
-                                    @* <NotesContent /> *@
-                                    <h5>Notes Content</h5>
-                                    <p>
-                                        The plan is to have a separate service that will keep track of the notes. I will put in a vote, but notes feel like something that should be stored in a database not locally.
-                                        This is because with a database I can do something like virtual loading, you would see your notes, and when you scroll down you see your notes, but what I am actually doing is loading them as you scroll.
-                                        This also unloads them when you scroll back up. This would lower the system requirements, but we'll cross that bridge when we get there.
-                                    </p>
-                                    
-                                    break;
-                                case 6:
-                                    @* <ExtrasContent /> *@
-                                    <TradesContainer CurrentCharacter="@CurrentCharacter" OnChanged="@AutoSaveCharacter" CanEdit="false"/>
-                                    <LanguageContainer CurrentCharacter="@CurrentCharacter" OnChanged="@AutoSaveCharacter" CanEdit="false"/>
-                                    break;
-                            }
-                        </div>
-                    </div>
+                                    case 0:
+                                        @* <ActionsContent /> *@
+                                        <CombatContainer CurrentCharacter="@CurrentCharacter" IsMobile="@IsMobile" OnChanged="AutoSaveCharacter" VersionTwo="true" CompactVersion="@CompactVersion" CanEdit="false"/>
+                                        <ResourceContainer CurrentCharacter="@CurrentCharacter" OnChanged="@AutoSaveCharacter" CanEdit="false"/>
+                                        break;
+                                    case 1:
+                                        @* <SpellsContent /> *@
+                                        <h5>Spell Content</h5>
+                                        <p>For now use the features container, a magic building system is coming soon™.</p>
+                                        <p>For the features, add the name description and use the tag to separate them.</p>
+                                        break;
+                                    case 2:
+                                        @* <InventoryContent /> *@
+                                        <InventoryContainer Character="@CurrentCharacter" IsMobile="@IsMobile" OnInventoryChanged="@AutoSaveCharacter" CanEdit="false"/>
+                                        break;
+                                    case 3:
+                                        @* <FeaturesContent /> *@
+                                        <FeaturesContainer CurrentCharacter="@CurrentCharacter" OnChanged="@AutoSaveCharacter" CanEdit="false"/>
+                                        break;
+                                    case 4:
+                                        @* <BackgroundContent /> *@
+                                        <h5>Background Content</h5>
+                                        <p>Once we get a better idea for backgrounds I will update this.</p>
+                                        break;
+                                    case 5:
+                                        @* <NotesContent /> *@
+                                        <h5>Notes Content</h5>
+                                        <p>
+                                            The plan is to have a separate service that will keep track of the notes. I will put in a vote, but notes feel like something that should be stored in a database not locally.
+                                            This is because with a database I can do something like virtual loading, you would see your notes, and when you scroll down you see your notes, but what I am actually doing is loading them as you scroll.
+                                            This also unloads them when you scroll back up. This would lower the system requirements, but we'll cross that bridge when we get there.
+                                        </p>
 
+                                        break;
+                                    case 6:
+                                        @* <ExtrasContent /> *@
+                                        <TradesContainer CurrentCharacter="@CurrentCharacter" OnChanged="@AutoSaveCharacter" CanEdit="false"/>
+                                        <LanguageContainer CurrentCharacter="@CurrentCharacter" OnChanged="@AutoSaveCharacter" CanEdit="false"/>
+                                        break;
+                                }
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
+
         </div>
 
-    </div>
-
-</EditForm>
+    </EditForm>
 
 </div>
 
@@ -398,7 +410,7 @@
     {
         NavigationManager.NavigateTo($"/characters/edit/{id}");
     }
-    
+
     private async Task SaveCharacter()
     {
         if (CurrentCharacter != null)
