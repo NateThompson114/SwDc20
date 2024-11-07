@@ -29,7 +29,7 @@
         
         <div class="row mb-2">
             
-            <div class="col-10">
+            <div class="col-md-10">
                 <div class="d-flex justify-content-between align-items-center mb-3 border-1 border-secondary">
                     <div class="row">
                         <div class="row d-flex justify-content-between align-items-center">
@@ -53,8 +53,8 @@
                         <input class="form-check-input" type="checkbox" id="demoToggle" @bind="DemoMode">
                         <label class="form-check-label" for="demoToggle">Demo Mode</label>
                         <span class="small alert-danger">
-                    <i class="fa-sharp fa-solid fa-circle-exclamation"></i>Features Unlocked in Demo mode are not finalized!
-                </span>
+                            <i class="fa-sharp fa-solid fa-circle-exclamation"></i>Features Unlocked in Demo mode are not finalized!
+                        </span>
                     </div>
 
                     @if (!string.IsNullOrEmpty(CurrentCharacter.ImageUrl))
@@ -97,7 +97,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-2">
+            <div class="col-md-2">
                 <ConditionContainer
                     Character="@CurrentCharacter"
                     OnConditionsChanged="AutoSaveCharacter" />

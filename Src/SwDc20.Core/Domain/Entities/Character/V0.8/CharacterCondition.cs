@@ -8,6 +8,11 @@ public class CharacterCondition
 	
     public int Duration { get; set; } = -1;
     public int? RemainingDuration { get; set; }
+    
+    public bool IsTransformationOf { get; set; }
+    public string ParentConditionName { get; set; }
+    public int TransformationLevel { get; set; }
+    public string TransformsIntoName { get; set; }
 		
     public int StackCount { get; set; }
     public int StackMax { get; set; } = 1;

@@ -1,4 +1,5 @@
-﻿@inject ConditionService ConditionService
+﻿@using System.Text
+@inject ConditionService ConditionService
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -11,42 +12,57 @@
         <div class="conditions-scroll">
             @if (_conditions?.Any() == true)
             {
-                @foreach (var (condition, instance) in GetOrderedConditions())
+                @foreach (var (condition, instance) in GetOrderedConditions().Where(x => ShouldShowCondition(x.Condition, x.Instance)))
                 {
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <div class="d-flex align-items-center">
-                            @if (instance.Rank > 0)
-                            {
-                                <button class="btn btn-sm btn-outline-secondary me-1"
-                                        @onclick="() => DecreaseRank(condition, instance)"
-                                        title="Decrease Level">
-                                    <i class="fa-solid fa-minus"></i>
-                                </button>
-                            }
-                            else
-                            {
-                                <div style="width: 31px"></div>
-                            }
-                        </div>
                         <div class="flex-grow-1 text-center">
                             <span class="@(instance.Rank == 0 ? "text-muted" : "")"
                                   title="@GetConditionTooltip(condition, instance)">
                                 @GetDisplayName(condition, instance)
+                                @if (HasLinkedConditions(condition, instance))
+                                {
+                                    <span class="text-info" title="@GetLinkedConditionsTooltip(condition, instance)">(*)</span>
+                                }
                             </span>
                         </div>
                         <div>
-                            @if (instance.Rank < condition.StackMax)
-                            {
+                            <div class="btn-group">
+                                @if (instance.Rank > 0 && (!condition.IsTransformationOf || instance.Rank > 1))
+                                {
+                                <button class="btn btn-sm btn-outline-secondary"
+                                        @onclick="() => DecreaseRank(condition, instance)"
+                                        title="Decrease Level">
+                                    <i class="fa-solid fa-minus"></i>
+                                </button>
+                                }
+
+                                @if (CanTransform(condition, instance))
+                                {
+                                <button class="btn btn-sm btn-outline-secondary"
+                                        @onclick="() => HandleTransformation(condition, instance)"
+                                        title="Transform to @condition.TransformsIntoName">
+                                    <i class="fa-solid fa-arrow-up"></i>
+                                </button>
+                                }
+
+                                @if (condition.IsTransformationOf && instance.Rank == 1)
+                                {
+                                <button class="btn btn-sm btn-outline-secondary"
+                                        @onclick="() => RevertTransformation(condition, instance)"
+                                        title="Revert to @condition.ParentConditionName">
+                                    <i class="fa-solid fa-arrow-down"></i>
+                                </button>
+                                }
+
+                                @if (ShowIncreaseRank(condition, instance))
+                                {
                                 <button class="btn btn-sm btn-outline-secondary"
                                         @onclick="() => IncreaseRank(condition, instance)"
                                         title="Increase Level">
                                     <i class="fa-solid fa-plus"></i>
                                 </button>
-                            }
-                            else
-                            {
-                                <div style="width: 31px"></div>
-                            }
+                                }
+                            </div>
                         </div>
                     </div>
                 }
@@ -140,12 +156,12 @@
     protected override async Task OnInitializedAsync()
     {
         _conditions = await ConditionService.GetConditionsAsync();
-        
-        if(_conditions.Any(c => c.Name == "Doomed"))
+
+        if (_conditions.Any(c => c.Name == "Doomed"))
         {
             _conditions.First(c => c.Name == "Doomed").StackMax = Math.Abs(CalculateDeathThreshold());
         }
-        
+
         InitializeCharacterConditions();
     }
 
@@ -169,11 +185,12 @@
         Character.Conditions.RemoveAll(ci =>
             !_conditions.Any(c => c.Name == ci.ConditionName));
     }
-    
+
     private IEnumerable<(CharacterCondition Condition, CharacterConditionInstance Instance)> GetOrderedConditions()
     {
         return _conditions
-            .Select(c => {
+            .Select(c =>
+            {
                 var instance = Character.Conditions.First(ci => ci.ConditionName == c.Name);
                 return (c, instance);
             })
@@ -186,7 +203,7 @@
         var name = instance.Rank > 0 && condition.StackMax > 1
             ? $"{condition.Name} {instance.Rank}"
             : condition.Name;
-        
+
         return name;
     }
 
@@ -202,20 +219,134 @@
         {
             tooltip += $"\n\nCurrent Level: {instance.Rank}/{condition.StackMax}";
         }
-        
-        if(condition.StackMax == instance.Rank && condition.MaxStackHealConditions.Any())
+
+        if (condition.StackMax == instance.Rank && condition.MaxStackHealConditions.Any())
         {
-            
             foreach (var healCondition in condition.MaxStackHealConditions)
             {
                 tooltip += $"\n\n{healCondition.Name}: {healCondition.Description}";
             }
-            
         }
 
         return tooltip;
     }
+
+    private bool HasLinkedConditions(CharacterCondition condition, CharacterConditionInstance instance)
+    {
+        return instance.Rank > 0 &&
+               (HasActiveSubConditions(condition) ||
+                condition.MaxStackHealConditions.Any() && instance.Rank == condition.StackMax);
+    }
+
+    private bool HasActiveSubConditions(CharacterCondition condition)
+    {
+        return condition.SubConditions.Any() &&
+               condition.SubConditions.Any(sc =>
+                   Character.Conditions.Any(ci =>
+                       ci.ConditionName == sc.Name && ci.Rank > 0));
+    }
+
+    private string GetLinkedConditionsTooltip(CharacterCondition condition, CharacterConditionInstance instance)
+    {
+        var tooltip = new StringBuilder();
+
+        // Add subconditions
+        if (condition.SubConditions.Any())
+        {
+            tooltip.AppendLine("Linked Conditions:");
+            foreach (var subCondition in condition.SubConditions)
+            {
+                var subInstance = Character.Conditions.First(ci => ci.ConditionName == subCondition.Name);
+                if (subInstance.Rank > 0)
+                {
+                    tooltip.AppendLine($"• {subCondition.Name} ({subInstance.Rank}): {subCondition.Description}");
+                }
+            }
+        }
+
+        // Add max stack heal conditions
+        if (condition.MaxStackHealConditions.Any() && instance.Rank == condition.StackMax)
+        {
+            if (tooltip.Length > 0) tooltip.AppendLine();
+            tooltip.AppendLine("Max Stack Effects:");
+            foreach (var healCondition in condition.MaxStackHealConditions)
+            {
+                tooltip.AppendLine($"• {healCondition.Name}: {healCondition.Description}");
+            }
+        }
+
+        return tooltip.ToString().TrimEnd();
+    }
+
+    #region Transformation Methods
+
+    private bool IsTransformation(CharacterCondition condition) => condition.IsTransformationOf;
+
+    private bool HasTransformation(CharacterCondition condition) => !string.IsNullOrEmpty(condition.TransformsIntoName);
+
+    private bool ShouldShowCondition(CharacterCondition condition, CharacterConditionInstance instance)
+    {
+        // If it's a transformation condition, only show if parent is at transformation level
+        if (condition.IsTransformationOf)
+        {
+            var parentCondition = _conditions.First(c => c.Name == condition.ParentConditionName);
+            var parentInstance = Character.Conditions.First(ci => ci.ConditionName == condition.ParentConditionName);
+            return parentInstance.Rank == parentCondition.TransformationLevel;
+        }
     
+        // If condition has a transformation level, hide when at transformation level
+        if (condition.TransformationLevel > 0)
+        {
+            return instance.Rank < condition.TransformationLevel;
+        }
+    
+        return true;
+    }
+
+    private bool CanTransform(CharacterCondition condition, CharacterConditionInstance instance)
+    {
+        return !string.IsNullOrEmpty(condition.TransformsIntoName) && 
+               instance.Rank == condition.TransformationLevel - 1;
+    }
+
+    private bool ShowIncreaseRank(CharacterCondition condition, CharacterConditionInstance instance)
+    {
+        // Don't show increase if we're one below transformation level
+        if (condition.TransformationLevel > 0)
+        {
+            return instance.Rank < condition.TransformationLevel - 1;
+        }
+    
+        // Normal max rank check
+        return instance.Rank < condition.StackMax;
+    }
+
+    private async Task HandleTransformation(CharacterCondition condition, CharacterConditionInstance instance)
+    {
+        var transformedCondition = _conditions.First(c => c.Name == condition.TransformsIntoName);
+        var transformedInstance = Character.Conditions.First(ci => ci.ConditionName == condition.TransformsIntoName);
+
+        instance.Rank = condition.TransformationLevel; // This will hide the base condition
+        transformedInstance.Rank = 1; // Initialize transformed condition
+
+        await OnConditionsChanged.InvokeAsync();
+        StateHasChanged();
+    }
+
+    private async Task RevertTransformation(CharacterCondition condition, CharacterConditionInstance instance)
+    {
+        var parentInstance = Character.Conditions
+            .First(ci => ci.ConditionName == condition.ParentConditionName);
+    
+        instance.Rank = 0;  // Reset transformation
+        parentInstance.Rank--;  // Just decrease parent rank by 1
+    
+        await OnConditionsChanged.InvokeAsync();
+        StateHasChanged();
+    }
+
+    #endregion
+
     private string GetHealConditionTooltip(CharacterCondition condition, CharacterConditionInstance instance)
     {
         var tooltip = condition.Description;
@@ -231,7 +362,7 @@
 
         return tooltip;
     }
-    
+
     private async Task IncreaseRank(CharacterCondition condition, CharacterConditionInstance instance)
     {
         if (instance.Rank < condition.StackMax)
@@ -243,7 +374,7 @@
             StateHasChanged(); // Force immediate UI update
         }
     }
-    
+
     private async Task DecreaseRank(CharacterCondition condition, CharacterConditionInstance instance)
     {
         if (instance.Rank > 0)
@@ -255,7 +386,7 @@
             StateHasChanged(); // Force immediate UI update
         }
     }
-    
+
     private int CalculateDeathThreshold()
     {
         int attributeValue = GetAttributeValue(Character.SelectedDeathThresholdAttribute);

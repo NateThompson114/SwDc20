@@ -302,11 +302,26 @@ public static class Dc20StandardConditions
 		}
 	};
 	
+	public static CharacterCondition HeavilyDazed = new()
+	{
+		Name = $"Heavily {Dazed.Name}",
+		Description = $"{Dazed.Description} You also have DisADV on Mental Saves",
+		HealConditions = Dazed.HealConditions,
+		
+	};
+	
+	public static CharacterCondition HeavilyImpaired = new()
+	{
+		Name = $"Heavily {Impaired.Name}",
+		Description = $"{Impaired.Description}  You also have DisADV on Physical Saves.",
+		HealConditions = Impaired.HealConditions,
+	};
+	
 	public static List<CharacterCondition> ToList()
 	{
 		Bleeding.PerStackHealConditions.Add( Dc20StandardHealConditions.MedicineAction().AppendedDescription(ConditionalExtensions.SuccessRemoveThe(Bleeding.Name).SuccessGainOneTempHpByFives_Append()));
 
-		SetupDazed();
+		
 
 		Doomed.PerStackHealConditions.Add(Doomed.StackLongRest());
 		Exhaustion.PerStackHealConditions.Add(Exhaustion.StackOnePerLongRest());
@@ -320,7 +335,6 @@ public static class Dc20StandardConditions
 			Rattled,
 			Intimidated
 		};
-		SetupImpaired();
 		Paralyzed.SubConditions = new List<CharacterCondition>
 		{
 			Stunned,
@@ -371,38 +385,27 @@ public static class Dc20StandardConditions
 			Incapacitated
 		};
 		
+		HeavilyDazed.PerStackVariables.AddRange(Dazed.PerStackVariables);
+		HeavilyDazed.PerStackVariables.Add(Dc20StandardConditionVariables.DisAdvantageOnMentalSaves);
+		HeavilyDazed.ParentConditionName = Dazed.Name;
+		HeavilyDazed.IsTransformationOf = true;
+
+		Dazed.TransformationLevel = 2;
+		Dazed.TransformsIntoName = HeavilyDazed.Name;
+		
+		HeavilyImpaired.PerStackVariables.AddRange(Impaired.PerStackVariables);
+		HeavilyImpaired.PerStackVariables.Add(Dc20StandardConditionVariables.DisAdvantageOnPhysicalSaves);
+		HeavilyImpaired.ParentConditionName = Impaired.Name;
+		HeavilyImpaired.IsTransformationOf = true;
+		
+		Impaired.TransformationLevel = 2;
+		Impaired.TransformsIntoName = HeavilyImpaired.Name;
+		
 		return typeof(Dc20StandardConditions)
 			.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
 			.Where(f => f.FieldType == typeof(CharacterCondition))
 			.Select(f => (CharacterCondition)f.GetValue(null))
 			.ToList();
-	}
-	
-	private static void SetupDazed()
-	{
-		var heavilyDazed = new CharacterCondition
-		{
-			Name = $"Heavily {Dazed.Name}",
-			Description = $"{Dazed.Description} You also have DisADV on Mental Saves",
-			HealConditions = Dazed.HealConditions,
-		};
-		heavilyDazed.PerStackVariables.AddRange(Dazed.PerStackVariables);
-		heavilyDazed.PerStackVariables.Add(Dc20StandardConditionVariables.DisAdvantageOnMentalSaves);
-
-		Dazed.TransformationConditions.Add(heavilyDazed);
-	}
-	private static void SetupImpaired()
-	{
-		var heavilyImpaired = new CharacterCondition
-		{
-			Name = $"Heavily {Impaired.Name}",
-			Description = $"{Impaired.Description}  You also have DisADV on Physical Saves.",
-			HealConditions = Impaired.HealConditions,
-		};
-		heavilyImpaired.PerStackVariables.AddRange(Impaired.PerStackVariables);
-		heavilyImpaired.PerStackVariables.Add(Dc20StandardConditionVariables.DisAdvantageOnPhysicalSaves);
-
-		Impaired.TransformationConditions.Add(heavilyImpaired);
 	}
 }
 
