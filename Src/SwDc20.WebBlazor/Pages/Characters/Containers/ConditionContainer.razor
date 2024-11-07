@@ -93,39 +93,58 @@
                             </tr>
                             </thead>
                             <tbody>
-                            @foreach (var (condition, instance) in GetOrderedConditions())
+                            @foreach (var (condition, instance) in GetOrderedConditions().Where(x => ShouldShowCondition(x.Condition, x.Instance)))
                             {
-                                <tr class="@(instance.Rank > 0 ? "table-active" : "")">
-                                    <td>@condition.Name</td>
-                                    <td>@instance.Rank</td>
-                                    <td>@condition.StackMax</td>
-                                    <td>
-                                        <small>@condition.Description</small>
-                                        @if (!string.IsNullOrEmpty(condition.HelperDescription))
+                            <tr class="@(instance.Rank > 0 ? "table-active" : "")">
+                                <td>@condition.Name</td>
+                                <td>@instance.Rank</td>
+                                <td>@condition.StackMax</td>
+                                <td>
+                                    <small>@condition.Description</small>
+                                    @if (!string.IsNullOrEmpty(condition.HelperDescription))
+                                    {
+                                    <br/>
+                                    <small class="text-muted">@condition.HelperDescription</small>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        @if (instance.Rank > 0 && (!condition.IsTransformationOf || instance.Rank > 1))
                                         {
-                                            <br/>
-                                            <small class="text-muted">@condition.HelperDescription</small>
+                                        <button class="btn btn-sm btn-outline-secondary"
+                                                @onclick="() => DecreaseRank(condition, instance)">
+                                            <i class="fa-solid fa-minus"></i>
+                                        </button>
                                         }
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            @if (instance.Rank > 0)
-                                            {
-                                                <button class="btn btn-sm btn-outline-secondary"
-                                                        @onclick="() => DecreaseRank(condition, instance)">
-                                                    <i class="fa-solid fa-minus"></i>
-                                                </button>
-                                            }
-                                            @if (instance.Rank < condition.StackMax)
-                                            {
-                                                <button class="btn btn-sm btn-outline-secondary"
-                                                        @onclick="() => IncreaseRank(condition, instance)">
-                                                    <i class="fa-solid fa-plus"></i>
-                                                </button>
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
+
+                                        @if (CanTransform(condition, instance))
+                                        {
+                                        <button class="btn btn-sm btn-outline-secondary"
+                                                @onclick="() => HandleTransformation(condition, instance)"
+                                                title="Transform to @condition.TransformsIntoName">
+                                            <i class="fa-solid fa-arrow-up"></i>
+                                        </button>
+                                        }
+
+                                        @if (condition.IsTransformationOf && instance.Rank == 1)
+                                        {
+                                        <button class="btn btn-sm btn-outline-secondary"
+                                                @onclick="() => RevertTransformation(condition, instance)"
+                                                title="Revert to @condition.ParentConditionName">
+                                            <i class="fa-solid fa-arrow-down"></i>
+                                        </button>
+                                        }
+
+                                        @if (ShowIncreaseRank(condition, instance))
+                                        {
+                                        <button class="btn btn-sm btn-outline-secondary"
+                                                @onclick="() => IncreaseRank(condition, instance)">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
                             }
                             </tbody>
                         </table>
@@ -286,12 +305,18 @@
 
     private bool ShouldShowCondition(CharacterCondition condition, CharacterConditionInstance instance)
     {
-        // If it's a transformation condition, only show if parent is at transformation level
+        // If it's a transformation condition, only show if:
+        // 1. Parent is at transformation level AND
+        // 2. This condition isn't at its own transformation level (if it has one)
         if (condition.IsTransformationOf)
         {
             var parentCondition = _conditions.First(c => c.Name == condition.ParentConditionName);
             var parentInstance = Character.Conditions.First(ci => ci.ConditionName == condition.ParentConditionName);
-            return parentInstance.Rank == parentCondition.TransformationLevel;
+        
+            bool parentIsAtTransformLevel = parentInstance.Rank == parentCondition.TransformationLevel;
+            bool notAtOwnTransformLevel = condition.TransformationLevel == 0 || instance.Rank < condition.TransformationLevel;
+        
+            return parentIsAtTransformLevel && notAtOwnTransformLevel;
         }
     
         // If condition has a transformation level, hide when at transformation level
