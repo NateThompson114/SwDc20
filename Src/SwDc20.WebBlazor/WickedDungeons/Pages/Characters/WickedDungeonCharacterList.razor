@@ -1,0 +1,49 @@
+﻿@* SwDc20.WebBlazor/WickedDungeons/Pages/Characters/WickedDungeonCharacterList.razor *@
+@page "/wickeddungeons/characters"
+@using SwDc20.WebBlazor.WickedDungeons.Models
+@inject WickedDungeonCharacterService CharacterService
+@inject NavigationManager NavigationManager
+
+<div class="character-list">
+    <h2>Wicked Dungeons Characters</h2>
+
+    <div class="character-grid">
+        @if (characters?.Any() == true)
+        {
+            @foreach (var character in characters)
+            {
+                <div class="character-card" @onclick="() => SelectCharacter(character)">
+                    <h3>@character.Name</h3>
+                    <div class="character-details">
+                        <p>@character.Role</p>
+                        <p>@character.Caste</p>
+                    </div>
+                </div>
+            }
+        }
+
+        <div class="character-card new-character" @onclick="CreateNewCharacter">
+            <div class="add-icon">+</div>
+            <p>Create New Character</p>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<WickedDungeonCharacter>? characters;
+
+    protected override async Task OnInitializedAsync()
+    {
+        characters = await CharacterService.GetCharactersAsync();
+    }
+
+    private void SelectCharacter(WickedDungeonCharacter character)
+    {
+        NavigationManager.NavigateTo($"/wickeddungeons/characters/{character.Name}");
+    }
+
+    private void CreateNewCharacter()
+    {
+        NavigationManager.NavigateTo("/wickeddungeons/characters/create");
+    }
+}
