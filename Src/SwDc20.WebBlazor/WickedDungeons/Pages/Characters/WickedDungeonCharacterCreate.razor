@@ -28,6 +28,10 @@
             <div class="step-number">4</div>
             <div class="step-title">Traits & Passions</div>
         </div>
+        <div class="step @(_currentStep == 5 ? "active" : "")">
+            <div class="step-number">5</div>
+            <div class="step-title">Gear & Gift</div>
+        </div>
     </div>
 
     <div class="creation-content">
@@ -43,7 +47,10 @@
                 <WickedDungeonSkillsStep Character="_newCharacter" OnValidSubmit="NextStep" OnBack="PreviousStep" />
                 break;
             case 4:
-                <WickedDungeonTraitsAndPassionsStep Character="_newCharacter" OnValidSubmit="SaveCharacter" OnBack="PreviousStep" />
+                <WickedDungeonTraitsAndPassionsStep Character="_newCharacter" OnValidSubmit="NextStep" OnBack="PreviousStep" />
+                break;
+            case 5:
+                <WickedDungeonGearAndGiftStep Character="_newCharacter" OnValidSubmit="SaveCharacter" OnBack="PreviousStep" />
                 break;
         }
     </div>
@@ -55,23 +62,12 @@
     
     protected override void OnInitialized()
     {
-        _newCharacter = new WickedDungeonCharacter
-        {
-            Attributes = new List<WickedDungeonCharacterAttribute>
-            {
-                new( AttributeStatics.Appeal),
-                new( AttributeStatics.Constitution),
-                new( AttributeStatics.Dexterity),
-                new( AttributeStatics.Guile),
-                new( AttributeStatics.Strength),
-                new( AttributeStatics.Wisdom)
-            }
-        };
+        _newCharacter = new WickedDungeonCharacter();
     }
     
     private void NextStep()
     {
-        if (_currentStep < 4)
+        if (_currentStep < 5)
             _currentStep++;
     }
 

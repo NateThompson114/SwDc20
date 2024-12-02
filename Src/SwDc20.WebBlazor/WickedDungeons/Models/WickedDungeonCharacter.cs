@@ -27,6 +27,16 @@ public class WickedDungeonCharacter
 
 	public WickedDungeonCharacter()
 	{
+		Attributes = new List<WickedDungeonCharacterAttribute>
+		{
+			new(AttributeStatics.Appeal),
+			new(AttributeStatics.Constitution),
+			new(AttributeStatics.Dexterity),
+			new(AttributeStatics.Guile),
+			new(AttributeStatics.Strength),
+			new(AttributeStatics.Wisdom)
+		};
+			
 		PersonalityTraits = new List<WickedDungeonCharacterPersonalityTrait>()
 		{
 			new(PersonalityTraitStatics.Amorous, 1),	
