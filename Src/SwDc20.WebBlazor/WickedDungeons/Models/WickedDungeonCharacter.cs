@@ -2,6 +2,7 @@
 
 public class WickedDungeonCharacter
 {
+	public Guid Id { get; init; }
 	public string Name { get; set; }
 	public string Banner { get; set; }
 	public int Age { get; set; }
@@ -27,6 +28,8 @@ public class WickedDungeonCharacter
 
 	public WickedDungeonCharacter()
 	{
+		Id = Guid.NewGuid();
+		
 		Attributes = new List<WickedDungeonCharacterAttribute>
 		{
 			new(AttributeStatics.Appeal),

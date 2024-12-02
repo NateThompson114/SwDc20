@@ -20,7 +20,7 @@ public class WickedDungeonCharacterService
     public async Task SaveCharacterAsync(WickedDungeonCharacter character)
     {
         var characters = await GetCharactersAsync();
-        var existingIndex = characters.FindIndex(c => c.Name == character.Name);
+        var existingIndex = characters.FindIndex(c => c.Id == character.Id);
 
         if (existingIndex != -1)
         {
@@ -34,10 +34,16 @@ public class WickedDungeonCharacterService
         await _localStorage.SetItemAsync(StorageKey, characters);
     }
 
-    public async Task DeleteCharacterAsync(string name)
+    public async Task DeleteCharacterAsync(Guid id)
     {
         var characters = await GetCharactersAsync();
-        characters.RemoveAll(c => c.Name == name);
+        characters.RemoveAll(c => c.Id == id);
         await _localStorage.SetItemAsync(StorageKey, characters);
+    }
+
+    public async Task<WickedDungeonCharacter> GetCharacterAsync(Guid id)
+    {
+        var characters = await GetCharactersAsync();
+        return characters.FirstOrDefault(c => c.Id == id);
     }
 }
