@@ -13,7 +13,7 @@ public class WickedDungeonCharacter
 	public List<WickedDungeonCharacterAttribute> Attributes { get; set; } = new();
 	public List<WickedDungeonCharacterSkill> Skills { get; set; } = new();
 
-	public DivineFavorStatics DivineFavor { get; set; }
+	public string DivineFavor { get; set; }
 
 	public List<WickedDungeonCharacterStat> Stats { get; set; } = new();
 

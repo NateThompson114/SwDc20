@@ -1,0 +1,171 @@
+﻿@* SwDc20.WebBlazor/WickedDungeons/Pages/Characters/WickedDungeonCharacterCreate.razor *@
+@page "/wickeddungeons/characters/create"
+@using SwDc20.WebBlazor.WickedDungeons.Models
+@using SwDc20.WebBlazor.WickedDungeons.Pages.Characters.Steps
+@inject WickedDungeonCharacterService CharacterService
+@inject NavigationManager NavigationManager
+
+<div class="character-create">
+    <div class="header">
+        <h2>Create New Character</h2>
+        <button class="btn btn-outline-secondary" @onclick="NavigateBack">Back</button>
+    </div>
+
+    <div class="creation-steps">
+        <div class="step @(_currentStep == 1 ? "active" : "")">
+            <div class="step-number">1</div>
+            <div class="step-title">Basic Info</div>
+        </div>
+        <div class="step @(_currentStep == 2 ? "active" : "")">
+            <div class="step-number">2</div>
+            <div class="step-title">Attributes</div>
+        </div>
+        <div class="step @(_currentStep == 3 ? "active" : "")">
+            <div class="step-number">3</div>
+            <div class="step-title">Skills</div>
+        </div>
+        <div class="step @(_currentStep == 4 ? "active" : "")">
+            <div class="step-number">4</div>
+            <div class="step-title">Traits & Passions</div>
+        </div>
+    </div>
+
+    <div class="creation-content">
+        @switch (_currentStep)
+        {
+            case 1:
+                <WickedDungeonBasicInfoStep Character="_newCharacter" OnValidSubmit="NextStep" />
+                break;
+            case 2:
+                <WickedDungeonAttributesStep Character="_newCharacter" OnValidSubmit="NextStep" OnBack="PreviousStep" />
+                break;
+            case 3:
+                <WickedDungeonSkillsStep Character="_newCharacter" OnValidSubmit="NextStep" OnBack="PreviousStep" />
+                break;
+            case 4:
+                <WickedDungeonTraitsAndPassionsStep Character="_newCharacter" OnValidSubmit="SaveCharacter" OnBack="PreviousStep" />
+                break;
+        }
+    </div>
+</div>
+
+@code {
+    private WickedDungeonCharacter _newCharacter = new();
+    private int _currentStep = 1;
+    
+    protected override void OnInitialized()
+    {
+        _newCharacter = new WickedDungeonCharacter
+        {
+            Attributes = new List<WickedDungeonCharacterAttribute>
+            {
+                new( AttributeStatics.Appeal),
+                new( AttributeStatics.Constitution),
+                new( AttributeStatics.Dexterity),
+                new( AttributeStatics.Guile),
+                new( AttributeStatics.Strength),
+                new( AttributeStatics.Wisdom)
+            }
+        };
+    }
+    
+    private void NextStep()
+    {
+        if (_currentStep < 4)
+            _currentStep++;
+    }
+
+    private void PreviousStep()
+    {
+        if (_currentStep > 1)
+            _currentStep--;
+    }
+
+    private async Task SaveCharacter()
+    {
+        await CharacterService.SaveCharacterAsync(_newCharacter);
+        NavigationManager.NavigateTo("/wickeddungeons/characters");
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/wickeddungeons/characters");
+    }
+}
+
+<style>
+.character-create {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.creation-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    padding: 0 20px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 1;
+}
+
+.step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    right: -50%;
+    width: 100%;
+    height: 2px;
+    background-color: #ddd;
+    z-index: 1;
+}
+
+.step.active .step-number {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 2;
+}
+
+.step-title {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.step.active .step-title {
+    color: var(--bs-primary);
+    font-weight: bold;
+}
+
+.creation-content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+</style>
