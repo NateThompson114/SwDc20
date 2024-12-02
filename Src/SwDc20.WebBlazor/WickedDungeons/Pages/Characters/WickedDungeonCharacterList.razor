@@ -6,13 +6,13 @@
 
 <div class="character-list">
     <h2>Wicked Dungeons Characters</h2>
-
+    <p>This is beta, the character creation is done, I will add the image to the card, and make the view look better. There is a dice roller that I created and implemented, now I just need to add it to the view sheet.</p>
     <div class="character-grid">
         @if (characters?.Any() == true)
         {
             @foreach (var character in characters)
             {
-                <div class="character-card">
+                <div class="character-card border-success">
                     <div class="card-content" @onclick="() => SelectCharacter(character.Id)">
                         <h3>@character.Name</h3>
                         <div class="character-details">
