@@ -1,0 +1,49 @@
+﻿@* SwDc20.WebBlazor/WickedDungeons/Components/WickedDungeonsButton.razor *@
+<div class="wicked-dungeons-container">
+    <div class="wicked-dungeons-button @(IsVisible ? "visible" : "")" @onclick="OnClick">
+        <img src="https://static.fundrazr.com/campaigns/dc5c61d3e5ac4b55908fbdef1bf707f3_xlarge.jpg" alt="Wicked Dungeons" />
+    </div>
+</div>
+
+<style>
+    .wicked-dungeons-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 10px;
+    }
+
+    .wicked-dungeons-button {
+        width: 90px;  /* Maintains magazine proportions */
+        height: 120px;
+        cursor: pointer;
+        opacity: 0;
+        transition: all 0.3s ease;
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+        border-radius: 3px;
+        overflow: hidden;
+        transform-origin: center center;
+    }
+
+    .wicked-dungeons-button.visible {
+        opacity: 1;
+    }
+
+    .wicked-dungeons-button img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .wicked-dungeons-button:hover {
+        transform: scale(1.2) rotate(5deg);
+        box-shadow: 4px 4px 15px rgba(0,0,0,0.4);
+        z-index: 1;
+    }
+</style>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+}

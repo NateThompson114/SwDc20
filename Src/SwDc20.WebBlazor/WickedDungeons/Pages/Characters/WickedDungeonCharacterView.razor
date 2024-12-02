@@ -1,0 +1,132 @@
+﻿@page "/wickeddungeons/characters/{Id:guid}"
+@using SwDc20.WebBlazor.WickedDungeons.Models
+@inject WickedDungeonCharacterService CharacterService
+
+<div class="character-sheet">
+    @if (character != null)
+    {
+        <div class="header">
+            <div class="basic-info">
+                <div class="field">
+                    <label>Name:</label>
+                    <span>@character.Name</span>
+                </div>
+                <div class="field">
+                    <label>Banner:</label>
+                    <span>@character.Banner</span>
+                </div>
+                <div class="field">
+                    <label>Role:</label>
+                    <span>@character.Role</span>
+                </div>
+                <div class="field">
+                    <label>Caste:</label>
+                    <span>@character.Caste</span>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(character.PictureUrl))
+            {
+                <img class="character-image" src="@character.PictureUrl" alt="@character.Name" style="height: 400px" />
+            }
+        </div>
+
+        <div class="content-grid">
+            <div class="attributes section">
+                <h3>Attributes</h3>
+                @foreach (var attr in character.Attributes)
+                {
+                    <div class="attribute">
+                        <span class="name">@attr.Name</span>
+                        <span class="value">@attr.Value</span>
+                        <span class="short-name">(@attr.ShortName)</span>
+                    </div>
+                }
+            </div>
+
+            <div class="divine-favor section">
+                <h3>Divine Favor</h3>
+                <div class="favor-status">@character.DivineFavor</div>
+            </div>
+
+            <div class="stats section">
+                <h3>Stats</h3>
+                @foreach (var stat in character.Stats)
+                {
+                    <div class="stat">
+                        <span class="name">@stat.Name</span>
+                        <span class="value">@stat.Value</span>
+                    </div>
+                }
+            </div>
+
+            <div class="personality-traits section">
+                <h3>Personality Traits</h3>
+                @for (int i = 0; i < character.PersonalityTraits.Count; i += 2)
+                {
+                    <div class="trait-pair">
+                        <div class="trait">
+                            <span>@character.PersonalityTraits[i].Trait</span>
+                            <span class="value">@character.PersonalityTraits[i].Value</span>
+                        </div>
+                        <div class="trait">
+                            <span>@character.PersonalityTraits[i + 1].Trait</span>
+                            <span class="value">@character.PersonalityTraits[i + 1].Value</span>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="passions section">
+                <h3>Passions</h3>
+                @foreach (var passion in character.Passions)
+                {
+                    <div class="passion">
+                        <span class="name">@passion.Name</span>
+                        <span class="value">@passion.Value</span>
+                    </div>
+                }
+            </div>
+
+            <div class="gear section">
+                <h3>Gear</h3>
+                @foreach (var item in character.Gear)
+                {
+                    <div class="gear-item">
+                        <span class="name">@item.Name</span>
+                        @if (item.IsFineQuality)
+                        {
+                            <span class="fine-quality">Fine</span>
+                        }
+                        @if (!string.IsNullOrEmpty(item.Description))
+                        {
+                            <span class="description">@item.Description</span>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="gift section">
+                <h3>Gift</h3>
+                <div class="gift-value">@character.Gift</div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p>Character not found.</p>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private WickedDungeonCharacter character;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var characters = await CharacterService.GetCharactersAsync();
+        character = characters.FirstOrDefault(c => c.Id == Id);
+    }
+}

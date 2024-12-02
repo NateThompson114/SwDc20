@@ -1,0 +1,131 @@
+﻿@using SwDc20.WebBlazor.WickedDungeons.Models
+
+<EditForm Model="Character" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="traits-section">
+        <h4>Personality Traits</h4>
+        @foreach (var traitGroup in Character.PersonalityTraits.GroupBy(pt => pt.Group))
+        {
+            <div class="trait-pair">
+                @{
+                    var positiveTrait = traitGroup.First(t => !t.NegativeTrait);
+                    var negativeTrait = traitGroup.First(t => t.NegativeTrait);
+                }
+                <div class="trait-name">@positiveTrait.Trait.Name</div>
+                <div class="trait-slider">
+                    <input type="range" 
+                           min="0" 
+                           max="20" 
+                           @bind="positiveTrait.Value" 
+                           @bind:after="() => UpdateTraitPair(positiveTrait)"
+                           class="form-range" />
+                </div>
+                <div class="trait-name">@negativeTrait.Trait.Name</div>
+                <div class="trait-values">
+                    <span>@positiveTrait.Value</span>
+                    <span>@negativeTrait.Value</span>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="passions-section mt-4">
+        <h4>Passions</h4>
+        <div class="passions-list">
+            @foreach (var passion in Character.Passions)
+            {
+                <div class="passion-item">
+                    <div class="passion-header">
+                        <input type="text" 
+                               @bind="passion.Name" 
+                               class="form-control" 
+                               placeholder="Passion Name" />
+                        <button type="button" 
+                                class="btn btn-danger btn-sm"
+                                @onclick="() => RemovePassion(passion)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <input type="range" 
+                           min="0" 
+                           max="20" 
+                           @bind="passion.Value" 
+                           class="form-range" />
+                    <span class="passion-value">@passion.Value</span>
+                </div>
+            }
+            <button type="button" 
+                    class="btn btn-outline-primary"
+                    @onclick="AddPassion">
+                Add Passion
+            </button>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-secondary" @onclick="OnBack">Back</button>
+        <button type="submit" class="btn btn-primary">Next</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public WickedDungeonCharacter Character { get; set; } = default!;
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnBack { get; set; }
+
+    private void UpdateTraitPair(WickedDungeonCharacterPersonalityTrait trait)
+    {
+        Character.SetPersonalityTrait(trait.Trait, trait.Value);
+        StateHasChanged();
+    }
+
+    private void AddPassion()
+    {
+        Character.AddPassion("New Passion", 10);
+        StateHasChanged();
+    }
+
+    private void RemovePassion(WickedDungeonCharacterPassion passion)
+    {
+        Character.RemovePassion(passion.Name);
+        StateHasChanged();
+    }
+}
+
+<style>
+    .trait-pair {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .trait-values {
+        display: flex;
+        justify-content: space-between;
+        grid-column: 1 / -1;
+        color: var(--bs-secondary);
+    }
+
+    .passion-item {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .passion-header {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .passion-value {
+        display: block;
+        text-align: center;
+        margin-top: 5px;
+        font-weight: bold;
+    }
+</style>

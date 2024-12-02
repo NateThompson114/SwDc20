@@ -1,0 +1,61 @@
+﻿@* WickedDungeonCharacterList.razor *@
+@page "/wickeddungeons/characters"
+@using SwDc20.WebBlazor.WickedDungeons.Models
+@inject WickedDungeonCharacterService CharacterService
+@inject NavigationManager NavigationManager
+
+<div class="character-list">
+    <h2>Wicked Dungeons Characters</h2>
+    <p>This is beta, the character creation is done, I will add the image to the card, and make the view look better. There is a dice roller that I created and implemented, now I just need to add it to the view sheet.</p>
+    <div class="character-grid">
+        @if (characters?.Any() == true)
+        {
+            @foreach (var character in characters)
+            {
+                <div class="character-card border-success">
+                    <div class="card-content" @onclick="() => SelectCharacter(character.Id)">
+                        <h3>@character.Name</h3>
+                        <div class="character-details">
+                            <p>@character.Role</p>
+                            <p>@character.Caste</p>
+                        </div>
+                    </div>
+                    <button class="delete-button" @onclick="() => DeleteCharacter(character.Id)">
+                        <span class="oi oi-trash"></span>
+                    </button>
+                </div>
+            }
+        }
+
+        <div class="character-card new-character" @onclick="CreateNewCharacter">
+            <div class="add-icon">+</div>
+            <p>Create New Character</p>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<WickedDungeonCharacter>? characters;
+
+    protected override async Task OnInitializedAsync()
+    {
+        characters = await CharacterService.GetCharactersAsync();
+    }
+
+    private void SelectCharacter(Guid id)
+    {
+        NavigationManager.NavigateTo($"/wickeddungeons/characters/{id}");
+    }
+
+    private async Task DeleteCharacter(Guid id)
+    {
+        await CharacterService.DeleteCharacterAsync(id);
+        characters = await CharacterService.GetCharactersAsync();
+        StateHasChanged();
+    }
+
+    private void CreateNewCharacter()
+    {
+        NavigationManager.NavigateTo("/wickeddungeons/characters/create");
+    }
+}

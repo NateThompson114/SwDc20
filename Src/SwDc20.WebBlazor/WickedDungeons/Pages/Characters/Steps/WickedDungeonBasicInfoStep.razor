@@ -1,0 +1,75 @@
+﻿@using SwDc20.WebBlazor.WickedDungeons.Models
+
+<EditForm Model="Character" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label for="name" class="form-label">Character Name</label>
+        <InputText id="name" class="form-control" @bind-Value="Character.Name" />
+        <ValidationMessage For="@(() => Character.Name)" />
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="banner" class="form-label">Banner</label>
+            <InputText id="banner" class="form-control" @bind-Value="Character.Banner" />
+            <ValidationMessage For="@(() => Character.Banner)" />
+        </div>
+        <div class="col-md-6 mb-3">
+
+            <label class="form-label">Divine Favor</label>
+            <InputSelect class="form-control" @bind-Value="Character.DivineFavor">
+                @foreach (var divineFavor in _divineFavorList)
+                {
+                    <option value="@divineFavor.Name" selected="@(divineFavor == DivineFavorStatics.GoodStanding)">@divineFavor.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="() => Character.DivineFavor"></ValidationMessage>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="role" class="form-label">Role</label>
+            <InputText id="role" class="form-control" @bind-Value="Character.Role" />
+            <ValidationMessage For="@(() => Character.Role)" />
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="caste" class="form-label">Caste</label>
+            <InputText id="caste" class="form-control" @bind-Value="Character.Caste" />
+            <ValidationMessage For="@(() => Character.Caste)" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="age" class="form-label">Age</label>
+            <InputNumber id="age" class="form-control" @bind-Value="Character.Age" />
+            <ValidationMessage For="@(() => Character.Age)" />
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="homeland" class="form-label">Homeland</label>
+            <InputText id="homeland" class="form-control" @bind-Value="Character.Homeland" />
+            <ValidationMessage For="@(() => Character.Homeland)" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="characterPictureUrl" class="form-label">Character Image Url</label>
+        <InputText id="characterPictureUrl" class="form-control" @bind-Value="Character.PictureUrl" />
+        <ValidationMessage For="@(() => Character.PictureUrl)" />
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+        <button type="submit" class="btn btn-primary">Next</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public WickedDungeonCharacter Character { get; set; } = default!;
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    
+    private List<DivineFavorStatics> _divineFavorList = new() { DivineFavorStatics.Indebted, DivineFavorStatics.GoodStanding, DivineFavorStatics.Favored };
+}
