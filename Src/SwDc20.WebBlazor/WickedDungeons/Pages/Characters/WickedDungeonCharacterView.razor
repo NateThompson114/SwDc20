@@ -2,115 +2,222 @@
 @using SwDc20.WebBlazor.WickedDungeons.Models
 @inject WickedDungeonCharacterService CharacterService
 
-<div class="character-sheet">
+<div class="container mt-3">
     @if (character != null)
     {
-        <div class="header">
-            <div class="basic-info">
-                <div class="field">
-                    <label>Name:</label>
-                    <span>@character.Name</span>
-                </div>
-                <div class="field">
-                    <label>Banner:</label>
-                    <span>@character.Banner</span>
-                </div>
-                <div class="field">
-                    <label>Role:</label>
-                    <span>@character.Role</span>
-                </div>
-                <div class="field">
-                    <label>Caste:</label>
-                    <span>@character.Caste</span>
-                </div>
-            </div>
+        <EditForm Model="@character" OnValidSubmit="SaveCharacter">
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            <div class="card border-0">
 
-            @if (!string.IsNullOrEmpty(character.PictureUrl))
-            {
-                <img class="character-image" src="@character.PictureUrl" alt="@character.Name" style="height: 400px" />
-            }
-        </div>
-
-        <div class="content-grid">
-            <div class="attributes section">
-                <h3>Attributes</h3>
-                @foreach (var attr in character.Attributes)
-                {
-                    <div class="attribute">
-                        <span class="name">@attr.Name</span>
-                        <span class="value">@attr.Value</span>
-                        <span class="short-name">(@attr.ShortName)</span>
+                <div class="row">
+                    <div class="form-floating col-md-6 mb-3">
+                        <input type="text" class="form-control" id="name" value="@character.Name" disabled="disabled">
+                        <label for="name">Name</label>
                     </div>
-                }
-            </div>
-
-            <div class="divine-favor section">
-                <h3>Divine Favor</h3>
-                <div class="favor-status">@character.DivineFavor</div>
-            </div>
-
-            <div class="stats section">
-                <h3>Stats</h3>
-                @foreach (var stat in character.Stats)
-                {
-                    <div class="stat">
-                        <span class="name">@stat.Name</span>
-                        <span class="value">@stat.Value</span>
+                    <div class="form-floating col-md-6 mb-3">
+                        <input type="text" class="form-control" id="banner" value="@character.Banner"
+                               disabled="disabled"/>
+                        <label for="banner">Banner</label>
                     </div>
-                }
+                </div>
+
+                <div class="row">
+
+                    <div class="form-floating col-md-2 mb-3">
+                        <input type="number" class="form-control" id="age" value="@character.Age" disabled="disabled"/>
+                        <label for="age">Age</label>
+                    </div>
+
+                    <div class="form-floating col-md-4 mb-3">
+                        <input type="text" class="form-control" id="homeland" value="@character.Homeland"
+                               disabled="disabled"/>
+                        <label for="homeland">Homeland</label>
+                    </div>
+
+                    <div class="form-floating col-md-3 mb-3">
+                        <input type="text" class="form-control" id="role" value="@character.Role" disabled="disabled"/>
+                        <label for="role">Role</label>
+                    </div>
+
+                    <div class="form-floating col-md-3 mb-3">
+                        <input type="text" class="form-control" id="caste" value="@character.Role" disabled="disabled"/>
+                        <label for="caste">Caste</label>
+                    </div>
+
+                </div>
+
             </div>
 
-            <div class="personality-traits section">
-                <h3>Personality Traits</h3>
-                @for (int i = 0; i < character.PersonalityTraits.Count; i += 2)
-                {
-                    <div class="trait-pair">
-                        <div class="trait">
-                            <span>@character.PersonalityTraits[i].Trait</span>
-                            <span class="value">@character.PersonalityTraits[i].Value</span>
+            <div class="row">
+
+                <div class="col-md-3 text-center">
+
+                    <div class="card border-0">
+                        <div class="card-header text-center">
+                            <h3>Attributes</h3>
                         </div>
-                        <div class="trait">
-                            <span>@character.PersonalityTraits[i + 1].Trait</span>
-                            <span class="value">@character.PersonalityTraits[i + 1].Value</span>
+                        <div class="card-body">
+                            @foreach (var attr in character.Attributes)
+                            {
+                                <div class="row">
+                                    <span class="col-md-2">@attr.Value</span>
+                                    <span class="col-md-6">@attr.Name</span>
+                                    <span class="col-md-4">(@attr.ShortName)</span>
+                                </div>
+                            }
                         </div>
                     </div>
-                }
-            </div>
 
-            <div class="passions section">
-                <h3>Passions</h3>
-                @foreach (var passion in character.Passions)
-                {
-                    <div class="passion">
-                        <span class="name">@passion.Name</span>
-                        <span class="value">@passion.Value</span>
+                    <div class="card border-0">
+                        <div class="card-header text-center">
+                            <h3>Skills</h3>
+                        </div>
+                        <div class="card-body">
+                            @foreach (var skill in character.Skills)
+                            {
+                                <div class="row">
+                                    <span class="col-md-2">@skill.Value</span>
+                                    <span class="col-md-6">@skill.Name</span>
+                                    <span class="col-md-4">(@skill.Attribute.Name.ToUpper()[..3])</span>
+                                </div>
+                            }
+                        </div>
                     </div>
-                }
-            </div>
 
-            <div class="gear section">
-                <h3>Gear</h3>
-                @foreach (var item in character.Gear)
-                {
-                    <div class="gear-item">
-                        <span class="name">@item.Name</span>
-                        @if (item.IsFineQuality)
-                        {
-                            <span class="fine-quality">Fine</span>
-                        }
-                        @if (!string.IsNullOrEmpty(item.Description))
-                        {
-                            <span class="description">@item.Description</span>
-                        }
+
+                </div>
+                <div class="col-md-5 text-center">
+
+                    <div class="card border-0">
+                        <div class="card-body">
+                            <h3>Divine Favor</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="favor-status">@character.DivineFavor</div>
+                        </div>
                     </div>
-                }
-            </div>
 
-            <div class="gift section">
-                <h3>Gift</h3>
-                <div class="gift-value">@character.Gift</div>
+                    <div class="card border-0">
+                        <div class="card-header">
+                            <h3>Stats</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                @foreach (var stat in character.Stats)
+                                {
+                                    <span class="col-md-2">@stat.Value</span>
+                                    <span class="col-md-3">@stat.Name</span>
+                                    <div class="co"></div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0">
+                        <div class="card-header">
+                            <div class="row">
+                                <h3>
+                                    Personality Traits 
+                                    <i class="fa-duotone fa-regular fa-square-check" style="--fa-primary-color: #13cd16; --fa-secondary-color: #13cd16;" hidden="@_personalityTraitSave"></i>
+                                </h3>
+                                
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            @{
+                                var traitCount = character.PersonalityTraits.Count;
+                                for (int i = 0; i < traitCount; i += 2)
+                                {
+                                    var leftIndex = i;
+                                    var rightIndex = i + 1;
+                                    var hasRightTrait = rightIndex < traitCount;
+
+                                    <div class="row">
+                                        <div class="mb-3 col-md-6">
+                                            <span class="col-md-3">@character.PersonalityTraits[leftIndex].Value</span>
+                                            <span class="col-md-6">@character.PersonalityTraits[leftIndex].Trait</span>
+                                            <input class="col-md-3 form-check-input"
+                                                   type="checkbox"
+                                                   checked="@character.PersonalityTraits[leftIndex].Used"
+                                                   @onchange="@(e => OnTraitToggled(leftIndex, e))" />
+                                        </div>
+                                        @if (hasRightTrait)
+                                        {
+                                            <div class="mb-3 col-md-6">
+                                                <input class="col-md-3 form-check-input"
+                                                       type="checkbox"
+                                                       checked="@character.PersonalityTraits[rightIndex].Used"
+                                                       @onchange="@(e => OnTraitToggled(rightIndex, e))" />
+                                                <span class="col-md-6">@character.PersonalityTraits[rightIndex].Trait</span>
+                                                <span class="col-md-3">@character.PersonalityTraits[rightIndex].Value</span>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <div class="card border-0">
+                        <div class="card-header">
+                            <h3>Passions</h3>
+                        </div>
+                        <div class="card-body">
+                            @foreach (var passion in character.Passions)
+                            {
+                                <div class="passion">
+                                    <span class="name">@passion.Name</span>
+                                    <span class="value">@passion.Value</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-md-4 text-center">
+                    @if (!string.IsNullOrEmpty(character.PictureUrl))
+                    {
+                        <img class="character-image" src="@character.PictureUrl" alt="@character.Name"
+                             style="width: 90%"/>
+                    }
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Gear</h3>
+                        </div>
+                        <div class="card-body">
+                            @foreach (var item in character.Gear)
+                            {
+                                <div class="gear-item">
+                                    <span class="name">@item.Name</span>
+                                    @if (item.IsFineQuality)
+                                    {
+                                        <span class="fine-quality">Fine</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.Description))
+                                    {
+                                        <span class="description">@item.Description</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Gift</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="gift-value">@character.Gift</div>
+                        </div>
+                    </div>
+
+                </div>
+
+
             </div>
-        </div>
+        </EditForm>
     }
     else
     {
@@ -119,14 +226,36 @@
 </div>
 
 @code {
-    [Parameter]
-    public Guid Id { get; set; }
+    [Parameter] public Guid Id { get; set; }
 
     private WickedDungeonCharacter character;
+    private bool _personalityTraitSave = true;
 
     protected override async Task OnInitializedAsync()
     {
         var characters = await CharacterService.GetCharactersAsync();
         character = characters.FirstOrDefault(c => c.Id == Id);
     }
+
+    private async Task OnTraitToggled(int index, ChangeEventArgs e)
+    {
+        if (index >= 0 && index < character.PersonalityTraits.Count)
+        {
+            character.PersonalityTraits[index].Used = (bool)e.Value;
+        }
+        
+        _personalityTraitSave = false;
+        StateHasChanged();
+        await SaveCharacter();
+        await Task.Delay(200);
+        _personalityTraitSave = true;
+        StateHasChanged();
+    }
+    
+    private async Task SaveCharacter()
+    {
+        await CharacterService.SaveCharacterAsync(character);
+        // NavigationManager.NavigateTo("/wickeddungeons/characters");
+    }
+
 }
