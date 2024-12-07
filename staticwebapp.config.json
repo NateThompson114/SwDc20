@@ -2,19 +2,6 @@
   "routes": [
     {
       "route": "/*",
-      "rewrite": "https://swdc20.com/"
-    },
-    {
-      "route": "/*",
-      "statusCode": 404,
-      "rewrite": "https://swdc20.com/"
-    },
-    {
-      "route": "/*",
-      "rewrite": "/index.html"
-    },
-    {
-      "route": "/*",
       "methods": [
         "get"
       ],
