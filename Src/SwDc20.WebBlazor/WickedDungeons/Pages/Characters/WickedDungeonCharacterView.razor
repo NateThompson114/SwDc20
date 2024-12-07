@@ -1,6 +1,10 @@
 ﻿@page "/wickeddungeons/characters/{Id:guid}"
+@using SwDc20.Core.Domain.Entities.Roll
+@using SwDc20.Core.Domain.Enums
+@using SwDc20.Core.Domain.ValueObjects
 @using SwDc20.WebBlazor.WickedDungeons.Models
 @inject WickedDungeonCharacterService CharacterService
+@inject DiceRollService DiceRollService
 
 <div class="container mt-3">
     @if (character != null)
@@ -223,6 +227,8 @@
     {
         <p>Character not found.</p>
     }
+    @* <DiceRollDisplay  /> *@
+    <button type="button" @onclick="RunRollServiceExample">Roll The New Stuff</button>
 </div>
 
 @code {
@@ -256,6 +262,24 @@
     {
         await CharacterService.SaveCharacterAsync(character);
         // NavigationManager.NavigateTo("/wickeddungeons/characters");
+    }
+
+    private void RunRollServiceExample()
+    {
+        var advantage = DiceFactory.D20().Roll(2, DiceRollType.KeepHighest, 
+            "Advantage Stealth Roll", 
+            "This roll is uses Stealth and Dexterity", 
+            new List<DiceModifier> {
+                new (3, "Dexterity Value"),
+                new (5, "Stealth Value"),        
+                new (DiceFactory.D4().Roll(), "Bless"),
+                new (DiceFactory.D8().Roll(), "Bardic Inspiration"),
+                new (-5, "Barbarian big d damage")
+            }
+        );
+        
+        // DiceRollDisplay.ShowRollResult(advantage);
+        DiceRollService.ShowRollResult(advantage);
     }
 
 }

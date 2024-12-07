@@ -43,6 +43,6 @@ public static class DiceRollerExtensions
         var doubleValue = (int)Math.Round(result * 2.0, MidpointRounding.AwayFromZero);
         var halfValue = (int)Math.Round(result / 2.0, MidpointRounding.ToZero);
             
-        return new DiceRollResult(rollResults, result, doubleValue, halfValue, header, description);
+        return new DiceRollResult(rollResults, rollType, modifiers, result, doubleValue, halfValue, header, description);
     }
 }

@@ -25,6 +25,7 @@ builder.Services.AddScoped<SkillService>();
 builder.Services.AddScoped<WeaponService>();
 builder.Services.AddScoped<ConditionService>();
 builder.Services.AddScoped<DiceRollerService>();
+builder.Services.AddScoped<DiceRollService>();
 builder.Services.AddScoped<RollCommunicationService>();
 builder.Services.AddScoped<WickedDungeonCharacterService>();
 
