@@ -5,7 +5,7 @@
       "rewrite": "https://swdc20.com/"
     },
     {
-      "route": "/*",
+      "route": "/",
       "statusCode": 404
     }
   ]
