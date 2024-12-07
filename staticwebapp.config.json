@@ -12,6 +12,13 @@
     {
       "route": "/*",
       "rewrite": "/index.html"
+    },
+    {
+      "route": "/*",
+      "methods": [
+        "get"
+      ],
+      "rewrite": "/index.html"
     }
   ]
 }
