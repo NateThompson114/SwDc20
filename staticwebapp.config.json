@@ -1,8 +1,1 @@
-{
-  "routes": [
-    {
-      "route": "/characters/*",
-      "rewrite": "/index.html"
-    }
-  ]
-}
+{}
