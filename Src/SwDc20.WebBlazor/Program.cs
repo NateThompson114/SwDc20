@@ -27,7 +27,7 @@ builder.Services.AddScoped<ConditionService>();
 builder.Services.AddScoped<DiceRollerService>();
 builder.Services.AddScoped<DiceRollService>();
 builder.Services.AddScoped<RollCommunicationService>();
-builder.Services.AddScoped<WickedDungeonCharacterService>();
+builder.Services.AddScoped<BannersCharacterService>();
 
 builder.Services.AddBlazoredToast();
 builder.Services.AddBlazoredModal();

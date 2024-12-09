@@ -1,4 +1,4 @@
-﻿@using SwDc20.WebBlazor.WickedDungeons.Models
+﻿@using SwDc20.WebBlazor.Banners.Models
 
 <EditForm Model="Character" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
@@ -27,11 +27,11 @@
 </EditForm>
 
 @code {
-    [Parameter] public WickedDungeonCharacter Character { get; set; } = default!;
+    [Parameter] public BannersCharacter Character { get; set; } = default!;
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnBack { get; set; }
 
-    private void IncrementSkill(WickedDungeonCharacterSkill skill)
+    private void IncrementSkill(BannersCharacterSkill skill)
     {
         if (skill.Value >= 20)
         {
@@ -43,7 +43,7 @@
         StateHasChanged();
     }
 
-    private void DecrementSkill(WickedDungeonCharacterSkill skill)
+    private void DecrementSkill(BannersCharacterSkill skill)
     {
         if (skill.Value <= 0)
         {

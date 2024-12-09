@@ -1,6 +1,6 @@
 ﻿using Ardalis.SmartEnum;
 
-namespace SwDc20.WebBlazor.WickedDungeons.Models;
+namespace SwDc20.WebBlazor.Banners.Models;
 
 public class AttributeStatics : SmartEnum<AttributeStatics>
 {

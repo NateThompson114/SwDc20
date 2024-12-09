@@ -1,8 +1,7 @@
-﻿@* SwDc20.WebBlazor/WickedDungeons/Pages/Characters/WickedDungeonCharacterCreate.razor *@
-@page "/wickeddungeons/characters/create"
-@using SwDc20.WebBlazor.WickedDungeons.Models
-@using SwDc20.WebBlazor.WickedDungeons.Pages.Characters.Steps
-@inject WickedDungeonCharacterService CharacterService
+﻿@page "/banners/characters/create"
+@using SwDc20.WebBlazor.Banners.Models
+@using SwDc20.WebBlazor.Banners.Pages.Characters.Steps
+@inject BannersCharacterService CharacterService
 @inject NavigationManager NavigationManager
 
 <div class="character-create">
@@ -38,31 +37,31 @@
         @switch (_currentStep)
         {
             case 1:
-                <WickedDungeonBasicInfoStep Character="_newCharacter" OnValidSubmit="NextStep" />
+                <BannersBasicInfoStep Character="_newCharacter" OnValidSubmit="NextStep" />
                 break;
             case 2:
-                <WickedDungeonAttributesStep Character="_newCharacter" OnValidSubmit="NextStep" OnBack="PreviousStep" />
+                <BannersAttributesStep Character="_newCharacter" OnValidSubmit="NextStep" OnBack="PreviousStep" />
                 break;
             case 3:
-                <WickedDungeonSkillsStep Character="_newCharacter" OnValidSubmit="NextStep" OnBack="PreviousStep" />
+                <BannersSkillsStep Character="_newCharacter" OnValidSubmit="NextStep" OnBack="PreviousStep" />
                 break;
             case 4:
-                <WickedDungeonTraitsAndPassionsStep Character="_newCharacter" OnValidSubmit="NextStep" OnBack="PreviousStep" />
+                <BannersTraitsAndPassionsStep Character="_newCharacter" OnValidSubmit="NextStep" OnBack="PreviousStep" />
                 break;
             case 5:
-                <WickedDungeonGearAndGiftStep Character="_newCharacter" OnValidSubmit="SaveCharacter" OnBack="PreviousStep" />
+                <BannersGearAndGiftStep Character="_newCharacter" OnValidSubmit="SaveCharacter" OnBack="PreviousStep" />
                 break;
         }
     </div>
 </div>
 
 @code {
-    private WickedDungeonCharacter _newCharacter = new();
+    private BannersCharacter _newCharacter = new();
     private int _currentStep = 1;
     
     protected override void OnInitialized()
     {
-        _newCharacter = new WickedDungeonCharacter();
+        _newCharacter = new BannersCharacter();
     }
     
     private void NextStep()
@@ -80,12 +79,12 @@
     private async Task SaveCharacter()
     {
         await CharacterService.SaveCharacterAsync(_newCharacter);
-        NavigationManager.NavigateTo("/wickeddungeons/characters");
+        NavigationManager.NavigateTo("/banners/characters");
     }
 
     private void NavigateBack()
     {
-        NavigationManager.NavigateTo("/wickeddungeons/characters");
+        NavigationManager.NavigateTo("/banners/characters");
     }
 }
 

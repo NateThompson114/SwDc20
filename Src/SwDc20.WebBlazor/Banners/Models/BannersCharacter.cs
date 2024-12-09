@@ -1,6 +1,6 @@
-﻿namespace SwDc20.WebBlazor.WickedDungeons.Models;
+﻿namespace SwDc20.WebBlazor.Banners.Models;
 
-public class WickedDungeonCharacter
+public class BannersCharacter
 {
 	public Guid Id { get; init; }
 	public string Name { get; set; }
@@ -11,26 +11,26 @@ public class WickedDungeonCharacter
 	public string Caste { get; set; }
 	public string PictureUrl { get; set; }
 
-	public List<WickedDungeonCharacterAttribute> Attributes { get; set; } = new();
-	public List<WickedDungeonCharacterSkill> Skills { get; set; } = new();
+	public List<BannersCharacterAttribute> Attributes { get; set; } = new();
+	public List<BannersCharacterSkill> Skills { get; set; } = new();
 
 	public string DivineFavor { get; set; }
 
-	public List<WickedDungeonCharacterStat> Stats { get; set; } = new();
+	public List<BannersCharacterStat> Stats { get; set; } = new();
 
-	public List<WickedDungeonCharacterPersonalityTrait> PersonalityTraits { get; set;} = new();
+	public List<BannersCharacterPersonalityTrait> PersonalityTraits { get; set;} = new();
 
-	public List<WickedDungeonCharacterPassion> Passions { get; set; } = new();
+	public List<BannersCharacterPassion> Passions { get; set; } = new();
 	
-	public List<WickedDungeonCharacterGear> Gear { get; set; } = new();
+	public List<BannersCharacterGear> Gear { get; set; } = new();
 	
 	public string Gift { get; set; }
 
-	public WickedDungeonCharacter()
+	public BannersCharacter()
 	{
 		Id = Guid.NewGuid();
 		
-		Attributes = new List<WickedDungeonCharacterAttribute>
+		Attributes = new List<BannersCharacterAttribute>
 		{
 			new(AttributeStatics.Appeal),
 			new(AttributeStatics.Constitution),
@@ -40,7 +40,7 @@ public class WickedDungeonCharacter
 			new(AttributeStatics.Wisdom)
 		};
 			
-		PersonalityTraits = new List<WickedDungeonCharacterPersonalityTrait>()
+		PersonalityTraits = new List<BannersCharacterPersonalityTrait>()
 		{
 			new(PersonalityTraitStatics.Amorous, 1),	
 			new(PersonalityTraitStatics.Chaste,1,true),
@@ -64,7 +64,7 @@ public class WickedDungeonCharacter
 			new(PersonalityTraitStatics.Suspicious,10,true)
 		};
 
-		Skills = new List<WickedDungeonCharacterSkill>()
+		Skills = new List<BannersCharacterSkill>()
 		{
 			new(SkillStatics.Awareness, AttributeStatics.Wisdom),
 			new(SkillStatics.Battle, AttributeStatics.Guile),
@@ -94,7 +94,7 @@ public class WickedDungeonCharacter
 	{
 		Stats.Clear();
 		
-		Stats.AddRange(new List<WickedDungeonCharacterStat>
+		Stats.AddRange(new List<BannersCharacterStat>
 		{
 			new(StatStatics.Defense, RoundUp(GetAttributeValue(AttributeStatics.Dexterity) / 2)),
 			new(StatStatics.Damage, RoundUp(GetAttributeValue(AttributeStatics.Strength) / 2)),
@@ -115,14 +115,14 @@ public class WickedDungeonCharacter
 		return (int)Math.Round(value, MidpointRounding.AwayFromZero);
 	}
 	
-	public List<WickedDungeonCharacterPersonalityTrait> SetPersonalityTrait(PersonalityTraitStatics trait, int value)
+	public List<BannersCharacterPersonalityTrait> SetPersonalityTrait(PersonalityTraitStatics trait, int value)
 	{
 		var traitObject = PersonalityTraits.First(pt => pt.Trait == trait);
 		var pairedTrait = PersonalityTraits.First(pt => 
 			pt.Group == traitObject.Group && 
 			pt.NegativeTrait == !traitObject.NegativeTrait
 		);
-		var traits = new List<WickedDungeonCharacterPersonalityTrait>() { traitObject, pairedTrait};;
+		var traits = new List<BannersCharacterPersonalityTrait>() { traitObject, pairedTrait};;
 		if(value > 20 || value < 0)
 		{
 			return traits;
@@ -134,13 +134,13 @@ public class WickedDungeonCharacter
 		return traits;
 	}
 	
-	public List<WickedDungeonCharacterPersonalityTrait> IncreasePersonalityTrait(PersonalityTraitStatics trait) 
+	public List<BannersCharacterPersonalityTrait> IncreasePersonalityTrait(PersonalityTraitStatics trait) 
 	{
 		var traitObject = PersonalityTraits.First(pt => pt.Trait == trait);
 		return SetPersonalityTrait(trait, traitObject.Value + 1);
 	}
 	
-	public WickedDungeonCharacterPassion AddPassion(string name, int value)
+	public BannersCharacterPassion AddPassion(string name, int value)
 	{
 		if(Passions.Any(p => p.Name == name))
 		{
@@ -149,7 +149,7 @@ public class WickedDungeonCharacter
 			return existingPassion;
 		}
 		
-		var newPassion = new WickedDungeonCharacterPassion(name,value);
+		var newPassion = new BannersCharacterPassion(name,value);
 		Passions.Add(newPassion);
 		return newPassion;
 	}
@@ -160,7 +160,7 @@ public class WickedDungeonCharacter
 		Passions.Remove(existingPassion);
 	}
 
-	public WickedDungeonCharacterGear AddGear(string name, string description = null, bool isFineQuality = false)
+	public BannersCharacterGear AddGear(string name, string description = null, bool isFineQuality = false)
 	{
 		if (Passions.Any(p => p.Name == name))
 		{
@@ -171,7 +171,7 @@ public class WickedDungeonCharacter
 			return existingGear;
 		}
 
-		var newGear = new WickedDungeonCharacterGear(name, description, isFineQuality);
+		var newGear = new BannersCharacterGear(name, description, isFineQuality);
 		Gear.Add(newGear);
 		return newGear;
 	}

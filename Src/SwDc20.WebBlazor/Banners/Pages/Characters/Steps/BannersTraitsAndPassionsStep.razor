@@ -1,4 +1,4 @@
-﻿@using SwDc20.WebBlazor.WickedDungeons.Models
+﻿@using SwDc20.WebBlazor.Banners.Models
 
 <EditForm Model="Character" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
@@ -57,7 +57,7 @@
             }
             <button type="button" 
                     class="btn btn-outline-primary"
-                    @onclick="AddPassion">
+                    @onclick="AddNewPassion">
                 Add Passion
             </button>
         </div>
@@ -70,23 +70,23 @@
 </EditForm>
 
 @code {
-    [Parameter] public WickedDungeonCharacter Character { get; set; } = default!;
+    [Parameter] public BannersCharacter Character { get; set; } = default!;
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnBack { get; set; }
 
-    private void UpdateTraitPair(WickedDungeonCharacterPersonalityTrait trait)
+    private void UpdateTraitPair(BannersCharacterPersonalityTrait trait)
     {
         Character.SetPersonalityTrait(trait.Trait, trait.Value);
         StateHasChanged();
     }
 
-    private void AddPassion()
+    private void AddNewPassion()
     {
         Character.AddPassion("New Passion", 10);
         StateHasChanged();
     }
 
-    private void RemovePassion(WickedDungeonCharacterPassion passion)
+    private void RemovePassion(BannersCharacterPassion passion)
     {
         Character.RemovePassion(passion.Name);
         StateHasChanged();

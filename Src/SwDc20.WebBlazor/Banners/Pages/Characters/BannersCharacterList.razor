@@ -1,11 +1,10 @@
-﻿@* WickedDungeonCharacterList.razor *@
-@page "/wickeddungeons/characters"
-@using SwDc20.WebBlazor.WickedDungeons.Models
-@inject WickedDungeonCharacterService CharacterService
+﻿@page "/banners/characters"
+@using SwDc20.WebBlazor.Banners.Models
+@inject BannersCharacterService CharacterService
 @inject NavigationManager NavigationManager
 
 <div class="character-list">
-    <h2>Wicked Dungeons Characters</h2>
+    <h2>Banners Characters</h2>
     <p>This is beta, the character creation is done, I will add the image to the card, and make the view look better. There is a dice roller that I created and implemented, now I just need to add it to the view sheet.</p>
     <div class="character-grid">
         @if (characters?.Any() == true)
@@ -35,7 +34,7 @@
 </div>
 
 @code {
-    private List<WickedDungeonCharacter>? characters;
+    private List<BannersCharacter>? characters;
 
     protected override async Task OnInitializedAsync()
     {
@@ -44,7 +43,7 @@
 
     private void SelectCharacter(Guid id)
     {
-        NavigationManager.NavigateTo($"/wickeddungeons/characters/{id}");
+        NavigationManager.NavigateTo($"/banners/characters/{id}");
     }
 
     private async Task DeleteCharacter(Guid id)
@@ -56,6 +55,6 @@
 
     private void CreateNewCharacter()
     {
-        NavigationManager.NavigateTo("/wickeddungeons/characters/create");
+        NavigationManager.NavigateTo("/banners/characters/create");
     }
 }

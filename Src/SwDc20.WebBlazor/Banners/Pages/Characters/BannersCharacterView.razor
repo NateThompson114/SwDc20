@@ -1,9 +1,9 @@
-﻿@page "/wickeddungeons/characters/{Id:guid}"
+﻿@page "/banners/characters/{Id:guid}"
 @using SwDc20.Core.Domain.Entities.Roll
 @using SwDc20.Core.Domain.Enums
 @using SwDc20.Core.Domain.ValueObjects
-@using SwDc20.WebBlazor.WickedDungeons.Models
-@inject WickedDungeonCharacterService CharacterService
+@using SwDc20.WebBlazor.Banners.Models
+@inject BannersCharacterService CharacterService
 @inject DiceRollService DiceRollService
 
 <div class="container mt-3">
@@ -234,7 +234,7 @@
 @code {
     [Parameter] public Guid Id { get; set; }
 
-    private WickedDungeonCharacter character;
+    private BannersCharacter character;
     private bool _personalityTraitSave = true;
 
     protected override async Task OnInitializedAsync()
@@ -261,7 +261,7 @@
     private async Task SaveCharacter()
     {
         await CharacterService.SaveCharacterAsync(character);
-        // NavigationManager.NavigateTo("/wickeddungeons/characters");
+        // NavigationManager.NavigateTo("/banners/characters");
     }
 
     private void RunRollServiceExample()

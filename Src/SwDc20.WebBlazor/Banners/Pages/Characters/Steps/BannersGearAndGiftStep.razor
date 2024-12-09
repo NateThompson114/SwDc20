@@ -1,4 +1,4 @@
-﻿@using SwDc20.WebBlazor.WickedDungeons.Models
+﻿@using SwDc20.WebBlazor.Banners.Models
 
 <EditForm Model="Character" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
@@ -80,7 +80,7 @@
 </EditForm>
 
 @code {
-    [Parameter] public WickedDungeonCharacter Character { get; set; } = default!;
+    [Parameter] public BannersCharacter Character { get; set; } = default!;
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnBack { get; set; }
 
@@ -102,7 +102,7 @@
         newGearIsFineQuality = false;
     }
     
-    private void RemoveGear(WickedDungeonCharacterGear gear)
+    private void RemoveGear(BannersCharacterGear gear)
     {
         Character.RemoveGear(gear.Name);
     }

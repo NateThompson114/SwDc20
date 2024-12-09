@@ -1,4 +1,4 @@
-﻿@using SwDc20.WebBlazor.WickedDungeons.Models
+﻿@using SwDc20.WebBlazor.Banners.Models
 
 <EditForm Model="Character" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
@@ -68,7 +68,7 @@
 </EditForm>
 
 @code {
-    [Parameter] public WickedDungeonCharacter Character { get; set; } = default!;
+    [Parameter] public BannersCharacter Character { get; set; } = default!;
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     
     private List<DivineFavorStatics> _divineFavorList = new() { DivineFavorStatics.Indebted, DivineFavorStatics.GoodStanding, DivineFavorStatics.Favored };

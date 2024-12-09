@@ -113,17 +113,17 @@ nav {
     flex: 1;
 }
 
-.wicked-dungeons-nav-container {
+.banners-nav-container {
     margin-top: auto;
     padding: 10px 0;
     border-top: 1px solid rgba(255,255,255,0.1);
 }
 
-.wicked-dungeons-nav-container ::deep a {
+.banners-nav-container ::deep a {
     background-color: transparent !important;
     padding: 0;
 }
 
-.wicked-dungeons-nav-container ::deep a:hover {
+.banners-nav-container ::deep a:hover {
     background-color: transparent !important;
 }

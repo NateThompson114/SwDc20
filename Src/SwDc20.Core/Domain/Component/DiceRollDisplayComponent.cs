@@ -65,9 +65,6 @@ public class DiceRollDisplayComponent : ComponentBase
         // Description
         RenderDescription(builder, sequence);
         
-        // Modifiers
-        RenderModifiers(builder, sequence, Result.Modifiers);
-        
         // Dice Groups
         RenderDiceGroup(builder, sequence);
 
@@ -104,8 +101,9 @@ public class DiceRollDisplayComponent : ComponentBase
         // builder.AddMarkupContent(sequence + 5, "<hr/>");
     }
     
-    private void RenderModifiers(RenderTreeBuilder builder, int sequence, List<DiceModifier>? modifiers)
+    private void RenderModifiers(RenderTreeBuilder builder, int sequence)
     {
+        var modifiers = Result.Modifiers;
         if (modifiers?.Count == 0) return;
         
         var totalMod = modifiers!.Sum(m => m.Modifier);
@@ -123,21 +121,35 @@ public class DiceRollDisplayComponent : ComponentBase
         
         builder.CloseElement();
         
-        builder.AddMarkupContent(sequence + 7, "<hr/>");
+        // builder.AddMarkupContent(sequence + 7, "<hr/>");
     }
     
     private void RenderDiceGroup(RenderTreeBuilder builder, int sequence)
     {
         builder.OpenElement(sequence, "div");
         builder.AddAttribute(sequence + 1, "class", "py-2 inline-flex items-center justify-center "); // Reduced padding
-    
+        
+        builder.OpenElement(sequence + 2, "div");
+        
+        var rollType = Result.RollType switch
+        {
+            DiceRollType.Normal => "Normal",
+            DiceRollType.KeepHighest => "Keep Highest",
+            DiceRollType.KeepLowest => "Keep Lowest",
+            DiceRollType.Pool => "Pool",
+            _ => throw new NotSupportedException($"Roll type {Result.RollType} is not supported")
+        };
+        
         // Title
-        builder.OpenElement(sequence + 2, "h6");
+        builder.OpenElement(sequence + 2, "strong");
         builder.AddAttribute(sequence + 3, "class", "text-xl mb-2");
-        builder.AddContent(sequence + 4, "Dice Rolls");
+        builder.AddContent(sequence + 4, $"Dice Rolls ({rollType})");
         builder.CloseElement();
         
+        builder.CloseElement();
         
+        // Modifiers
+        RenderModifiers(builder, sequence);
         
         builder.OpenElement(sequence + 5, "table");
         builder.AddAttribute(sequence + 6, "class", "w-full table-auto border-collapse");
@@ -162,21 +174,14 @@ public class DiceRollDisplayComponent : ComponentBase
         }
         builder.CloseElement();
         
-        builder.AddMarkupContent(sequence++, "<hr/>");
+        // builder.AddMarkupContent(sequence++, "<hr/>");
         
-        var rollType = Result.RollType switch
-        {
-            DiceRollType.Normal => "Normal",
-            DiceRollType.KeepHighest => "Keep Highest",
-            DiceRollType.KeepLowest => "Keep Lowest",
-            DiceRollType.Pool => "Pool",
-            _ => throw new NotSupportedException($"Roll type {Result.RollType} is not supported")
-        };
         
-        builder.OpenElement(sequence + 2, "h6");
-        builder.AddAttribute(sequence + 3, "class", "text-xl mb-2");
-        builder.AddContent(sequence + 8, $"{rollType}");
-        builder.CloseElement();
+        
+        // builder.OpenElement(sequence + 2, "strong");
+        // builder.AddAttribute(sequence + 3, "class", "text-xl mb-2");
+        // builder.AddContent(sequence + 8, $"{rollType}");
+        // builder.CloseElement();
         
         builder.AddMarkupContent(sequence++, "<hr/>");
         

@@ -1,23 +1,23 @@
 ﻿using Blazored.LocalStorage;
-using SwDc20.WebBlazor.WickedDungeons.Models;
+using SwDc20.WebBlazor.Banners.Models;
 
-public class WickedDungeonCharacterService
+public class BannersCharacterService
 {
     private readonly ILocalStorageService _localStorage;
-    private const string StorageKey = "wicked_dungeons_characters";
+    private const string StorageKey = "banners_characters";
 
-    public WickedDungeonCharacterService(ILocalStorageService localStorage)
+    public BannersCharacterService(ILocalStorageService localStorage)
     {
         _localStorage = localStorage;
     }
 
-    public async Task<List<WickedDungeonCharacter>> GetCharactersAsync()
+    public async Task<List<BannersCharacter>> GetCharactersAsync()
     {
-        var characters = await _localStorage.GetItemAsync<List<WickedDungeonCharacter>>(StorageKey);
-        return characters ?? new List<WickedDungeonCharacter>();
+        var characters = await _localStorage.GetItemAsync<List<BannersCharacter>>(StorageKey);
+        return characters ?? new List<BannersCharacter>();
     }
 
-    public async Task SaveCharacterAsync(WickedDungeonCharacter character)
+    public async Task SaveCharacterAsync(BannersCharacter character)
     {
         var characters = await GetCharactersAsync();
         var existingIndex = characters.FindIndex(c => c.Id == character.Id);
@@ -41,7 +41,7 @@ public class WickedDungeonCharacterService
         await _localStorage.SetItemAsync(StorageKey, characters);
     }
 
-    public async Task<WickedDungeonCharacter> GetCharacterAsync(Guid id)
+    public async Task<BannersCharacter> GetCharacterAsync(Guid id)
     {
         var characters = await GetCharactersAsync();
         return characters.FirstOrDefault(c => c.Id == id);

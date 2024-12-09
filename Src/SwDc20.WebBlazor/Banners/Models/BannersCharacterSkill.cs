@@ -1,12 +1,12 @@
-﻿namespace SwDc20.WebBlazor.WickedDungeons.Models;
+﻿namespace SwDc20.WebBlazor.Banners.Models;
 
-public class WickedDungeonCharacterSkill
+public class BannersCharacterSkill
 {
     public SkillStatics Name { get; set; }
     public int Value { get; set; }
     public AttributeStatics Attribute { get; set; }
 	
-    public WickedDungeonCharacterSkill(SkillStatics name, AttributeStatics attribute, int value = 0 )
+    public BannersCharacterSkill(SkillStatics name, AttributeStatics attribute, int value = 0 )
     {
         Name = name;
         Attribute = attribute;
